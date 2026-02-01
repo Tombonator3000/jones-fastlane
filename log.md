@@ -2,6 +2,222 @@
 
 ---
 
+## 2026-02-01 - Implementering av Wiki Hour Rules
+
+### Wiki-analyse
+
+Gjennomgått følgende wiki-sider:
+- https://jonesinthefastlane.fandom.com/wiki/Hour (Time-systemet)
+- https://jonesinthefastlane.fandom.com/wiki/Turn (Tur-mekanikk)
+- https://jonesinthefastlane.fandom.com/wiki/Week (Uke/måned-system)
+- https://jonesinthefastlane.fandom.com/wiki/Weekend (Weekend events)
+- https://jonesinthefastlane.fandom.com/wiki/Wild_Willy (Røveri-mekanikk)
+- https://jonesinthefastlane.fandom.com/wiki/Relaxation (Hvile-system)
+- https://jonesinthefastlane.fandom.com/wiki/Market_Crash (Økonomisk krasj)
+- https://jonesinthefastlane.fandom.com/wiki/Clothes (Klær og uniformer)
+- https://jonesinthefastlane.fandom.com/wiki/Doctor_Visit (Legebesøk)
+
+### Identifiserte avvik fra original spill
+
+#### 1. Starvation Penalty
+- **Wiki**: 20 timer tap ved sult
+- **Vår impl**: Brukte DOCTOR_VISIT.hoursLost (10 timer)
+- **Fix**: Separat STARVATION.hoursLost = 20
+
+#### 2. Wild Willy Apartment Robbery
+- **Wiki**: Sjansen er `1/(relaxation+1)` - ikke flat prosent
+  - Ved relaxation=10: ~9% sjanse per tur
+  - Ved relaxation=50: ~2% sjanse per tur
+- **Vår impl**: Flat 10% per item
+- **Fix**: Beregn sjanse basert på spillerens relaxation stat
+
+#### 3. Relaxation System
+- **Wiki**:
+  - RELAX action: 6 timer, +3 relaxation, max 50
+  - Første RELAX per tur gir +2 happiness
+  - Ved relaxation=10: 25% sjanse for doctor visit ved tur-start
+- **Vår impl**: Mangler RELAX action og lav-relaxation penalty
+- **Fix**: Legg til RELAX action og sjekk ved tur-start
+
+#### 4. Weekend Cost Rules
+- **Wiki**:
+  - Hvis spiller har $0 cash: weekend koster $0
+  - Før uke 8: max weekend cost $55
+  - Etter uke 8: max weekend cost $100
+- **Vår impl**: Ingen slike begrensninger
+- **Fix**: Implementer disse reglene i selectWeekendEvent
+
+#### 5. Enrollment Time Cost
+- **Wiki**: Enrollment tar 0 timer (gratis tids-messig)
+- **Vår impl**: Trekker 2 timer
+- **Fix**: Fjern timer-kostnad fra ENROLL_DEGREE
+
+#### 6. Study Time
+- **Wiki**: Hver leksjon tar fast 6 timer
+- **Vår impl**: Bruker action.hours parameter
+- **Fix**: Fast 6 timer per study action
+
+#### 7. Market Crash/Boom System
+- **Wiki**:
+  - Kan kun skje fra uke 8+
+  - Moderate crash: spillere kan få pay cut til 80%
+  - Major crash: alle mister jobb, bank deposits slettes
+- **Vår impl**: Enkel random fluktuasjon
+- **Fix**: Implementer ordentlig crash/boom system
+
+#### 8. Rent Garnishment
+- **Wiki**: Ved manglende betaling garnisheres lønn (ikke eviction)
+- **Vår impl**: "Relative bails you out"
+- **Fix**: Implementer garnishment system
+
+### Implementasjonsplan
+
+1. ✅ Oppdater STARVATION constant med 20 timer
+2. ✅ Endre Wild Willy til relaxation-basert sjanse
+3. ✅ Legg til RELAX action
+4. ✅ Legg til lav-relaxation doctor visit sjekk
+5. ✅ Fix weekend cost regler
+6. ✅ Fix enrollment til 0 timer
+7. ✅ Fix study til 6 timer
+8. ✅ Implementer market crash/boom
+9. ✅ Implementer rent garnishment
+
+### Filer som endres
+- `src/types/game.ts` - Nye constants og typer
+- `src/contexts/GameContext.tsx` - Game logic endringer
+
+### Implementerte endringer
+
+#### 1. Nye Constants i types/game.ts
+
+```typescript
+// STARVATION - Wiki: 20 timer tap ved sult
+export const STARVATION = {
+  hoursLost: 20,
+  happinessLoss: 4,
+  doctorChance: 0.5,
+};
+
+// RELAXATION - Wiki: Hvile-system
+export const RELAXATION = {
+  minValue: 10,
+  maxValue: 50,
+  hoursPerRelax: 6,
+  relaxationGain: 3,
+  happinessFirstRelax: 2,
+  lowRelaxationThreshold: 10,
+  doctorChanceAtMin: 0.25,
+};
+
+// MARKET_EVENTS - Wiki: Crash/Boom fra uke 8+
+export const MARKET_EVENTS = {
+  minWeekForCrash: 8,
+  crashTypes: { minor, moderate, major },
+  boomTypes: { minor, moderate, major },
+};
+
+// RENT_GARNISHMENT - Wiki: Lønnstrekk ved manglende betaling
+export const RENT_GARNISHMENT = {
+  garnishmentRate: 0.25,
+};
+```
+
+#### 2. Nye Player-felt
+
+```typescript
+hasRelaxedThisTurn: boolean;  // For å spore første RELAX per tur
+rentDebt: number;              // Husleiegjeld for garnishment
+currentWage: number | null;    // For pay cut ved crash
+```
+
+#### 3. Oppdaterte Actions i GameContext.tsx
+
+**STUDY**: Fast 6 timer per leksjon (var variabel)
+```typescript
+// Wiki: Each lesson takes 6 hours
+// If fewer than 6 hours remain, still takes entire lesson
+const hoursUsed = Math.min(6, currentPlayer.hoursRemaining);
+const newProgress = currentProgress + 1; // 1 lesson per study
+```
+
+**RELAX** (NY): 6 timer, +3 relaxation, +2 happiness første gang
+```typescript
+case 'RELAX': {
+  // Wiki: Relaxing takes 6 hours
+  relaxation: Math.min(50, currentPlayer.relaxation + 3),
+  happiness: currentPlayer.hasRelaxedThisTurn ? 0 : +2,
+  hasRelaxedThisTurn: true,
+}
+```
+
+**ENROLL_DEGREE**: 0 timer (var 2)
+```typescript
+// Wiki: Enrollment takes no time (0 hours)
+// But need at least 1 hour to choose a course
+```
+
+**PAY_RENT**: Garnishment i stedet for "relative bails out"
+```typescript
+// Can't pay? Rest becomes rentDebt
+rentDebt: totalOwed - amountPaid
+```
+
+**WORK**: Garnishment av lønn
+```typescript
+// Wiki: 25% of wages go to paying rent debt
+if (rentDebt > 0) {
+  const garnishment = earnings * 0.25;
+  earnings -= garnishment;
+  rentDebt -= garnishment;
+}
+```
+
+#### 4. Oppdatert END_TURN
+
+**Starvation**: Nå 20 timer (var 10)
+```typescript
+const starvationPenalty = starvation ? STARVATION.hoursLost : 0; // 20 timer
+```
+
+**Wild Willy**: Relaxation-basert sjanse
+```typescript
+// Wiki: 1/(relaxation+1) sjanse
+const robberyChance = 1 / (currentPlayer.relaxation + 1);
+// Ved relax=10: ~9% sjanse
+// Ved relax=50: ~2% sjanse
+```
+
+**Lav-relaxation doctor visit**:
+```typescript
+// Wiki: 25% chance at relaxation=10
+const lowRelaxationDoctorVisit =
+  currentPlayer.relaxation <= 10 && Math.random() < 0.25;
+```
+
+**Weekend cost**:
+```typescript
+// Wiki: $0 hvis ingen cash
+if (player.money === 0) return { cost: 0 };
+// Wiki: max $55 før uke 8, max $100 etter
+const maxCost = week < 8 ? 55 : 100;
+```
+
+**Market Crash/Boom**:
+```typescript
+// Wiki: Kun fra uke 8+
+if (nextWeek >= 8 && Math.random() < 0.05) {
+  // 5% sjanse for crash
+  // Major: Banks wiped, all fired
+  // Moderate: Economy drop, pay cut chance
+  // Minor: Small economy drop
+}
+```
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - AI Forbedringer og Wild Willy Balansering
 
 ### Analyse

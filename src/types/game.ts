@@ -28,6 +28,12 @@ export interface Player {
   lotteryTickets: number;
   // Pawn shop
   pawnedItems: PawnedItem[];
+  // Turn tracking for wiki mechanics
+  hasRelaxedThisTurn: boolean;
+  // Rent debt for garnishment system
+  rentDebt: number;
+  // Current wage (can be affected by pay cuts)
+  currentWage: number | null;
 }
 
 export interface PawnedItem {
@@ -415,6 +421,47 @@ export const DOCTOR_VISIT = {
   triggers: ['starvation', 'spoiled-food', 'low-relaxation'],
 };
 
+// STARVATION - Based on wiki (separate from doctor visit)
+export const STARVATION = {
+  hoursLost: 20, // Wiki: "advances the clock by 20 Hours (1/3 of a turn!)"
+  happinessLoss: 4,
+  doctorChance: 0.5, // 50% chance of doctor visit when starving
+};
+
+// RELAXATION - Based on wiki
+export const RELAXATION = {
+  minValue: 10,
+  maxValue: 50,
+  hoursPerRelax: 6,
+  relaxationGain: 3,
+  happinessFirstRelax: 2, // Only first relax per turn gives happiness
+  lowRelaxationThreshold: 10, // Doctor visit chance at this level
+  doctorChanceAtMin: 0.25, // 25% chance of doctor visit when relaxation is at minimum
+};
+
+// MARKET EVENTS - Based on wiki
+export const MARKET_EVENTS = {
+  minWeekForCrash: 8, // Crashes only happen on week 8+
+  minWeekForBoom: 4,
+  crashTypes: {
+    minor: { economyDrop: 15, payCutChance: 0, fireChance: 0, wipeBanks: false },
+    moderate: { economyDrop: 25, payCutChance: 0.3, fireChance: 0, wipeBanks: false },
+    major: { economyDrop: 40, payCutChance: 1.0, fireChance: 1.0, wipeBanks: true },
+  },
+  boomTypes: {
+    minor: { economyBoost: 15 },
+    moderate: { economyBoost: 25 },
+    major: { economyBoost: 40 },
+  },
+  payCutMultiplier: 0.8, // Pay cut reduces wage to 80%
+};
+
+// RENT GARNISHMENT - Based on wiki
+export const RENT_GARNISHMENT = {
+  garnishmentRate: 0.25, // 25% of wages garnished until debt paid
+  description: 'Your wages are being garnished to pay back rent!',
+};
+
 export const AVATARS = [
   { id: 'jones', name: 'Jones', emoji: '🧔', description: 'The legendary competitor' },
   { id: 'player1', name: 'Alex', emoji: '👨', description: 'Ready to succeed' },
@@ -455,6 +502,9 @@ export function createInitialPlayer(id: string, name: string, avatar: string): P
     stocks: {},
     lotteryTickets: 0,
     pawnedItems: [],
+    hasRelaxedThisTurn: false,
+    rentDebt: 0,
+    currentWage: null,
   };
 }
 

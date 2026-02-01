@@ -140,6 +140,17 @@
 - [x] Wild Willy balansering - redusert fra 25% til 10% (2026-02-01)
 - [x] AI security apartment-vurdering ved lav happiness (2026-02-01)
 
+### Wiki Hour Rules Implementation (2026-02-01)
+- [x] Starvation penalty: 20 timer (var 10)
+- [x] Wild Willy relaxation-basert sjanse: 1/(relax+1)
+- [x] RELAX action: 6 timer, +3 relax, +2 happiness første gang
+- [x] Lav-relaxation doctor visit: 25% sjanse ved relax=10
+- [x] Weekend cost: $0 hvis ingen cash, max $55 før uke 8
+- [x] Enrollment: 0 timer (var 2)
+- [x] Study: Fast 6 timer per leksjon
+- [x] Market crash/boom system (uke 8+)
+- [x] Rent garnishment system
+
 ---
 
 *Sist oppdatert: 2026-02-01*
