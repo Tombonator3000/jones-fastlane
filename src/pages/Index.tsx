@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { GameProvider, useGame } from '@/contexts/GameContext';
@@ -8,14 +8,92 @@ import { LocationDialog } from '@/components/game/LocationDialog';
 import { GameSetup } from '@/components/game/GameSetup';
 import { WeekendEventDialog } from '@/components/game/WeekendEventDialog';
 import { GameOverDialog } from '@/components/game/GameOverDialog';
-import { Location, LOCATIONS } from '@/types/game';
+import { Location, LOCATIONS, Job } from '@/types/game';
 import { toast } from 'sonner';
+import { useJonesAI } from '@/hooks/useJonesAI';
 
 function GameContent() {
   const { state, dispatch, getCurrentPlayer } = useGame();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showWeekendEvent, setShowWeekendEvent] = useState(false);
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
+  const [isAiTurn, setIsAiTurn] = useState(false);
+  const aiActionQueue = useRef<Array<{ action: string; params?: Record<string, unknown>; delay: number; message: string }>>([]);
+  const { decideNextAction } = useJonesAI();
   const player = getCurrentPlayer();
+
+  // Check if current player is Jones (AI)
+  const isJonesPlaying = player?.name === 'Jones';
+
+  // Process AI actions
+  const processNextAiAction = useCallback(() => {
+    if (aiActionQueue.current.length === 0) {
+      setIsAiTurn(false);
+      setAiMessage(null);
+      return;
+    }
+
+    const nextAction = aiActionQueue.current.shift();
+    if (!nextAction) return;
+
+    setAiMessage(nextAction.message);
+
+    setTimeout(() => {
+      switch (nextAction.action) {
+        case 'MOVE_TO_LOCATION':
+          dispatch({ type: 'MOVE_TO_LOCATION', locationId: nextAction.params?.locationId as string });
+          break;
+        case 'WORK':
+          dispatch({ type: 'WORK', hours: nextAction.params?.hours as number });
+          break;
+        case 'STUDY':
+          dispatch({ type: 'STUDY', degreeId: nextAction.params?.degreeId as string, hours: nextAction.params?.hours as number });
+          break;
+        case 'BUY_FOOD':
+          dispatch({ type: 'BUY_FOOD', amount: nextAction.params?.amount as number, cost: nextAction.params?.cost as number });
+          break;
+        case 'BUY_CLOTHES':
+          dispatch({ type: 'BUY_CLOTHES', level: nextAction.params?.level as string, cost: nextAction.params?.cost as number });
+          break;
+        case 'BUY_ITEM':
+          dispatch({ type: 'BUY_ITEM', itemId: nextAction.params?.itemId as string, cost: nextAction.params?.cost as number, happiness: nextAction.params?.happiness as number });
+          break;
+        case 'APPLY_FOR_JOB':
+          dispatch({ type: 'APPLY_FOR_JOB', job: nextAction.params?.job as Job });
+          break;
+        case 'ENROLL_DEGREE':
+          dispatch({ type: 'ENROLL_DEGREE', degreeId: nextAction.params?.degreeId as string, cost: nextAction.params?.cost as number });
+          break;
+        case 'PAY_RENT':
+          dispatch({ type: 'PAY_RENT' });
+          break;
+        case 'DEPOSIT_MONEY':
+          dispatch({ type: 'DEPOSIT_MONEY', amount: nextAction.params?.amount as number });
+          break;
+        case 'END_TURN':
+          dispatch({ type: 'END_TURN' });
+          break;
+      }
+
+      // Process next action after a short delay
+      setTimeout(processNextAiAction, 500);
+    }, nextAction.delay);
+  }, [dispatch]);
+
+  // Trigger AI turn when it's Jones' turn
+  useEffect(() => {
+    if (isJonesPlaying && state.isGameStarted && !state.isGameOver && !isAiTurn && !showWeekendEvent) {
+      // Small delay before AI starts thinking
+      const timer = setTimeout(() => {
+        setIsAiTurn(true);
+        const decisions = decideNextAction(player!, state.goals, state.rentDue);
+        aiActionQueue.current = decisions;
+        processNextAiAction();
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isJonesPlaying, state.isGameStarted, state.isGameOver, isAiTurn, showWeekendEvent, state.currentPlayerIndex, decideNextAction, player, state.goals, state.rentDue, processNextAiAction]);
 
   useEffect(() => {
     if (state.weekendEvent && state.isGameStarted) {
@@ -24,13 +102,13 @@ function GameContent() {
   }, [state.weekendEvent, state.week]);
 
   useEffect(() => {
-    if (state.rentDue && player) {
+    if (state.rentDue && player && !isJonesPlaying) {
       toast.warning("Rent is due! Visit the Rent Office to pay.");
     }
-  }, [state.rentDue]);
+  }, [state.rentDue, player, isJonesPlaying]);
 
   const handleLocationClick = (location: Location) => {
-    if (!player) return;
+    if (!player || isAiTurn) return;
     
     if (player.currentLocation !== location.id) {
       dispatch({ type: 'MOVE_TO_LOCATION', locationId: location.id });
@@ -39,6 +117,7 @@ function GameContent() {
   };
 
   const handleEndTurn = () => {
+    if (isAiTurn) return;
     dispatch({ type: 'END_TURN' });
   };
 
@@ -79,9 +158,23 @@ function GameContent() {
             <Button
               className="pixel-button w-full mt-4 bg-accent hover:bg-accent/90"
               onClick={handleEndTurn}
+              disabled={isAiTurn}
             >
-              END WEEK
+              {isAiTurn ? 'JONES SPILLER...' : 'END WEEK'}
             </Button>
+
+            {/* AI Message */}
+            {aiMessage && (
+              <motion.div
+                className="mt-4 bg-primary/20 border border-primary rounded-lg p-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <p className="font-pixel text-xs text-primary text-center">
+                  🤖 {aiMessage}
+                </p>
+              </motion.div>
+            )}
 
             {/* Rent Warning */}
             {state.rentDue && (
