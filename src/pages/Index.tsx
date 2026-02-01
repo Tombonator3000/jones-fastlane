@@ -10,6 +10,8 @@ import { GameOverDialog } from '@/components/game/GameOverDialog';
 import { Location, LOCATIONS, Job } from '@/types/game';
 import { toast } from 'sonner';
 import { useJonesAI } from '@/hooks/useJonesAI';
+import { useMovementAnimation } from '@/hooks/useMovementAnimation';
+import { getHomeLocation } from '@/data/roadPaths';
 
 function GameContent() {
   const { state, dispatch, getCurrentPlayer } = useGame();
@@ -17,8 +19,16 @@ function GameContent() {
   const [showWeekendEvent, setShowWeekendEvent] = useState(false);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [isAiTurn, setIsAiTurn] = useState(false);
+  const [pendingEndTurn, setPendingEndTurn] = useState(false);
   const aiActionQueue = useRef<Array<{ action: string; params?: Record<string, unknown>; delay: number; message: string }>>([]);
   const { decideNextAction } = useJonesAI();
+  const {
+    currentAnimation,
+    isAnimating,
+    startMovement,
+    completeAnimation,
+    queueAutoGoHome,
+  } = useMovementAnimation();
   const player = getCurrentPlayer();
 
   // Check if current player is Jones (AI)
@@ -38,10 +48,29 @@ function GameContent() {
     setAiMessage(nextAction.message);
 
     setTimeout(() => {
+      const currentAiPlayer = getCurrentPlayer();
+
       switch (nextAction.action) {
-        case 'MOVE_TO_LOCATION':
-          dispatch({ type: 'MOVE_TO_LOCATION', locationId: nextAction.params?.locationId as string });
+        case 'MOVE_TO_LOCATION': {
+          // Use animation for AI movement
+          const targetLocationId = nextAction.params?.locationId as string;
+          if (currentAiPlayer && currentAiPlayer.currentLocation !== targetLocationId) {
+            startMovement(
+              currentAiPlayer,
+              currentAiPlayer.currentLocation,
+              targetLocationId,
+              () => {
+                dispatch({ type: 'MOVE_TO_LOCATION', locationId: targetLocationId });
+                // Continue with next action after animation
+                setTimeout(processNextAiAction, 300);
+              }
+            );
+            return; // Don't continue processing until animation is done
+          } else {
+            dispatch({ type: 'MOVE_TO_LOCATION', locationId: targetLocationId });
+          }
           break;
+        }
         case 'WORK':
           dispatch({ type: 'WORK', hours: nextAction.params?.hours as number });
           break;
@@ -69,15 +98,25 @@ function GameContent() {
         case 'DEPOSIT_MONEY':
           dispatch({ type: 'DEPOSIT_MONEY', amount: nextAction.params?.amount as number });
           break;
-        case 'END_TURN':
+        case 'END_TURN': {
+          // AI should also go home before ending turn
+          const homeLocation = getHomeLocation(currentAiPlayer?.apartment || 'low-cost');
+          if (currentAiPlayer && currentAiPlayer.currentLocation !== homeLocation) {
+            queueAutoGoHome(currentAiPlayer, () => {
+              dispatch({ type: 'END_TURN' });
+              setTimeout(processNextAiAction, 300);
+            });
+            return; // Don't continue until animation is done
+          }
           dispatch({ type: 'END_TURN' });
           break;
+        }
       }
 
       // Process next action after a short delay
       setTimeout(processNextAiAction, 500);
     }, nextAction.delay);
-  }, [dispatch]);
+  }, [dispatch, getCurrentPlayer, startMovement, queueAutoGoHome]);
 
   // Trigger AI turn when it's Jones' turn
   useEffect(() => {
@@ -107,17 +146,51 @@ function GameContent() {
   }, [state.rentDue, player, isJonesPlaying]);
 
   const handleLocationClick = (location: Location) => {
-    if (!player || isAiTurn) return;
-    
+    if (!player || isAiTurn || isAnimating) return;
+
     if (player.currentLocation !== location.id) {
-      dispatch({ type: 'MOVE_TO_LOCATION', locationId: location.id });
+      // Check if player has enough time to move (costs 4 hours)
+      if (player.hoursRemaining < 4) {
+        toast.error("Ikke nok tid til a bevege deg! Avslutt uken.");
+        return;
+      }
+
+      // Start movement animation, then update game state when complete
+      startMovement(
+        player,
+        player.currentLocation,
+        location.id,
+        () => {
+          dispatch({ type: 'MOVE_TO_LOCATION', locationId: location.id });
+          setSelectedLocation(location);
+        }
+      );
+    } else {
+      // Already at this location, just open the menu
+      setSelectedLocation(location);
     }
-    setSelectedLocation(location);
   };
 
   const handleEndTurn = () => {
-    if (isAiTurn) return;
-    dispatch({ type: 'END_TURN' });
+    if (isAiTurn || isAnimating) return;
+
+    if (!player) return;
+
+    // Get the player's home location
+    const homeLocation = getHomeLocation(player.apartment);
+
+    // If player is not at home, animate them going home first
+    if (player.currentLocation !== homeLocation) {
+      setPendingEndTurn(true);
+      queueAutoGoHome(player, () => {
+        // After arriving home, end the turn
+        dispatch({ type: 'END_TURN' });
+        setPendingEndTurn(false);
+      });
+    } else {
+      // Already at home, just end the turn
+      dispatch({ type: 'END_TURN' });
+    }
   };
 
   const handleRestart = () => {
@@ -157,9 +230,9 @@ function GameContent() {
             <Button
               className="pixel-button w-full mt-4 bg-accent hover:bg-accent/90"
               onClick={handleEndTurn}
-              disabled={isAiTurn}
+              disabled={isAiTurn || isAnimating || pendingEndTurn}
             >
-              {isAiTurn ? 'JONES SPILLER...' : 'END WEEK'}
+              {isAiTurn ? 'JONES SPILLER...' : pendingEndTurn ? 'GAR HJEM...' : isAnimating ? 'BEVEGER SEG...' : 'AVSLUTT UKE'}
             </Button>
 
             {/* AI Message */}
@@ -200,6 +273,8 @@ function GameContent() {
               onLocationClick={handleLocationClick}
               selectedLocation={selectedLocation}
               onCloseLocation={() => setSelectedLocation(null)}
+              movementAnimation={currentAnimation}
+              onAnimationComplete={completeAnimation}
             />
             
             {/* Quick info bar */}
