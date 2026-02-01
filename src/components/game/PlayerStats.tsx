@@ -101,7 +101,9 @@ export function PlayerStats() {
         </div>
         <div className="flex items-center gap-2">
           <span>👔</span>
-          <span className="game-text text-muted-foreground capitalize">{player.clothes}</span>
+          <span className="game-text text-muted-foreground">
+            C:{player.clothes.casual} D:{player.clothes.dress} B:{player.clothes.business}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span>🏠</span>

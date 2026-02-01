@@ -2,6 +2,35 @@
 
 ---
 
+## 2026-02-01 - Fix React Error #31
+
+### Problem
+React error #31: "Objects are not valid as a React child" med objekt `{casual, dress, business}`.
+
+Feilmeldingen viste blank skjerm på grunn av at et objekt ble forsøkt rendret direkte i JSX.
+
+### Årsak
+I `src/components/game/PlayerStats.tsx:104` ble `player.clothes` (et objekt) rendret direkte:
+```tsx
+<span>{player.clothes}</span>
+```
+
+`player.clothes` har typen `{ casual: number, dress: number, business: number }` og kan ikke rendres som tekst.
+
+### Løsning
+Formaterte klær-objektet til lesbar streng:
+```tsx
+<span>C:{player.clothes.casual} D:{player.clothes.dress} B:{player.clothes.business}</span>
+```
+
+### Filer endret
+- `src/components/game/PlayerStats.tsx` - Fikset klær-visning
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - Dokumentasjon
 
 ### Utført

@@ -95,7 +95,8 @@
 
 ## Bugs
 
-*Ingen kjente bugs for øyeblikket*
+### Fikset
+- [x] React Error #31 - `player.clothes` objekt rendret direkte i PlayerStats.tsx (2026-02-01)
 
 ---
 
