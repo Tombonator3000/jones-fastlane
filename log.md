@@ -2,6 +2,44 @@
 
 ---
 
+## 2026-02-01 - Fix React Error #31 (WeekendEvent)
+
+### Problem
+React error #31: "Objects are not valid as a React child" med objekt `{text, cost, happinessChange}`.
+
+Feilmeldingen førte til blank skjerm når weekend event ble trigget.
+
+### Årsak
+I `src/components/game/WeekendEventDialog.tsx:36` ble hele `state.weekendEvent` objektet rendret direkte:
+```tsx
+<p className="game-text text-lg text-foreground">
+  {state.weekendEvent}
+</p>
+```
+
+`state.weekendEvent` har typen `WeekendEvent` med properties `{ text: string, cost: number, happinessChange: number }` og kan ikke rendres som tekst.
+
+### Løsning
+Endret til å rendere `.text`-propertyen, og la til visning av kostnad og happiness-endring:
+```tsx
+<p className="game-text text-lg text-foreground">
+  {state.weekendEvent.text}
+</p>
+
+<div className="text-sm text-muted-foreground space-y-1">
+  <p>Cost: ${state.weekendEvent.cost}</p>
+  <p>Happiness: {state.weekendEvent.happinessChange > 0 ? '+' : ''}{state.weekendEvent.happinessChange}</p>
+</div>
+```
+
+### Filer endret
+- `src/components/game/WeekendEventDialog.tsx` - Fikset weekend event visning
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - AI Gameplay Test Session
 
 ### Mål

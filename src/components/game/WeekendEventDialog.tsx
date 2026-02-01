@@ -33,8 +33,13 @@ export function WeekendEventDialog({ open, onClose }: WeekendEventDialogProps) {
             className="space-y-4"
           >
             <p className="game-text text-lg text-foreground">
-              {state.weekendEvent}
+              {state.weekendEvent.text}
             </p>
+
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>Cost: ${state.weekendEvent.cost}</p>
+              <p>Happiness: {state.weekendEvent.happinessChange > 0 ? '+' : ''}{state.weekendEvent.happinessChange}</p>
+            </div>
             
             <Button
               className="pixel-button w-full"
