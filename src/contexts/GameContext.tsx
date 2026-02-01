@@ -5,6 +5,7 @@ import {
   GameGoals,
   Job,
   WeekendEvent,
+  WildWillyEvent,
   createInitialPlayer,
   createInitialGameState,
   WEEKEND_EVENTS,
@@ -61,6 +62,7 @@ type GameAction =
   | { type: 'SET_WEEKEND_EVENT'; event: WeekendEvent | null }
   | { type: 'WILD_WILLY_STREET_ROBBERY' }
   | { type: 'WILD_WILLY_APARTMENT_ROBBERY'; stolenItems: string[] }
+  | { type: 'CLEAR_WILD_WILLY_EVENT' }
   | { type: 'DOCTOR_VISIT'; cost: number }
   | { type: 'PROCESS_LOTTERY' }
   | { type: 'MARKET_CRASH'; severity: 'minor' | 'moderate' | 'major' }
@@ -187,14 +189,45 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
+      // ===== Wiki: Street Robbery when LEAVING bank or blacks-market =====
+      // Wiki: Only happens on or after Week #4
+      // Wiki: Only if player is carrying any Cash
+      // Wiki: Bank: 1/31 chance (~3.2%), Black's Market: 1/51 chance (~1.95%)
+      const leavingLocation = currentPlayer.currentLocation;
+      const robberyChance = WILD_WILLY.streetRobbery.chances[leavingLocation];
+
+      let streetRobbery: WildWillyEvent | null = null;
+      if (
+        state.week >= WILD_WILLY.streetRobbery.minWeek &&
+        currentPlayer.money > 0 &&
+        robberyChance !== undefined &&
+        Math.random() < robberyChance
+      ) {
+        // Street robbery triggered!
+        streetRobbery = {
+          type: 'street',
+          amountStolen: currentPlayer.money,
+          happinessLoss: WILD_WILLY.streetRobbery.happinessLoss,
+        };
+      }
+
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         currentLocation: action.locationId,
         hoursRemaining: currentPlayer.hoursRemaining - moveCost - 2,
+        // If street robbery, lose all cash and happiness
+        money: streetRobbery ? 0 : currentPlayer.money,
+        happiness: streetRobbery
+          ? Math.max(0, currentPlayer.happiness - WILD_WILLY.streetRobbery.happinessLoss)
+          : currentPlayer.happiness,
       };
 
-      return { ...state, players: updatedPlayers };
+      return {
+        ...state,
+        players: updatedPlayers,
+        wildWillyEvent: streetRobbery,
+      };
     }
 
     case 'WORK': {
@@ -761,29 +794,43 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const eventCost = Math.min(currentPlayer.money + lotteryWinnings, event.cost);
 
       // ===== Wiki: Wild Willy apartment robbery =====
-      // Chance is 1/(relaxation+1), not flat percentage
+      // Wiki: Only at Low-Cost Housing, only if player owns Durables
+      // Chance is 1/(relaxation+1) - inversely proportional to relaxation
+      // Relaxation ranges from 10 to 50:
+      //   - At relaxation=10: 1/11 = ~9% chance
+      //   - At relaxation=50: 1/51 = ~2% chance
       let wildWillyRobbery = false;
       let stolenItems: string[] = [];
-      if (currentPlayer.apartment === 'low-cost' && state.week >= 4) {
+      let apartmentRobberyEvent: WildWillyEvent | null = null;
+
+      if (currentPlayer.apartment === 'low-cost' && currentPlayer.items.length > 0) {
         // Wiki: Robbery chance is inversely proportional to relaxation
         const robberyChance = 1 / (currentPlayer.relaxation + 1);
 
         if (Math.random() < robberyChance) {
-          // Robbery triggered - check each item type
-          const stealableItems = currentPlayer.items.filter(item => {
-            const appliance = APPLIANCES.find(a => a.id === item);
-            return appliance?.canBeStolen !== false;
-          });
+          // Robbery triggered - check each item TYPE
+          // Wiki: Items that can NEVER be stolen: Refrigerator, Freezer, Stove, Computer, Encyclopedia, Dictionary, Atlas
+          const stealableItems = currentPlayer.items.filter(item =>
+            !WILD_WILLY.unStealableItems.includes(item)
+          );
 
-          // Wiki: 25% chance per item TYPE (not per item) to be stolen
+          // Wiki: 25% chance per item TYPE to be stolen
+          // Since player can only own one of each item type, this is per unique item
           for (const item of stealableItems) {
-            if (Math.random() < 0.25) {
+            if (Math.random() < WILD_WILLY.apartmentRobbery.chancePerItemType) {
               stolenItems.push(item);
             }
           }
 
+          // Wiki: If at least one type of item has been stolen, display newspaper and lose happiness
+          // Wiki: If all item types avoided being stolen, continue as if no robbery happened
           if (stolenItems.length > 0) {
             wildWillyRobbery = true;
+            apartmentRobberyEvent = {
+              type: 'apartment',
+              itemsStolen: stolenItems,
+              happinessLoss: WILD_WILLY.apartmentRobbery.happinessLoss,
+            };
           }
         }
       }
@@ -978,12 +1025,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         month: nextMonth,
         rentDue: rentDue,
         weekendEvent: event,
+        wildWillyEvent: apartmentRobberyEvent, // Show Wild Willy dialog if apartment robbery occurred
         // Wiki: Update both economicIndex and economyReading
         economicIndex: newEconomicIndex,
         economyReading: newEconomyReading,
         stockPrices: newStockPrices,
         newspaper: newspaperMessages.length > 0 ? newspaperMessages.join(' | ') : null,
       };
+    }
+
+    case 'CLEAR_WILD_WILLY_EVENT': {
+      return { ...state, wildWillyEvent: null };
     }
 
     default:

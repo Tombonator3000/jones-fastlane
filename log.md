@@ -2,6 +2,121 @@
 
 ---
 
+## 2026-02-01 - Wild Willy Full Implementation
+
+### Oppgave
+Implementere Wild Willy karakteren fullstendig basert på wiki-spesifikasjonene:
+- Street Robbery (når spilleren forlater Bank eller Black's Market)
+- Apartment Robbery (ved Low-Cost Housing)
+- Visuell dialog med Wild Willy sprite og animasjon
+
+### Wiki-spesifikasjoner
+
+#### Street Robbery
+- **Trigger**: Kun når spilleren FORLATER Bank eller Black's Market
+- **Vilkår**:
+  - Uke 4 eller senere
+  - Spilleren må ha Cash
+- **Sannsynlighet**:
+  - Bank: 1/31 sjanse (~3.2%)
+  - Black's Market: 1/51 sjanse (~1.95%)
+- **Konsekvens**:
+  - Mister ALL Cash (settes til $0)
+  - -3 Happiness
+
+#### Apartment Robbery
+- **Trigger**: Ved turstart for spillere i Low-Cost Housing
+- **Vilkår**: Spilleren må eie Durables (gjenstander)
+- **Sannsynlighet**: `1 / (Relaxation + 1)`
+  - Ved Relaxation=10: ~9% sjanse
+  - Ved Relaxation=50: ~2% sjanse
+- **Item-sjekk**: 25% sjanse per item TYPE (ikke per item)
+- **Konsekvens**:
+  - Hvis minst én gjenstand stjeles: -4 Happiness
+  - Hvis ingen stjeles: Ingen effekt
+
+#### Items som ALDRI kan stjeles
+- Refrigerator, Freezer, Stove
+- Computer
+- Encyclopedia, Dictionary, Atlas
+
+### Implementerte endringer
+
+#### 1. types/game.ts - WILD_WILLY konstant
+```typescript
+export const WILD_WILLY = {
+  streetRobbery: {
+    minWeek: 4,
+    happinessLoss: 3,
+    chances: {
+      'bank': 1 / 31,        // ~3.2%
+      'blacks-market': 1 / 51, // ~1.95%
+    },
+  },
+  apartmentRobbery: {
+    chancePerItemType: 0.25, // 25% per item type
+    happinessLoss: 4,
+  },
+  unStealableItems: [
+    'refrigerator', 'freezer', 'stove',
+    'computer', 'encyclopedia', 'dictionary', 'atlas',
+  ],
+};
+```
+
+#### 2. types/game.ts - APPLIANCES canBeStolen oppdatert
+Rettet `canBeStolen` verdier for:
+- Freezer: `true` → `false`
+- Stove: `true` → `false`
+- Encyclopedia, Dictionary, Atlas: `true` → `false`
+
+#### 3. types/game.ts - WildWillyEvent interface
+```typescript
+export interface WildWillyEvent {
+  type: 'street' | 'apartment';
+  amountStolen?: number;  // For street robbery
+  itemsStolen?: string[]; // For apartment robbery
+  happinessLoss: number;
+}
+```
+
+#### 4. GameContext.tsx - Street Robbery i MOVE_TO_LOCATION
+- Sjekker om spilleren forlater 'bank' eller 'blacks-market'
+- Ruller sannsynlighet basert på lokasjon
+- Setter `wildWillyEvent` i state for å trigge dialog
+
+#### 5. GameContext.tsx - Apartment Robbery i END_TURN
+- Forbedret logikk for relaxation-basert sjanse
+- Bruker `WILD_WILLY.unStealableItems` for å filtrere
+- Setter `apartmentRobberyEvent` for UI-visning
+
+#### 6. Ny komponent: WildWillyDialog.tsx
+- Animert dialog med Wild Willy sprite
+- Forskjellig bakgrunn for street vs apartment robbery
+- Framer Motion animasjoner:
+  - Wild Willy glir inn fra høyre
+  - "STICK 'EM UP!" tekst for street robbery
+  - Gun flash effekt
+- Newspaper-stil overskrift med detaljer
+- Viser stjålet beløp eller gjenstander
+
+#### 7. Index.tsx - Integrert WildWillyDialog
+- Importerer og bruker WildWillyDialog
+- State for `showWildWilly`
+- Effect som lytter på `state.wildWillyEvent`
+- AI-tur venter på dialog før fortsettelse
+
+### Filer endret
+- `src/types/game.ts` - Typer og konstanter
+- `src/contexts/GameContext.tsx` - Spilllogikk
+- `src/components/game/WildWillyDialog.tsx` - NY komponent
+- `src/pages/Index.tsx` - Dialog-integrasjon
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - Wiki Economy System Implementation
 
 ### Oppgave

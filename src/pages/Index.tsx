@@ -6,6 +6,7 @@ import { GameBoard } from '@/components/game/GameBoard';
 import { PlayerStats } from '@/components/game/PlayerStats';
 import { GameSetup } from '@/components/game/GameSetup';
 import { WeekendEventDialog } from '@/components/game/WeekendEventDialog';
+import { WildWillyDialog } from '@/components/game/WildWillyDialog';
 import { GameOverDialog } from '@/components/game/GameOverDialog';
 import { Location, LOCATIONS, Job } from '@/types/game';
 import { toast } from 'sonner';
@@ -17,6 +18,7 @@ function GameContent() {
   const { state, dispatch, getCurrentPlayer } = useGame();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showWeekendEvent, setShowWeekendEvent] = useState(false);
+  const [showWildWilly, setShowWildWilly] = useState(false);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [isAiTurn, setIsAiTurn] = useState(false);
   const [pendingEndTurn, setPendingEndTurn] = useState(false);
@@ -120,7 +122,7 @@ function GameContent() {
 
   // Trigger AI turn when it's Jones' turn
   useEffect(() => {
-    if (isJonesPlaying && state.isGameStarted && !state.isGameOver && !isAiTurn && !showWeekendEvent) {
+    if (isJonesPlaying && state.isGameStarted && !state.isGameOver && !isAiTurn && !showWeekendEvent && !showWildWilly) {
       // Small delay before AI starts thinking
       const timer = setTimeout(() => {
         setIsAiTurn(true);
@@ -131,13 +133,20 @@ function GameContent() {
 
       return () => clearTimeout(timer);
     }
-  }, [isJonesPlaying, state.isGameStarted, state.isGameOver, isAiTurn, showWeekendEvent, state.currentPlayerIndex, decideNextAction, player, state.goals, state.rentDue, processNextAiAction]);
+  }, [isJonesPlaying, state.isGameStarted, state.isGameOver, isAiTurn, showWeekendEvent, showWildWilly, state.currentPlayerIndex, decideNextAction, player, state.goals, state.rentDue, processNextAiAction]);
 
   useEffect(() => {
     if (state.weekendEvent && state.isGameStarted) {
       setShowWeekendEvent(true);
     }
   }, [state.weekendEvent, state.week]);
+
+  // Wild Willy robbery event
+  useEffect(() => {
+    if (state.wildWillyEvent && state.isGameStarted) {
+      setShowWildWilly(true);
+    }
+  }, [state.wildWillyEvent, state.isGameStarted]);
 
   useEffect(() => {
     if (state.rentDue && player && !isJonesPlaying) {
@@ -296,6 +305,13 @@ function GameContent() {
         onClose={() => {
           setShowWeekendEvent(false);
           dispatch({ type: 'SET_WEEKEND_EVENT', event: null });
+        }}
+      />
+
+      <WildWillyDialog
+        open={showWildWilly}
+        onClose={() => {
+          setShowWildWilly(false);
         }}
       />
 

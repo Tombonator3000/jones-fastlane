@@ -12,7 +12,7 @@
 - [x] Jones AI motstander
 - [x] Ukesyklus og helgehendelser
 - [x] Økonomi-indeks system
-- [x] Wild Willy tilfeldige røverier (apartment robbery i END_TURN)
+- [x] Wild Willy fullstendig implementasjon (street + apartment robbery) (2026-02-01)
 - [x] Leilighetsskifte-mekanikk
 - [x] Pantelåner fullstendig implementasjon
 
@@ -45,6 +45,7 @@
 ### Dialogs
 - [x] Game Over dialog
 - [x] Weekend Event dialog
+- [x] Wild Willy Robbery dialog (2026-02-01)
 - [x] Location Menu i center panel (2026-02-01)
 - [x] Butikk-dialoger (alle lokasjoner via LocationMenu)
 - [x] Jobb-søknad dialog (via LocationMenu)
@@ -163,6 +164,17 @@
 - [x] Pay cut system for moderate crashes (80% av lønn)
 - [x] Aksjer fluktuerer uavhengig rundt økonomi-baseline
 - [x] Alle UI-komponenter oppdatert til economyReading
+
+### Wild Willy Full Implementation (2026-02-01)
+- [x] Street Robbery ved Bank (1/31 sjanse ~3.2%)
+- [x] Street Robbery ved Black's Market (1/51 sjanse ~1.95%)
+- [x] Street Robbery kun fra uke 4+, kun med Cash
+- [x] Apartment Robbery med relaxation-basert sjanse: 1/(relax+1)
+- [x] 25% sjanse per item TYPE (ikke per item) for apartment robbery
+- [x] Unstealable items: Refrigerator, Freezer, Stove, Computer, Encyclopedia, Dictionary, Atlas
+- [x] WildWillyDialog komponent med animasjon og sprite
+- [x] Visuell "newspaper" overskrift med detaljer
+- [x] Integrert i spill-flyten (Index.tsx)
 
 ---
 
