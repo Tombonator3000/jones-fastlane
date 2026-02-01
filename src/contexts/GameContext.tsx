@@ -14,6 +14,10 @@ import {
   STOCKS,
   WILD_WILLY,
   DOCTOR_VISIT,
+  STARVATION,
+  RELAXATION,
+  MARKET_EVENTS,
+  RENT_GARNISHMENT,
   LOTTERY_PRIZES,
   FRESH_FOOD,
   APPLIANCES,
@@ -33,7 +37,8 @@ type GameAction =
   | { type: 'ADD_PLAYER'; name: string; avatar: string }
   | { type: 'MOVE_TO_LOCATION'; locationId: string }
   | { type: 'WORK'; hours: number }
-  | { type: 'STUDY'; degreeId: string; hours: number }
+  | { type: 'STUDY'; degreeId: string } // Wiki: Each lesson is 6 hours
+  | { type: 'RELAX' } // Wiki: 6 hours, +3 relaxation, +2 happiness first time
   | { type: 'BUY_FAST_FOOD'; itemId: string; cost: number; happiness: number }
   | { type: 'BUY_FRESH_FOOD'; units: number; cost: number }
   | { type: 'BUY_CLOTHES'; clothingType: 'casual' | 'dress' | 'business'; store: 'qt' | 'zmart'; cost: number; weeks: number; happiness: number }
@@ -55,7 +60,9 @@ type GameAction =
   | { type: 'WILD_WILLY_STREET_ROBBERY' }
   | { type: 'WILD_WILLY_APARTMENT_ROBBERY'; stolenItems: string[] }
   | { type: 'DOCTOR_VISIT'; cost: number }
-  | { type: 'PROCESS_LOTTERY' };
+  | { type: 'PROCESS_LOTTERY' }
+  | { type: 'MARKET_CRASH'; severity: 'minor' | 'moderate' | 'major' }
+  | { type: 'ECONOMIC_BOOM'; severity: 'minor' | 'moderate' | 'major' };
 
 function calculateDistance(from: string, to: string): number {
   // Simplified distance calculation - each move costs 1 hour
@@ -72,8 +79,17 @@ function checkWinCondition(player: Player, goals: GameGoals): boolean {
   return wealthProgress >= 100 && happinessProgress >= 100 && educationProgress >= 100 && careerProgress >= 100;
 }
 
-function selectWeekendEvent(player: Player): WeekendEvent {
-  // Check for item-specific weekends
+function selectWeekendEvent(player: Player, week: number): WeekendEvent {
+  // Wiki: If player has $0 cash, weekend costs $0
+  if (player.money === 0) {
+    return {
+      text: "You stayed home and saved money.",
+      cost: 0,
+      happinessChange: 0,
+    };
+  }
+
+  // Check for item-specific weekends (these are always cheap: $5-$20)
   const itemEvents: { item: string; events: WeekendEvent[] }[] = [
     { item: 'microwave', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('microwave')) },
     { item: 'vcr', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('vcr')) },
@@ -89,8 +105,18 @@ function selectWeekendEvent(player: Player): WeekendEvent {
     }
   }
 
-  // Otherwise random event
-  return WEEKEND_EVENTS[Math.floor(Math.random() * WEEKEND_EVENTS.length)];
+  // Wiki: Before week 8, max cost is $55. After week 8, max is $100.
+  const maxCost = week < 8 ? 55 : 100;
+
+  // Filter events by max cost
+  const affordableEvents = WEEKEND_EVENTS.filter(e => e.cost <= maxCost);
+
+  if (affordableEvents.length === 0) {
+    // Fallback to cheapest event
+    return WEEKEND_EVENTS.reduce((min, e) => e.cost < min.cost ? e : min, WEEKEND_EVENTS[0]);
+  }
+
+  return affordableEvents[Math.floor(Math.random() * affordableEvents.length)];
 }
 
 function processLottery(tickets: number): number {
@@ -190,7 +216,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       // Calculate earnings with experience bonus
-      const earnings = calculateWage(currentPlayer.job.baseWage, state.economyIndex, currentPlayer.experience) * action.hours;
+      let earnings = calculateWage(currentPlayer.job.baseWage, state.economyIndex, currentPlayer.experience) * action.hours;
+
+      // Wiki: Garnishment - if player has rent debt, 25% of wages go to paying it off
+      let newRentDebt = currentPlayer.rentDebt;
+      if (newRentDebt > 0) {
+        const garnishmentAmount = Math.floor(earnings * RENT_GARNISHMENT.garnishmentRate);
+        const actualGarnishment = Math.min(garnishmentAmount, newRentDebt);
+        earnings -= actualGarnishment;
+        newRentDebt -= actualGarnishment;
+      }
 
       // Working increases experience and dependability
       const experienceGain = Math.floor(action.hours / 2);
@@ -204,6 +239,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         career: Math.min(100, Math.max(currentPlayer.career, currentPlayer.job.careerPoints)),
         experience: Math.min(100, currentPlayer.experience + experienceGain),
         dependability: Math.min(100, currentPlayer.dependability + dependabilityGain),
+        rentDebt: newRentDebt,
       };
 
       return { ...state, players: updatedPlayers };
@@ -211,26 +247,32 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'STUDY': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      if (currentPlayer.hoursRemaining < action.hours) {
+
+      // Wiki: Need at least 1 hour to take a lesson
+      if (currentPlayer.hoursRemaining < 1) {
         return state;
       }
 
       const degree = DEGREES.find(d => d.id === action.degreeId);
       if (!degree) return state;
 
+      // Wiki: Each lesson takes 6 hours
+      // If fewer than 6 hours remain, player still takes the entire lesson
+      const hoursUsed = Math.min(6, currentPlayer.hoursRemaining);
+
       const lessonsRequired = getLessonsRequired(currentPlayer, degree);
       const currentProgress = currentPlayer.studyProgress[action.degreeId] || 0;
-      const newProgress = currentProgress + action.hours;
+      const newProgress = currentProgress + 1; // Progress by 1 lesson
       const completed = newProgress >= lessonsRequired;
 
       const updatedPlayers = [...state.players];
 
-      // Graduation gives +5 dependability (temporary boost)
+      // Wiki: Each Degree gives +5 max dependability and +5 max experience
       const dependabilityBoost = completed ? 5 : 0;
 
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
-        hoursRemaining: currentPlayer.hoursRemaining - action.hours,
+        hoursRemaining: Math.max(0, currentPlayer.hoursRemaining - 6), // Always costs 6 hours even if less remain
         studyProgress: {
           ...currentPlayer.studyProgress,
           [action.degreeId]: completed ? 0 : newProgress,
@@ -243,6 +285,29 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           : currentPlayer.enrolledCourses,
         education: completed ? currentPlayer.education + degree.educationPoints : currentPlayer.education,
         dependability: Math.min(100, currentPlayer.dependability + dependabilityBoost),
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'RELAX': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      // Wiki: Relaxing takes 6 hours
+      if (currentPlayer.hoursRemaining < RELAXATION.hoursPerRelax) {
+        return state;
+      }
+
+      // Wiki: First relax per turn gives +2 happiness
+      const happinessGain = currentPlayer.hasRelaxedThisTurn ? 0 : RELAXATION.happinessFirstRelax;
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        hoursRemaining: currentPlayer.hoursRemaining - RELAXATION.hoursPerRelax,
+        relaxation: Math.min(RELAXATION.maxValue, currentPlayer.relaxation + RELAXATION.relaxationGain),
+        happiness: Math.min(100, currentPlayer.happiness + happinessGain),
+        hasRelaxedThisTurn: true,
       };
 
       return { ...state, players: updatedPlayers };
@@ -370,6 +435,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
+      // Wiki: Enrollment takes no time, but need at least 1 hour to choose a course
+      if (currentPlayer.hoursRemaining < 1) {
+        return state;
+      }
+
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
@@ -379,7 +449,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           ...currentPlayer.studyProgress,
           [action.degreeId]: 0,
         },
-        hoursRemaining: currentPlayer.hoursRemaining - 2,
+        // Wiki: Enrollment itself takes no time (0 hours)
       };
 
       return { ...state, players: updatedPlayers };
@@ -390,19 +460,31 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const apartment = APARTMENTS[currentPlayer.apartment];
       const rentAmount = calculatePrice(apartment.baseRent, state.economyIndex);
 
-      if (currentPlayer.money + currentPlayer.bankBalance < rentAmount) {
-        // Relative bails you out but you lose happiness
+      // Include any existing rent debt
+      const totalOwed = rentAmount + currentPlayer.rentDebt;
+
+      // Calculate how much player can pay
+      const totalAvailable = currentPlayer.money + currentPlayer.bankBalance;
+
+      if (totalAvailable < totalOwed) {
+        // Wiki: Can't pay full rent - add to rent debt (garnishment system)
+        // Pay what you can, rest becomes debt
+        const amountPaid = totalAvailable;
+        const newDebt = totalOwed - amountPaid;
+
         const updatedPlayers = [...state.players];
         updatedPlayers[state.currentPlayerIndex] = {
           ...currentPlayer,
-          money: 50,
+          money: 0,
           bankBalance: 0,
-          happiness: Math.max(0, currentPlayer.happiness - 20),
+          rentDebt: newDebt,
+          happiness: Math.max(0, currentPlayer.happiness - 5), // Some happiness loss for debt
         };
         return { ...state, players: updatedPlayers, rentDue: false };
       }
 
-      let remainingRent = rentAmount;
+      // Can pay full amount
+      let remainingRent = totalOwed;
       let newMoney = currentPlayer.money;
       let newBankBalance = currentPlayer.bankBalance;
 
@@ -419,6 +501,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...currentPlayer,
         money: newMoney,
         bankBalance: newBankBalance,
+        rentDebt: 0, // Clear any previous debt
       };
 
       return { ...state, players: updatedPlayers, rentDue: false };
@@ -678,28 +761,35 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Process lottery
       const lotteryWinnings = processLottery(currentPlayer.lotteryTickets);
 
-      // Weekend event
-      const event = selectWeekendEvent(currentPlayer);
+      // Weekend event - Wiki: pass week for cost limits
+      const event = selectWeekendEvent(currentPlayer, state.week);
       const eventCost = Math.min(currentPlayer.money + lotteryWinnings, event.cost);
 
-      // Wild Willy apartment robbery (only low-cost housing)
+      // ===== Wiki: Wild Willy apartment robbery =====
+      // Chance is 1/(relaxation+1), not flat percentage
       let wildWillyRobbery = false;
       let stolenItems: string[] = [];
       if (currentPlayer.apartment === 'low-cost' && state.week >= 4) {
-        // 25% chance per item that can be stolen
-        const stealableItems = currentPlayer.items.filter(item => {
-          const appliance = APPLIANCES.find(a => a.id === item);
-          return appliance?.canBeStolen !== false;
-        });
+        // Wiki: Robbery chance is inversely proportional to relaxation
+        const robberyChance = 1 / (currentPlayer.relaxation + 1);
 
-        for (const item of stealableItems) {
-          if (Math.random() < WILD_WILLY.apartmentRobbery.chancePerItem) {
-            stolenItems.push(item);
+        if (Math.random() < robberyChance) {
+          // Robbery triggered - check each item type
+          const stealableItems = currentPlayer.items.filter(item => {
+            const appliance = APPLIANCES.find(a => a.id === item);
+            return appliance?.canBeStolen !== false;
+          });
+
+          // Wiki: 25% chance per item TYPE (not per item) to be stolen
+          for (const item of stealableItems) {
+            if (Math.random() < 0.25) {
+              stolenItems.push(item);
+            }
           }
-        }
 
-        if (stolenItems.length > 0) {
-          wildWillyRobbery = true;
+          if (stolenItems.length > 0) {
+            wildWillyRobbery = true;
+          }
         }
       }
 
@@ -726,7 +816,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Relaxation changes based on activities
       let newRelaxation = currentPlayer.relaxation;
       if (event.happinessChange > 0) {
-        newRelaxation = Math.min(50, newRelaxation + 2);
+        newRelaxation = Math.min(RELAXATION.maxValue, newRelaxation + 2);
       }
 
       // Update pawned items
@@ -734,14 +824,25 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         .map(p => ({ ...p, weeksRemaining: p.weeksRemaining - 1 }))
         .filter(p => p.weeksRemaining > 0);
 
-      // Hours penalty for starvation
-      const starvationPenalty = starvation ? DOCTOR_VISIT.hoursLost : 0;
-      const starvationHappinessPenalty = starvation ? DOCTOR_VISIT.happinessLoss : 0;
+      // ===== Wiki: Starvation uses 20 hours, not 10 =====
+      const starvationPenalty = starvation ? STARVATION.hoursLost : 0;
+      const starvationHappinessPenalty = starvation ? STARVATION.happinessLoss : 0;
 
-      // Doctor cost for starvation (random between min and max)
-      const doctorCost = starvation
+      // Doctor cost for starvation (50% chance, random between min and max)
+      const starvationDoctorVisit = starvation && Math.random() < STARVATION.doctorChance;
+      const starvationDoctorCost = starvationDoctorVisit
         ? Math.floor(Math.random() * (DOCTOR_VISIT.maxCost - DOCTOR_VISIT.minCost + 1)) + DOCTOR_VISIT.minCost
         : 0;
+
+      // ===== Wiki: Low relaxation doctor visit =====
+      // 25% chance of doctor visit when relaxation is at minimum (10)
+      const lowRelaxationDoctorVisit = currentPlayer.relaxation <= RELAXATION.lowRelaxationThreshold &&
+        Math.random() < RELAXATION.doctorChanceAtMin;
+      const lowRelaxationDoctorCost = lowRelaxationDoctorVisit
+        ? Math.floor(Math.random() * (DOCTOR_VISIT.maxCost - DOCTOR_VISIT.minCost + 1)) + DOCTOR_VISIT.minCost
+        : 0;
+      const lowRelaxationHoursPenalty = lowRelaxationDoctorVisit ? DOCTOR_VISIT.hoursLost : 0;
+      const lowRelaxationHappinessPenalty = lowRelaxationDoctorVisit ? DOCTOR_VISIT.happinessLoss : 0;
 
       // Wild Willy happiness penalty
       const wildWillyHappinessPenalty = wildWillyRobbery ? WILD_WILLY.apartmentRobbery.happinessLoss : 0;
@@ -755,16 +856,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const loseJob = newDependability < 10 && currentPlayer.job !== null;
       const newJob = loseJob ? null : currentPlayer.job;
 
+      // Total doctor cost and hours penalty
+      const totalDoctorCost = starvationDoctorCost + lowRelaxationDoctorCost;
+      const totalHoursPenalty = starvationPenalty + lowRelaxationHoursPenalty;
+      const totalHappinessPenalty = starvationHappinessPenalty + lowRelaxationHappinessPenalty + wildWillyHappinessPenalty;
+
       // Update current player
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
-        money: Math.max(0, currentPlayer.money + lotteryWinnings - eventCost - doctorCost),
+        money: Math.max(0, currentPlayer.money + lotteryWinnings - eventCost - totalDoctorCost),
         food: newFood,
         hasFastFood: false, // Reset for next turn
         clothes: newClothes,
-        hoursRemaining: 60 - starvationPenalty,
-        happiness: Math.max(0, Math.min(100, currentPlayer.happiness + event.happinessChange - starvationHappinessPenalty - wildWillyHappinessPenalty)),
+        hoursRemaining: 60 - totalHoursPenalty,
+        happiness: Math.max(0, Math.min(100, currentPlayer.happiness + event.happinessChange - totalHappinessPenalty)),
         dependability: newDependability,
         relaxation: newRelaxation,
         lotteryTickets: 0, // Reset lottery tickets
@@ -772,6 +878,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         currentLocation: currentPlayer.apartment === 'low-cost' ? 'low-cost-housing' : 'security-apartments',
         items: itemsAfterRobbery,
         job: newJob,
+        hasRelaxedThisTurn: false, // Reset for next turn
       };
 
       // Move to next player
@@ -780,18 +887,62 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const nextMonth = nextWeek > state.month * 4 ? state.month + 1 : state.month;
       const rentDue = nextWeek % 4 === 0 && nextWeek !== state.week;
 
-      // Update economy (random fluctuation)
+      // ===== Wiki: Market Crash/Boom system =====
       let newEconomyIndex = state.economyIndex;
-      if (Math.random() < 0.1) {
-        // Economic boom or crash
-        if (Math.random() < 0.5) {
-          newEconomyIndex = Math.min(90, state.economyIndex + 20);
+      let marketEvent: string | null = null;
+      let bankWiped = false;
+      let playersFired = false;
+
+      // Wiki: Market crashes only happen on week 8+
+      if (nextWeek >= MARKET_EVENTS.minWeekForCrash && Math.random() < 0.05) {
+        // 5% chance of market crash
+        const crashRoll = Math.random();
+        let crashType: 'minor' | 'moderate' | 'major';
+        if (crashRoll < 0.1) {
+          crashType = 'major';
+          marketEvent = 'MAJOR MARKET CRASH! Banks wiped, all jobs lost!';
+          bankWiped = true;
+          playersFired = true;
+        } else if (crashRoll < 0.4) {
+          crashType = 'moderate';
+          marketEvent = 'Market Crash! Economy takes a hit.';
         } else {
-          newEconomyIndex = Math.max(-30, state.economyIndex - 20);
+          crashType = 'minor';
+          marketEvent = 'Minor market downturn.';
         }
+        const crashInfo = MARKET_EVENTS.crashTypes[crashType];
+        newEconomyIndex = Math.max(-30, state.economyIndex - crashInfo.economyDrop);
+      } else if (nextWeek >= MARKET_EVENTS.minWeekForBoom && Math.random() < 0.05) {
+        // 5% chance of economic boom
+        const boomRoll = Math.random();
+        let boomType: 'minor' | 'moderate' | 'major';
+        if (boomRoll < 0.1) {
+          boomType = 'major';
+          marketEvent = 'ECONOMIC BOOM! Great times ahead!';
+        } else if (boomRoll < 0.4) {
+          boomType = 'moderate';
+          marketEvent = 'Economic upturn! Business is booming!';
+        } else {
+          boomType = 'minor';
+          marketEvent = 'Minor economic improvement.';
+        }
+        const boomInfo = MARKET_EVENTS.boomTypes[boomType];
+        newEconomyIndex = Math.min(90, state.economyIndex + boomInfo.economyBoost);
       } else {
-        // Small fluctuation
+        // Small random fluctuation
         newEconomyIndex = Math.max(-30, Math.min(90, state.economyIndex + (Math.random() - 0.5) * 10));
+      }
+
+      // Apply major crash effects to all players
+      if (bankWiped || playersFired) {
+        for (let i = 0; i < updatedPlayers.length; i++) {
+          if (bankWiped) {
+            updatedPlayers[i] = { ...updatedPlayers[i], bankBalance: 0 };
+          }
+          if (playersFired) {
+            updatedPlayers[i] = { ...updatedPlayers[i], job: null, currentWage: null };
+          }
+        }
       }
 
       // Update stock prices
@@ -799,6 +950,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       // Build newspaper message
       let newspaperMessages: string[] = [];
+      if (marketEvent) {
+        newspaperMessages.push(marketEvent);
+      }
       if (lotteryWinnings > 0) {
         newspaperMessages.push(`Lottery winner! You won $${lotteryWinnings}!`);
       }
@@ -806,7 +960,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         newspaperMessages.push(`${WILD_WILLY.apartmentRobbery.description} Items stolen: ${stolenItems.join(', ')}`);
       }
       if (starvation) {
-        newspaperMessages.push(`You starved and had to visit the doctor! Cost: $${doctorCost}`);
+        newspaperMessages.push(`You starved! Lost ${STARVATION.hoursLost} hours.${starvationDoctorVisit ? ` Doctor visit: $${starvationDoctorCost}` : ''}`);
+      }
+      if (lowRelaxationDoctorVisit) {
+        newspaperMessages.push(`Exhaustion! Doctor visit required. Cost: $${lowRelaxationDoctorCost}`);
       }
       if (loseJob) {
         newspaperMessages.push(`You were fired from your job due to low dependability!`);
