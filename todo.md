@@ -45,9 +45,10 @@
 ### Dialogs
 - [x] Game Over dialog
 - [x] Weekend Event dialog
-- [ ] Butikk-dialoger (alle lokasjoner)
-- [ ] Jobb-søknad dialog
-- [ ] Studieprogram dialog
+- [x] Location Menu i center panel (2026-02-01)
+- [x] Butikk-dialoger (alle lokasjoner via LocationMenu)
+- [x] Jobb-søknad dialog (via LocationMenu)
+- [x] Studieprogram dialog (via LocationMenu)
 
 ### Statistikk
 - [x] PlayerStats komponent
@@ -139,6 +140,7 @@
 - [x] AI klesoppgradering for karriere - kjøper dress/business proaktivt (2026-02-01)
 - [x] Wild Willy balansering - redusert fra 25% til 10% (2026-02-01)
 - [x] AI security apartment-vurdering ved lav happiness (2026-02-01)
+- [x] Location Menu i center panel - retro design (2026-02-01)
 
 ### Wiki Hour Rules Implementation (2026-02-01)
 - [x] Starvation penalty: 20 timer (var 10)

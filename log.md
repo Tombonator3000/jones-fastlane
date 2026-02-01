@@ -2,6 +2,75 @@
 
 ---
 
+## 2026-02-01 - Location Menu i Center Panel
+
+### Oppgave
+Når spilleren er på et sted skal menyen åpnes på midten av spillbrettet slik at man kan samhandle med stedet man er på. Layout og design skal matche originalspillets stil.
+
+### Implementasjon
+
+#### 1. Ny komponent: LocationMenu (`src/components/game/LocationMenu.tsx`)
+- Erstatter den tidligere modale LocationDialog
+- Vises direkte i sentrum av spillbrettet
+- Retro-stil design med:
+  - Kremfarget bakgrunn med gradient
+  - Teal/turkis header
+  - Pixel-font titler
+  - Interaktive item-lister
+  - Done-knapp for å lukke
+
+#### 2. CSS-stiler (`src/index.css`)
+Nye klasser lagt til:
+```css
+.location-menu-panel      /* Hovedpanel med retro-utseende */
+.location-menu-header     /* Turkis header med lokasjonsnavn */
+.location-menu-content    /* Scrollbar innholdsområde */
+.location-menu-section    /* Seksjoner med border */
+.location-menu-section-title  /* Pixel-font seksjonstitler */
+.location-menu-button     /* Retro-stil knapper */
+.location-menu-close      /* Done-knapp */
+.location-menu-item       /* Klikkbare items i lister */
+```
+
+#### 3. Oppdatert GameBoard (`src/components/game/GameBoard.tsx`)
+- Nye props: `selectedLocation`, `onCloseLocation`
+- Senterpanelet viser nå enten:
+  - Spillstatus (uke, måned, spiller) når ingen lokasjon er valgt
+  - LocationMenu når en lokasjon er valgt
+- AnimatePresence for smooth overganger
+
+#### 4. Oppdatert Index.tsx (`src/pages/Index.tsx`)
+- Fjernet LocationDialog import/bruk
+- Sender selectedLocation og onCloseLocation til GameBoard
+
+### Lokasjonsmenyer implementert
+Alle 13 lokasjoner har fullstendig menyinnhold:
+- **Monolith Burgers**: Fast food meny med priser
+- **Black's Market**: Fresh food, lottery
+- **QT Clothing**: Kvalitetsklær med varighet
+- **Z-Mart**: Rabatterte klær og elektronikk
+- **Socket City**: Elektronikk/appliances med priser
+- **Employment Office**: Jobbliste med krav
+- **Hi-Tech U**: Kurs innskriving og studieprogresjon
+- **Bank**: Innskudd/uttak, aksjehandel
+- **Factory**: Arbeidsområde
+- **Rent Office**: Husleie og leilighetsbytte
+- **Pawn Shop**: Pantsetting og innløsning
+- **Low-Cost Housing / Security Apartments**: Hjemvisning
+
+### Design-elementer (fra originalspill-bilder)
+- Kremfarget bakgrunn (#f5f0e6)
+- Turkis knapper (#4a9a9a)
+- Pixel-font (Press Start 2P)
+- VT323 for vanlig tekst
+- Innrykket border med skygge
+- Scrollbar med retro-stil
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - Implementering av Wiki Hour Rules
 
 ### Wiki-analyse
