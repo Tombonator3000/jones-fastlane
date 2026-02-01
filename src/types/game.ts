@@ -109,6 +109,14 @@ export interface Stock {
   isSafe: boolean; // T-Bills are safe from crashes
 }
 
+// Wild Willy event types
+export interface WildWillyEvent {
+  type: 'street' | 'apartment';
+  amountStolen?: number; // For street robbery (all cash)
+  itemsStolen?: string[]; // For apartment robbery
+  happinessLoss: number;
+}
+
 export interface GameState {
   players: Player[];
   currentPlayerIndex: number;
@@ -125,6 +133,7 @@ export interface GameState {
   economyReading: number; // -30 to +90, price multiplier (replaces old economyIndex)
   rentDue: boolean;
   weekendEvent: WeekendEvent | null;
+  wildWillyEvent: WildWillyEvent | null; // For showing Wild Willy robbery dialog
   stockPrices: Record<string, number>;
   pawnShopItems: PawnShopItem[];
   newspaper: string | null;
@@ -244,19 +253,20 @@ export const JOBS: Job[] = [
 ];
 
 // APPLIANCES - Based on wiki prices
+// Wiki: Some items can NEVER be stolen by Wild Willy: Refrigerator, Freezer, Stove, Computer, Encyclopedia, Dictionary, Atlas
 export const APPLIANCES: Appliance[] = [
   { id: 'refrigerator', name: 'Refrigerator', socketCityPrice: 876, zMartPrice: 650, happiness: 1, canBreak: true, canBeStolen: false, special: 'Stores up to 6 weeks of fresh food' },
-  { id: 'freezer', name: 'Freezer', socketCityPrice: 500, zMartPrice: 375, happiness: 1, canBreak: true, canBeStolen: true, special: 'With refrigerator, stores up to 12 weeks of food' },
+  { id: 'freezer', name: 'Freezer', socketCityPrice: 500, zMartPrice: 375, happiness: 1, canBreak: true, canBeStolen: false, special: 'With refrigerator, stores up to 12 weeks of food' },
   { id: 'computer', name: 'Computer', socketCityPrice: 1599, zMartPrice: null, happiness: 3, canBreak: true, canBeStolen: false, special: 'Reduces lessons needed by 1. Cannot be stolen.' },
   { id: 'television', name: 'Television', socketCityPrice: 650, zMartPrice: 450, happiness: 2, canBreak: true, canBeStolen: true, special: 'Triggers TV weekend events' },
   { id: 'bw-tv', name: 'Black & White TV', socketCityPrice: 0, zMartPrice: 200, happiness: 1, canBreak: true, canBeStolen: true, special: 'Only at Z-Mart' },
   { id: 'stereo', name: 'Stereo', socketCityPrice: 400, zMartPrice: 450, happiness: 2, canBreak: true, canBeStolen: true, special: 'Cheaper at Socket City' },
   { id: 'vcr', name: 'VCR', socketCityPrice: 550, zMartPrice: 400, happiness: 2, canBreak: true, canBeStolen: true, special: 'Triggers VCR weekend events' },
   { id: 'microwave', name: 'Microwave', socketCityPrice: 350, zMartPrice: 250, happiness: 1, canBreak: true, canBeStolen: true, special: 'Triggers microwave weekend events' },
-  { id: 'stove', name: 'Stove', socketCityPrice: 600, zMartPrice: 450, happiness: 1, canBreak: true, canBeStolen: true, special: 'Alternative to microwave for cooking bonus' },
-  { id: 'encyclopedia', name: 'Encyclopedia', socketCityPrice: 300, zMartPrice: 200, happiness: 1, canBreak: false, canBeStolen: true, special: 'With dictionary+atlas: -1 lesson per degree' },
-  { id: 'dictionary', name: 'Dictionary', socketCityPrice: 150, zMartPrice: 100, happiness: 1, canBreak: false, canBeStolen: true, special: 'With encyclopedia+atlas: -1 lesson per degree' },
-  { id: 'atlas', name: 'Atlas', socketCityPrice: 150, zMartPrice: 100, happiness: 1, canBreak: false, canBeStolen: true, special: 'With encyclopedia+dictionary: -1 lesson per degree' },
+  { id: 'stove', name: 'Stove', socketCityPrice: 600, zMartPrice: 450, happiness: 1, canBreak: true, canBeStolen: false, special: 'Alternative to microwave for cooking bonus' },
+  { id: 'encyclopedia', name: 'Encyclopedia', socketCityPrice: 300, zMartPrice: 200, happiness: 1, canBreak: false, canBeStolen: false, special: 'With dictionary+atlas: -1 lesson per degree' },
+  { id: 'dictionary', name: 'Dictionary', socketCityPrice: 150, zMartPrice: 100, happiness: 1, canBreak: false, canBeStolen: false, special: 'With encyclopedia+atlas: -1 lesson per degree' },
+  { id: 'atlas', name: 'Atlas', socketCityPrice: 150, zMartPrice: 100, happiness: 1, canBreak: false, canBeStolen: false, special: 'With encyclopedia+dictionary: -1 lesson per degree' },
 ];
 
 // CLOTHING - Based on wiki
@@ -400,20 +410,34 @@ export const LOTTERY_PRIZES = [
   { tickets: 500, prizes: [{ amount: 5000, chance: 0.05 }, { amount: 500, chance: 0.2 }, { amount: 200, chance: 1.0 }] }, // Guaranteed $200 at 500 tickets
 ];
 
-// WILD WILLY events - Based on wiki (balanced for better gameplay)
+// WILD WILLY events - Based on wiki
 export const WILD_WILLY = {
   streetRobbery: {
-    locations: ['bank', 'blacks-market'],
-    minWeek: 4,
-    happinessLoss: 3,
+    minWeek: 4, // Wiki: Only on or after Week #4
+    happinessLoss: 3, // Wiki: -3 Happiness
     description: 'Wild Willy robbed you on the street! All cash stolen!',
+    // Wiki: Different chances based on location
+    chances: {
+      'bank': 1 / 31, // ~3.2% chance when leaving bank
+      'blacks-market': 1 / 51, // ~1.95% chance when leaving market
+    } as Record<string, number>,
   },
   apartmentRobbery: {
     location: 'low-cost-housing',
-    chancePerItem: 0.10, // 10% per item type (reduced from 25% for balance)
-    happinessLoss: 4,
+    chancePerItemType: 0.25, // Wiki: 25% chance per item TYPE (not per item)
+    happinessLoss: 4, // Wiki: -4 Happiness
     description: 'Wild Willy broke into your apartment!',
   },
+  // Items that can NEVER be stolen (per wiki)
+  unStealableItems: [
+    'refrigerator',
+    'freezer',
+    'stove',
+    'computer',
+    'encyclopedia',
+    'dictionary',
+    'atlas',
+  ],
 };
 
 // DOCTOR VISIT - Based on wiki
@@ -527,6 +551,7 @@ export function createInitialGameState(goals: GameGoals): GameState {
     economyReading: 0, // -30 to +90, neutral start
     rentDue: false,
     weekendEvent: null,
+    wildWillyEvent: null,
     stockPrices: STOCKS.reduce((acc, stock) => ({ ...acc, [stock.id]: stock.basePrice }), {}),
     pawnShopItems: [],
     newspaper: null,
