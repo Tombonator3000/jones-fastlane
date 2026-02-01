@@ -4,13 +4,28 @@ import {
   Player,
   GameGoals,
   Job,
+  WeekendEvent,
   createInitialPlayer,
   createInitialGameState,
   WEEKEND_EVENTS,
-  RENT_PRICES,
+  APARTMENTS,
   JOBS,
+  DEGREES,
+  STOCKS,
+  WILD_WILLY,
+  DOCTOR_VISIT,
+  LOTTERY_PRIZES,
+  FRESH_FOOD,
+  calculatePrice,
+  calculateWage,
+  hasRequiredClothing,
+  getCurrentClothingLevel,
+  meetsJobRequirements,
+  getAvailableDegrees,
+  getLessonsRequired,
+  getMaxFoodStorage,
+  ClothingLevel,
 } from '@/types/game';
-import { toast } from '@/hooks/use-toast';
 
 type GameAction =
   | { type: 'START_GAME'; goals: GameGoals }
@@ -18,17 +33,28 @@ type GameAction =
   | { type: 'MOVE_TO_LOCATION'; locationId: string }
   | { type: 'WORK'; hours: number }
   | { type: 'STUDY'; degreeId: string; hours: number }
-  | { type: 'BUY_FOOD'; amount: number; cost: number }
-  | { type: 'BUY_CLOTHES'; level: string; cost: number }
-  | { type: 'BUY_ITEM'; itemId: string; cost: number; happiness: number }
+  | { type: 'BUY_FAST_FOOD'; itemId: string; cost: number; happiness: number }
+  | { type: 'BUY_FRESH_FOOD'; units: number; cost: number }
+  | { type: 'BUY_CLOTHES'; clothingType: 'casual' | 'dress' | 'business'; store: 'qt' | 'zmart'; cost: number; weeks: number; happiness: number }
+  | { type: 'BUY_APPLIANCE'; itemId: string; cost: number; happiness: number; store: 'socket-city' | 'z-mart' }
   | { type: 'APPLY_FOR_JOB'; job: Job }
   | { type: 'ENROLL_DEGREE'; degreeId: string; cost: number }
   | { type: 'PAY_RENT' }
   | { type: 'DEPOSIT_MONEY'; amount: number }
   | { type: 'WITHDRAW_MONEY'; amount: number }
+  | { type: 'BUY_STOCK'; stockId: string; quantity: number; price: number }
+  | { type: 'SELL_STOCK'; stockId: string; quantity: number; price: number }
+  | { type: 'BUY_LOTTERY_TICKETS'; cost: number }
+  | { type: 'BUY_TICKET'; ticketType: 'baseball' | 'theatre' | 'concert'; cost: number; happiness: number }
+  | { type: 'PAWN_ITEM'; itemId: string; pawnValue: number }
+  | { type: 'REDEEM_ITEM'; itemId: string; cost: number }
   | { type: 'END_TURN' }
   | { type: 'CHANGE_APARTMENT'; apartmentType: 'low-cost' | 'security' }
-  | { type: 'SET_WEEKEND_EVENT'; event: string | null };
+  | { type: 'SET_WEEKEND_EVENT'; event: WeekendEvent | null }
+  | { type: 'WILD_WILLY_STREET_ROBBERY' }
+  | { type: 'WILD_WILLY_APARTMENT_ROBBERY'; stolenItems: string[] }
+  | { type: 'DOCTOR_VISIT'; cost: number }
+  | { type: 'PROCESS_LOTTERY' };
 
 function calculateDistance(from: string, to: string): number {
   // Simplified distance calculation - each move costs 1 hour
@@ -39,10 +65,77 @@ function calculateDistance(from: string, to: string): number {
 function checkWinCondition(player: Player, goals: GameGoals): boolean {
   const wealthProgress = ((player.money + player.bankBalance) / goals.wealth) * 100;
   const happinessProgress = (player.happiness / goals.happiness) * 100;
-  const educationProgress = (player.degrees.length / (goals.education / 25)) * 100;
-  const careerProgress = ((player.job?.careerLevel || 0) / (goals.career / 20)) * 100;
-  
+  const educationProgress = (player.education / goals.education) * 100;
+  const careerProgress = (player.career / goals.career) * 100;
+
   return wealthProgress >= 100 && happinessProgress >= 100 && educationProgress >= 100 && careerProgress >= 100;
+}
+
+function selectWeekendEvent(player: Player): WeekendEvent {
+  // Check for item-specific weekends
+  const itemEvents: { item: string; events: WeekendEvent[] }[] = [
+    { item: 'microwave', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('microwave')) },
+    { item: 'vcr', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('vcr')) },
+    { item: 'stereo', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('stereo')) },
+    { item: 'television', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('tv') || e.text.toLowerCase().includes('television')) },
+    { item: 'computer', events: WEEKEND_EVENTS.filter(e => e.text.toLowerCase().includes('computer')) },
+  ];
+
+  // 20% chance for item-specific weekend if player owns the item
+  for (const { item, events } of itemEvents) {
+    if (player.items.includes(item) && events.length > 0 && Math.random() < 0.2) {
+      return events[Math.floor(Math.random() * events.length)];
+    }
+  }
+
+  // Otherwise random event
+  return WEEKEND_EVENTS[Math.floor(Math.random() * WEEKEND_EVENTS.length)];
+}
+
+function processLottery(tickets: number): number {
+  if (tickets === 0) return 0;
+
+  // Find the appropriate prize tier
+  const tiers = LOTTERY_PRIZES.sort((a, b) => b.tickets - a.tickets);
+
+  for (const tier of tiers) {
+    if (tickets >= tier.tickets) {
+      for (const prize of tier.prizes) {
+        if (Math.random() < prize.chance) {
+          return prize.amount;
+        }
+      }
+      break;
+    }
+  }
+
+  return 0;
+}
+
+function updateStockPrices(currentPrices: Record<string, number>, economyIndex: number): Record<string, number> {
+  const newPrices: Record<string, number> = {};
+
+  for (const stock of STOCKS) {
+    const currentPrice = currentPrices[stock.id] || stock.basePrice;
+
+    if (stock.isSafe) {
+      // T-Bills are stable, minor fluctuation
+      const change = (Math.random() - 0.5) * 0.05;
+      newPrices[stock.id] = Math.round(currentPrice * (1 + change));
+    } else {
+      // Other stocks fluctuate more, trending toward economy
+      const economyTrend = economyIndex / 200;
+      const randomChange = (Math.random() - 0.5) * 0.3;
+      const totalChange = economyTrend + randomChange;
+
+      let newPrice = Math.round(currentPrice * (1 + totalChange));
+      // Clamp to 50% - 250% of base price
+      newPrice = Math.max(Math.round(stock.basePrice * 0.5), Math.min(Math.round(stock.basePrice * 2.5), newPrice));
+      newPrices[stock.id] = newPrice;
+    }
+  }
+
+  return newPrices;
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -69,7 +162,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'MOVE_TO_LOCATION': {
       const currentPlayer = state.players[state.currentPlayerIndex];
       const moveCost = calculateDistance(currentPlayer.currentLocation, action.locationId);
-      
+
       if (currentPlayer.hoursRemaining < moveCost + 2) {
         return state;
       }
@@ -78,7 +171,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         currentLocation: action.locationId,
-        hoursRemaining: currentPlayer.hoursRemaining - moveCost - 2, // 2 hours to enter building
+        hoursRemaining: currentPlayer.hoursRemaining - moveCost - 2,
       };
 
       return { ...state, players: updatedPlayers };
@@ -90,13 +183,25 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
-      const earnings = Math.floor((currentPlayer.job.wage * action.hours / 8) * state.economyMultiplier);
+      // Check clothing requirement
+      if (!hasRequiredClothing(currentPlayer, currentPlayer.job.requiredClothes)) {
+        return state;
+      }
+
+      const earnings = calculateWage(currentPlayer.job.baseWage, state.economyIndex) * action.hours;
+
+      // Working increases experience and dependability
+      const experienceGain = Math.floor(action.hours / 2);
+      const dependabilityGain = 1;
+
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         money: currentPlayer.money + earnings,
         hoursRemaining: currentPlayer.hoursRemaining - action.hours,
-        career: Math.min(100, currentPlayer.career + 2),
+        career: Math.min(100, Math.max(currentPlayer.career, currentPlayer.job.careerPoints)),
+        experience: Math.min(100, currentPlayer.experience + experienceGain),
+        dependability: Math.min(100, currentPlayer.dependability + dependabilityGain),
       };
 
       return { ...state, players: updatedPlayers };
@@ -108,11 +213,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
+      const degree = DEGREES.find(d => d.id === action.degreeId);
+      if (!degree) return state;
+
+      const lessonsRequired = getLessonsRequired(currentPlayer, degree);
       const currentProgress = currentPlayer.studyProgress[action.degreeId] || 0;
       const newProgress = currentProgress + action.hours;
-      const completed = newProgress >= 10;
+      const completed = newProgress >= lessonsRequired;
 
       const updatedPlayers = [...state.players];
+
+      // Graduation gives +5 dependability (temporary boost)
+      const dependabilityBoost = completed ? 5 : 0;
+
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         hoursRemaining: currentPlayer.hoursRemaining - action.hours,
@@ -123,24 +236,54 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         degrees: completed && !currentPlayer.degrees.includes(action.degreeId)
           ? [...currentPlayer.degrees, action.degreeId]
           : currentPlayer.degrees,
-        education: completed ? currentPlayer.education + 25 : currentPlayer.education,
+        enrolledCourses: completed
+          ? currentPlayer.enrolledCourses.filter(c => c !== action.degreeId)
+          : currentPlayer.enrolledCourses,
+        education: completed ? currentPlayer.education + degree.educationPoints : currentPlayer.education,
+        dependability: Math.min(100, currentPlayer.dependability + dependabilityBoost),
       };
 
       return { ...state, players: updatedPlayers };
     }
 
-    case 'BUY_FOOD': {
+    case 'BUY_FAST_FOOD': {
       const currentPlayer = state.players[state.currentPlayerIndex];
       if (currentPlayer.money < action.cost) {
         return state;
       }
 
-      const maxFood = currentPlayer.hasRefrigerator ? 8 : 4;
+      // Only first fast food happiness bonus counts per turn
+      const happinessGain = !currentPlayer.hasFastFood ? action.happiness : 0;
+
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         money: currentPlayer.money - action.cost,
-        food: Math.min(maxFood, currentPlayer.food + action.amount),
+        hasFastFood: true,
+        happiness: Math.min(100, currentPlayer.happiness + happinessGain),
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'BUY_FRESH_FOOD': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+      if (currentPlayer.money < action.cost) {
+        return state;
+      }
+
+      const maxStorage = getMaxFoodStorage(currentPlayer);
+      if (maxStorage === 0) {
+        // No refrigerator - food will spoil
+        return state;
+      }
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - action.cost,
+        food: Math.min(maxStorage, currentPlayer.food + action.units),
+        happiness: Math.min(100, currentPlayer.happiness + action.units * FRESH_FOOD.happinessPerUnit),
       };
 
       return { ...state, players: updatedPlayers };
@@ -152,33 +295,37 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
+      const updatedClothes = { ...currentPlayer.clothes };
+      updatedClothes[action.clothingType] = (updatedClothes[action.clothingType] || 0) + action.weeks;
+
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         money: currentPlayer.money - action.cost,
-        clothes: action.level as Player['clothes'],
-        clothesWeeksRemaining: 8,
-        happiness: currentPlayer.happiness + 5,
+        clothes: updatedClothes,
+        happiness: Math.min(100, currentPlayer.happiness + action.happiness),
       };
 
       return { ...state, players: updatedPlayers };
     }
 
-    case 'BUY_ITEM': {
+    case 'BUY_APPLIANCE': {
       const currentPlayer = state.players[state.currentPlayerIndex];
       if (currentPlayer.money < action.cost) {
         return state;
       }
 
+      // Only give happiness if player doesn't already own this item
+      const happinessGain = !currentPlayer.items.includes(action.itemId) ? action.happiness : 0;
+
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         money: currentPlayer.money - action.cost,
-        items: [...currentPlayer.items, action.itemId],
-        happiness: currentPlayer.happiness + action.happiness,
-        hasRefrigerator: action.itemId === 'refrigerator' ? true : currentPlayer.hasRefrigerator,
-        hasComputer: action.itemId === 'computer' ? true : currentPlayer.hasComputer,
-        hasTV: action.itemId === 'tv' ? true : currentPlayer.hasTV,
+        items: currentPlayer.items.includes(action.itemId)
+          ? currentPlayer.items
+          : [...currentPlayer.items, action.itemId],
+        happiness: Math.min(100, currentPlayer.happiness + happinessGain),
       };
 
       return { ...state, players: updatedPlayers };
@@ -186,17 +333,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'APPLY_FOR_JOB': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      
-      // Check requirements
-      const hasRequiredDegrees = action.job.requiredDegrees.every(d => 
-        currentPlayer.degrees.includes(d)
-      );
-      
-      const clothesOrder: Player['clothes'][] = ['rags', 'casual', 'business', 'executive'];
-      const hasRequiredClothes = clothesOrder.indexOf(currentPlayer.clothes) >= 
-        clothesOrder.indexOf(action.job.requiredClothes);
 
-      if (!hasRequiredDegrees || !hasRequiredClothes) {
+      const { eligible } = meetsJobRequirements(currentPlayer, action.job);
+      if (!eligible) {
         return state;
       }
 
@@ -204,7 +343,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         job: action.job,
-        career: Math.max(currentPlayer.career, action.job.careerLevel * 15),
+        career: Math.max(currentPlayer.career, action.job.careerPoints),
         hoursRemaining: currentPlayer.hoursRemaining - 2,
       };
 
@@ -213,7 +352,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'ENROLL_DEGREE': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      if (currentPlayer.money < action.cost || currentPlayer.degrees.includes(action.degreeId)) {
+      const degree = DEGREES.find(d => d.id === action.degreeId);
+
+      if (!degree ||
+          currentPlayer.money < action.cost ||
+          currentPlayer.degrees.includes(action.degreeId) ||
+          currentPlayer.enrolledCourses.includes(action.degreeId) ||
+          currentPlayer.enrolledCourses.length >= 4) {
+        return state;
+      }
+
+      // Check prerequisites
+      const hasPrereqs = degree.prerequisites.every(p => currentPlayer.degrees.includes(p));
+      if (!hasPrereqs) {
         return state;
       }
 
@@ -221,6 +372,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         money: currentPlayer.money - action.cost,
+        enrolledCourses: [...currentPlayer.enrolledCourses, action.degreeId],
         studyProgress: {
           ...currentPlayer.studyProgress,
           [action.degreeId]: 0,
@@ -233,14 +385,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'PAY_RENT': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      const rentAmount = Math.floor(RENT_PRICES[currentPlayer.apartment] * state.economyMultiplier);
-      
+      const apartment = APARTMENTS[currentPlayer.apartment];
+      const rentAmount = calculatePrice(apartment.baseRent, state.economyIndex);
+
       if (currentPlayer.money + currentPlayer.bankBalance < rentAmount) {
-        // Relative bails you out
+        // Relative bails you out but you lose happiness
         const updatedPlayers = [...state.players];
         updatedPlayers[state.currentPlayerIndex] = {
           ...currentPlayer,
           money: 50,
+          bankBalance: 0,
           happiness: Math.max(0, currentPlayer.happiness - 20),
         };
         return { ...state, players: updatedPlayers, rentDue: false };
@@ -270,7 +424,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'DEPOSIT_MONEY': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      if (currentPlayer.money < action.amount) {
+      if (currentPlayer.money < action.amount || currentPlayer.hoursRemaining < 2) {
         return state;
       }
 
@@ -287,7 +441,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'WITHDRAW_MONEY': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      if (currentPlayer.bankBalance < action.amount) {
+      if (currentPlayer.bankBalance < action.amount || currentPlayer.hoursRemaining < 2) {
         return state;
       }
 
@@ -297,6 +451,195 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         money: currentPlayer.money + action.amount,
         bankBalance: currentPlayer.bankBalance - action.amount,
         hoursRemaining: currentPlayer.hoursRemaining - 2,
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'BUY_STOCK': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+      const totalCost = action.price * action.quantity;
+
+      if (currentPlayer.money < totalCost || currentPlayer.hoursRemaining < 2) {
+        return state;
+      }
+
+      const updatedStocks = { ...currentPlayer.stocks };
+      updatedStocks[action.stockId] = (updatedStocks[action.stockId] || 0) + action.quantity;
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - totalCost,
+        stocks: updatedStocks,
+        hoursRemaining: currentPlayer.hoursRemaining - 2,
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'SELL_STOCK': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+      const currentQuantity = currentPlayer.stocks[action.stockId] || 0;
+
+      if (currentQuantity < action.quantity || currentPlayer.hoursRemaining < 2) {
+        return state;
+      }
+
+      const updatedStocks = { ...currentPlayer.stocks };
+      updatedStocks[action.stockId] = currentQuantity - action.quantity;
+      if (updatedStocks[action.stockId] === 0) {
+        delete updatedStocks[action.stockId];
+      }
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money + (action.price * action.quantity),
+        stocks: updatedStocks,
+        hoursRemaining: currentPlayer.hoursRemaining - 2,
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'BUY_LOTTERY_TICKETS': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      if (currentPlayer.money < action.cost) {
+        return state;
+      }
+
+      // First purchase per turn gives +2 happiness
+      const happinessGain = currentPlayer.lotteryTickets === 0 ? 2 : 0;
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - action.cost,
+        lotteryTickets: currentPlayer.lotteryTickets + 10, // $10 = 10 tickets
+        happiness: Math.min(100, currentPlayer.happiness + happinessGain),
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'BUY_TICKET': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      if (currentPlayer.money < action.cost) {
+        return state;
+      }
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - action.cost,
+        items: [...currentPlayer.items, `${action.ticketType}-ticket`],
+        happiness: Math.min(100, currentPlayer.happiness + action.happiness),
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'PAWN_ITEM': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      if (!currentPlayer.items.includes(action.itemId)) {
+        return state;
+      }
+
+      // Remove item from inventory
+      const updatedItems = currentPlayer.items.filter(i => i !== action.itemId);
+
+      // Add to pawned items
+      const pawnedItem = {
+        itemId: action.itemId,
+        redeemPrice: Math.round(action.pawnValue * 1.25), // 25% markup to redeem
+        weeksRemaining: 4, // 4 weeks to redeem
+      };
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money + action.pawnValue,
+        items: updatedItems,
+        pawnedItems: [...currentPlayer.pawnedItems, pawnedItem],
+        happiness: Math.max(0, currentPlayer.happiness - 1), // Pawning costs -1 happiness
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'REDEEM_ITEM': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+      const pawnedItem = currentPlayer.pawnedItems.find(p => p.itemId === action.itemId);
+
+      if (!pawnedItem || currentPlayer.money < action.cost) {
+        return state;
+      }
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - action.cost,
+        items: [...currentPlayer.items, action.itemId],
+        pawnedItems: currentPlayer.pawnedItems.filter(p => p.itemId !== action.itemId),
+      };
+
+      return { ...state, players: updatedPlayers };
+    }
+
+    case 'WILD_WILLY_STREET_ROBBERY': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: 0,
+        happiness: Math.max(0, currentPlayer.happiness - WILD_WILLY.streetRobbery.happinessLoss),
+      };
+
+      return {
+        ...state,
+        players: updatedPlayers,
+        newspaper: WILD_WILLY.streetRobbery.description,
+      };
+    }
+
+    case 'WILD_WILLY_APARTMENT_ROBBERY': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      // Remove stolen items (except computer which can't be stolen)
+      const updatedItems = currentPlayer.items.filter(item =>
+        !action.stolenItems.includes(item) || item === 'computer'
+      );
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        items: updatedItems,
+        happiness: Math.max(0, currentPlayer.happiness - WILD_WILLY.apartmentRobbery.happinessLoss),
+      };
+
+      return {
+        ...state,
+        players: updatedPlayers,
+        newspaper: `${WILD_WILLY.apartmentRobbery.description} Items stolen: ${action.stolenItems.join(', ')}`,
+      };
+    }
+
+    case 'DOCTOR_VISIT': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      const actualCost = Math.min(currentPlayer.money, action.cost);
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - actualCost,
+        hoursRemaining: Math.max(0, currentPlayer.hoursRemaining - DOCTOR_VISIT.hoursLost),
+        happiness: Math.max(0, currentPlayer.happiness - DOCTOR_VISIT.happinessLoss),
       };
 
       return { ...state, players: updatedPlayers };
@@ -320,7 +663,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'END_TURN': {
       const currentPlayer = state.players[state.currentPlayerIndex];
-      
+
       // Check for win
       if (checkWinCondition(currentPlayer, state.goals)) {
         return {
@@ -330,36 +673,87 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
 
-      // Weekend event
-      const event = WEEKEND_EVENTS[Math.floor(Math.random() * WEEKEND_EVENTS.length)];
-      const costMatch = event.match(/Cost: \$(\d+)/);
-      const eventCost = costMatch ? parseInt(costMatch[1]) : 0;
+      // Process lottery
+      const lotteryWinnings = processLottery(currentPlayer.lotteryTickets);
 
-      // Decrease food and clothes
-      const newFood = Math.max(0, currentPlayer.food - 1);
-      const newClothesWeeks = currentPlayer.clothesWeeksRemaining - 1;
-      
-      // Hunger penalty
-      const hungerPenalty = newFood === 0 ? 10 : 0;
+      // Weekend event
+      const event = selectWeekendEvent(currentPlayer);
+      const eventCost = Math.min(currentPlayer.money + lotteryWinnings, event.cost);
+
+      // Decrease food (fresh food)
+      let newFood = currentPlayer.food;
+      let starvation = false;
+
+      if (currentPlayer.hasFastFood || newFood > 0) {
+        if (newFood > 0) newFood--;
+      } else {
+        starvation = true;
+      }
+
+      // Decrease clothes
+      const newClothes = {
+        casual: Math.max(0, currentPlayer.clothes.casual - 1),
+        dress: Math.max(0, currentPlayer.clothes.dress - 1),
+        business: Math.max(0, currentPlayer.clothes.business - 1),
+      };
+
+      // Dependability decreases by 3 per week
+      const newDependability = Math.max(0, currentPlayer.dependability - 3);
+
+      // Relaxation changes based on activities
+      let newRelaxation = currentPlayer.relaxation;
+      if (event.happinessChange > 0) {
+        newRelaxation = Math.min(50, newRelaxation + 2);
+      }
+
+      // Update pawned items
+      const updatedPawnedItems = currentPlayer.pawnedItems
+        .map(p => ({ ...p, weeksRemaining: p.weeksRemaining - 1 }))
+        .filter(p => p.weeksRemaining > 0);
+
+      // Hours penalty for starvation
+      const starvationPenalty = starvation ? 10 : 0;
+      const happinessPenalty = starvation ? 5 : 0;
 
       // Update current player
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
-        money: Math.max(0, currentPlayer.money - eventCost),
+        money: Math.max(0, currentPlayer.money + lotteryWinnings - eventCost),
         food: newFood,
-        clothesWeeksRemaining: newClothesWeeks,
-        clothes: newClothesWeeks <= 0 ? 'rags' : currentPlayer.clothes,
-        hoursRemaining: 60 - hungerPenalty,
-        happiness: Math.max(0, currentPlayer.happiness - (newFood === 0 ? 5 : 0)),
+        hasFastFood: false, // Reset for next turn
+        clothes: newClothes,
+        hoursRemaining: 60 - starvationPenalty,
+        happiness: Math.max(0, Math.min(100, currentPlayer.happiness + event.happinessChange - happinessPenalty)),
+        dependability: newDependability,
+        relaxation: newRelaxation,
+        lotteryTickets: 0, // Reset lottery tickets
+        pawnedItems: updatedPawnedItems,
         currentLocation: currentPlayer.apartment === 'low-cost' ? 'low-cost-housing' : 'security-apartments',
       };
 
       // Move to next player
       const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
       const nextWeek = nextPlayerIndex === 0 ? state.week + 1 : state.week;
-      const nextMonth = nextWeek > 4 && state.week <= 4 ? state.month + 1 : state.month;
-      const rentDue = nextWeek % 4 === 0;
+      const nextMonth = nextWeek > state.month * 4 ? state.month + 1 : state.month;
+      const rentDue = nextWeek % 4 === 0 && nextWeek !== state.week;
+
+      // Update economy (random fluctuation)
+      let newEconomyIndex = state.economyIndex;
+      if (Math.random() < 0.1) {
+        // Economic boom or crash
+        if (Math.random() < 0.5) {
+          newEconomyIndex = Math.min(90, state.economyIndex + 20);
+        } else {
+          newEconomyIndex = Math.max(-30, state.economyIndex - 20);
+        }
+      } else {
+        // Small fluctuation
+        newEconomyIndex = Math.max(-30, Math.min(90, state.economyIndex + (Math.random() - 0.5) * 10));
+      }
+
+      // Update stock prices
+      const newStockPrices = updateStockPrices(state.stockPrices, newEconomyIndex);
 
       return {
         ...state,
@@ -367,11 +761,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         currentPlayerIndex: nextPlayerIndex,
         week: nextWeek,
         month: nextMonth,
-        rentDue: rentDue && !state.rentDue,
+        rentDue: rentDue,
         weekendEvent: event,
-        economyMultiplier: Math.random() > 0.9 
-          ? state.economyMultiplier * (Math.random() > 0.5 ? 1.1 : 0.9)
-          : state.economyMultiplier,
+        economyIndex: newEconomyIndex,
+        stockPrices: newStockPrices,
+        newspaper: lotteryWinnings > 0 ? `Lottery winner! You won $${lotteryWinnings}!` : null,
       };
     }
 
@@ -385,6 +779,7 @@ interface GameContextType {
   dispatch: React.Dispatch<GameAction>;
   getCurrentPlayer: () => Player | null;
   getAvailableJobs: () => Job[];
+  getPlayerAvailableDegrees: () => typeof DEGREES;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -407,15 +802,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!player) return [];
 
     return JOBS.filter(job => {
-      const hasRequiredDegrees = job.requiredDegrees.every(d => player.degrees.includes(d));
-      const clothesOrder: Player['clothes'][] = ['rags', 'casual', 'business', 'executive'];
-      const hasRequiredClothes = clothesOrder.indexOf(player.clothes) >= clothesOrder.indexOf(job.requiredClothes);
-      return hasRequiredDegrees && hasRequiredClothes;
+      const { eligible } = meetsJobRequirements(player, job);
+      return eligible;
     });
   };
 
+  const getPlayerAvailableDegrees = () => {
+    const player = getCurrentPlayer();
+    if (!player) return [];
+    return getAvailableDegrees(player);
+  };
+
   return (
-    <GameContext.Provider value={{ state, dispatch, getCurrentPlayer, getAvailableJobs }}>
+    <GameContext.Provider value={{ state, dispatch, getCurrentPlayer, getAvailableJobs, getPlayerAvailableDegrees }}>
       {children}
     </GameContext.Provider>
   );
