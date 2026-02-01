@@ -2,6 +2,130 @@
 
 ---
 
+## 2026-02-01 - Wiki Jobs List Implementation
+
+### Oppgave
+Implementere den fullstendige jobb-listen fra wiki: https://jonesinthefastlane.fandom.com/wiki/List_of_Jobs
+
+### Wiki-data
+
+Totalt 43 jobber fordelt på 9 lokasjoner:
+
+| Location | Jobber | Lønnsspenn |
+|----------|--------|------------|
+| Z-Mart | 3 | $5-$8 |
+| Monolith Burgers | 4 | $5-$8 |
+| QT Clothing | 4 | $6-$12 |
+| Socket City | 4 | $6-$14 |
+| Hi-Tech U | 3 | $5-$20 |
+| Factory | 9 | $7-$25 |
+| Bank | 5 | $6-$22 |
+| Black's Market | 5 | $6-$18 |
+| Rent Office | 2 | $7-$9 |
+
+### Spesielle regler
+- **Cook** (Monolith Burgers): Hvem som helst kan få denne jobben (0 experience krav)
+- **Janitor** (QT Clothing, Socket City): CD-ROM only jobber
+- **Clerk** (Socket City): CD-ROM only jobb
+
+### Implementerte endringer
+
+#### JOBS array fullstendig erstattet (`types/game.ts:206-269`)
+
+Alle 43 jobber implementert med wiki-nøyaktige verdier:
+
+```typescript
+// Eksempel struktur for hver jobb:
+{
+  id: 'cook-monolith',
+  title: 'Cook',
+  location: 'monolith-burger',
+  baseWage: 5,
+  hoursPerShift: 6,
+  requiredDegrees: [],
+  requiredClothes: 'casual',
+  requiredExperience: 0,  // Anyone can get this job
+  requiredDependability: 10,
+  careerPoints: 3
+}
+```
+
+#### Jobb-hierarki per lokasjon
+
+**Z-Mart:**
+- Clerk ($5) → Assistant Manager ($7) → Manager ($8, Junior College)
+
+**Monolith Burgers:**
+- Cook ($5, ingen krav) → Clerk ($6) → Assistant Manager ($7) → Manager ($8, Junior College)
+
+**QT Clothing:**
+- Janitor ($6) → Salesperson ($8) → Assistant Manager ($9, Junior College) → Manager ($12, Business Admin)
+
+**Socket City:**
+- Clerk ($6) → Salesperson ($7) → Electronics Repairman ($11, Electronics) → Manager ($14, Electronics + Junior College)
+
+**Hi-Tech U:**
+- Janitor ($5) → Teacher ($11, Academic) → Professor ($20, Research)
+
+**Factory (høyeste lønn):**
+- Janitor ($7) → Assembly Worker ($8, Trade School) → Secretary ($9, Junior College)
+- Machinist's Helper ($10, Pre-Engineering) → Machinist ($19, Engineering)
+- Executive Secretary ($18, Business Admin)
+- Department Manager ($22, Junior College + Engineering)
+- Engineer ($23, Junior College + Engineering)
+- General Manager ($25, Business Admin + Engineering) **HØYEST BETALT**
+
+**Bank:**
+- Janitor ($6) → Teller ($10, Junior College) → Assistant Manager ($14, Business Admin)
+- Manager ($19, Business Admin) → Broker ($22, Business Admin + Academic)
+
+**Black's Market:**
+- Janitor ($6) → Checker ($8) → Butcher ($12, Trade School)
+- Assistant Manager ($15, Junior College) → Manager ($18, Business Admin)
+
+**Rent Office:**
+- Groundskeeper ($7) → Apartment Manager ($9, Junior College)
+
+### Career Points beregning
+
+Career points er beregnet basert på lønn og krav:
+- Laveste jobber (Janitor, Cook): 3-8 points
+- Entry-level: 5-15 points
+- Mid-tier: 18-35 points
+- Senior: 42-65 points
+- Top-tier: 72-100 points
+
+General Manager (Factory) gir maksimum 100 career points.
+
+### Kleskrav
+
+| Uniform | Jobber |
+|---------|--------|
+| Casual | Janitor, Cook, Clerk, Assembly Worker, Machinist, etc. |
+| Dress | Salesperson, Teller, Secretary, Teacher, Professor, etc. |
+| Business | Manager-stillinger (QT, Socket City, Bank, Black's Market, Factory) |
+
+### Grad-krav
+
+| Grad | Åpner for |
+|------|-----------|
+| Trade School | Assembly Worker, Butcher |
+| Junior College | Manager (Z-Mart/Monolith), Assistant Manager (QT/Black's), Teller, Secretary, Apartment Manager |
+| Electronics | Electronics Repairman, Manager (Socket City) |
+| Pre-Engineering | Machinist's Helper |
+| Engineering | Machinist, Department Manager, Engineer, General Manager |
+| Business Admin | Manager (QT/Black's), Executive Secretary, Bank positions, General Manager |
+| Academic | Teacher, Broker |
+| Research | Professor |
+
+### Filer endret
+- `src/types/game.ts` - Fullstendig erstattet JOBS array (43 jobber)
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - Wild Willy Full Implementation
 
 ### Oppgave

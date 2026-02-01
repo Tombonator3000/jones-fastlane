@@ -22,7 +22,7 @@
 - [x] Visuell lokasjonsdialog for hver plass (LocationDialog.tsx)
 
 ### Jobber og karriere
-- [x] 30+ jobber med krav
+- [x] 43 wiki-nøyaktige jobber implementert (2026-02-01)
 - [x] Jobbsøking ved Employment Office (APPLY_FOR_JOB)
 - [x] Lønnsøkning basert på erfaring (experience bonus opptil 50%)
 - [x] Oppsigelse/sparking mekanikk (dependability < 10)
@@ -175,6 +175,15 @@
 - [x] WildWillyDialog komponent med animasjon og sprite
 - [x] Visuell "newspaper" overskrift med detaljer
 - [x] Integrert i spill-flyten (Index.tsx)
+
+### Wiki Jobs List Implementation (2026-02-01)
+- [x] 43 wiki-nøyaktige jobber implementert
+- [x] 9 lokasjoner: Z-Mart, Monolith Burgers, QT Clothing, Socket City, Hi-Tech U, Factory, Bank, Black's Market, Rent Office
+- [x] Cook (Monolith) har 0 experience krav (hvem som helst kan få den)
+- [x] CD-ROM only jobber inkludert (Janitor QT/Socket, Clerk Socket)
+- [x] Career points beregnet basert på lønn og krav (3-100)
+- [x] Kleskrav: casual, dress, business per wiki
+- [x] Grad-krav: Trade School, Junior College, Electronics, Pre-Engineering, Engineering, Business Admin, Academic, Research
 
 ---
 

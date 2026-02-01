@@ -203,53 +203,69 @@ export const DEGREES: Degree[] = [
   { id: 'advanced-electronics', name: 'Advanced Electronics', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['electronics'], educationPoints: 9 },
 ];
 
-// JOBS - Based on wiki with proper requirements
+// JOBS - Based on wiki: https://jonesinthefastlane.fandom.com/wiki/List_of_Jobs
+// (*) CD-ROM only jobs - included for completeness
+// (**) Cook - Anyone can get this job, no matter their stats
 export const JOBS: Job[] = [
-  // Entry level - No degrees, casual or no uniform
-  { id: 'janitor-qt', title: 'Janitor', location: 'qt-clothing', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'none', requiredExperience: 0, requiredDependability: 0, careerPoints: 5 },
-  { id: 'janitor-factory', title: 'Janitor', location: 'factory', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'none', requiredExperience: 0, requiredDependability: 0, careerPoints: 5 },
-  { id: 'fry-cook', title: 'Fry Cook', location: 'monolith-burger', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 0, requiredDependability: 0, careerPoints: 8 },
-  { id: 'dishwasher', title: 'Dishwasher', location: 'monolith-burger', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'none', requiredExperience: 0, requiredDependability: 0, careerPoints: 5 },
-  { id: 'stock-clerk', title: 'Stock Clerk', location: 'z-mart', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 0, requiredDependability: 0, careerPoints: 8 },
-  { id: 'stock-clerk-bm', title: 'Stock Clerk', location: 'blacks-market', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 0, requiredDependability: 0, careerPoints: 10 },
-  { id: 'sales-clerk-qt', title: 'Sales Clerk', location: 'qt-clothing', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 12 },
-  { id: 'clerk-socket', title: 'Clerk', location: 'socket-city', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 12 },
-  { id: 'rent-clerk', title: 'Rent Clerk', location: 'rent-office', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'none', requiredExperience: 10, requiredDependability: 10, careerPoints: 12 },
+  // ========== Z-MART ==========
+  { id: 'clerk-zmart', title: 'Clerk', location: 'z-mart', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 5 },
+  { id: 'assistant-manager-zmart', title: 'Assistant Manager', location: 'z-mart', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 20, requiredDependability: 20, careerPoints: 10 },
+  { id: 'manager-zmart', title: 'Manager', location: 'z-mart', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'business', requiredExperience: 30, requiredDependability: 30, careerPoints: 15 },
 
-  // Requires Trade School
-  { id: 'butcher', title: 'Butcher', location: 'blacks-market', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 20, careerPoints: 20 },
-  { id: 'assembly-worker', title: 'Assembly Worker', location: 'factory', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 20, careerPoints: 18 },
-  { id: 'machinists-helper', title: "Machinist's Helper", location: 'factory', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 22 },
+  // ========== MONOLITH BURGERS ==========
+  // (**) Cook - Anyone can get this job, 0 experience required
+  { id: 'cook-monolith', title: 'Cook', location: 'monolith-burger', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 0, requiredDependability: 10, careerPoints: 3 },
+  { id: 'clerk-monolith', title: 'Clerk', location: 'monolith-burger', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 7 },
+  { id: 'assistant-manager-monolith', title: 'Assistant Manager', location: 'monolith-burger', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 30, careerPoints: 12 },
+  { id: 'manager-monolith', title: 'Manager', location: 'monolith-burger', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 40, careerPoints: 18 },
 
-  // Requires Junior College
-  { id: 'secretary', title: 'Secretary', location: 'factory', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 25 },
-  { id: 'teller', title: 'Teller', location: 'bank', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 25 },
-  { id: 'apartment-manager', title: 'Apartment Manager', location: 'rent-office', baseWage: 13, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 28 },
+  // ========== QT CLOTHING ==========
+  // (*) Janitor - CD-ROM only
+  { id: 'janitor-qt', title: 'Janitor', location: 'qt-clothing', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
+  { id: 'salesperson-qt', title: 'Salesperson', location: 'qt-clothing', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 15 },
+  { id: 'assistant-manager-qt', title: 'Assistant Manager', location: 'qt-clothing', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'business', requiredExperience: 40, requiredDependability: 40, careerPoints: 22 },
+  { id: 'manager-qt', title: 'Manager', location: 'qt-clothing', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 35 },
 
-  // Requires Electronics
-  { id: 'technician', title: 'Technician', location: 'socket-city', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['electronics'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 30 },
-  { id: 'repair-tech', title: 'Repair Technician', location: 'socket-city', baseWage: 15, hoursPerShift: 6, requiredDegrees: ['electronics', 'junior-college'], requiredClothes: 'dress', requiredExperience: 50, requiredDependability: 50, careerPoints: 35 },
+  // ========== SOCKET CITY ==========
+  // (*) Clerk - CD-ROM only
+  { id: 'clerk-socket', title: 'Clerk', location: 'socket-city', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
+  { id: 'salesperson-socket', title: 'Salesperson', location: 'socket-city', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 12 },
+  { id: 'electronics-repairman', title: 'Electronics Repairman', location: 'socket-city', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['electronics'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 30 },
+  { id: 'manager-socket', title: 'Manager', location: 'socket-city', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['electronics', 'junior-college'], requiredClothes: 'business', requiredExperience: 40, requiredDependability: 40, careerPoints: 42 },
 
-  // Requires Business Administration
-  { id: 'assistant-manager-bm', title: 'Assistant Manager', location: 'blacks-market', baseWage: 15, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 35 },
-  { id: 'assistant-manager-qt', title: 'Assistant Manager', location: 'qt-clothing', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 33 },
-  { id: 'assistant-manager-zmart', title: 'Assistant Manager', location: 'z-mart', baseWage: 15, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'dress', requiredExperience: 45, requiredDependability: 45, careerPoints: 36 },
+  // ========== HI-TECH U ==========
+  { id: 'janitor-hitechu', title: 'Janitor', location: 'hi-tech-u', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 4 },
+  { id: 'teacher-hitechu', title: 'Teacher', location: 'hi-tech-u', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['academic'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 50, careerPoints: 32 },
+  { id: 'professor-hitechu', title: 'Professor', location: 'hi-tech-u', baseWage: 20, hoursPerShift: 6, requiredDegrees: ['research'], requiredClothes: 'dress', requiredExperience: 50, requiredDependability: 60, careerPoints: 65 },
 
-  // Requires Trade School + Junior College
-  { id: 'machinist', title: 'Machinist', location: 'factory', baseWage: 16, hoursPerShift: 6, requiredDegrees: ['trade-school', 'junior-college'], requiredClothes: 'dress', requiredExperience: 50, requiredDependability: 50, careerPoints: 40 },
-  { id: 'executive-secretary', title: 'Executive Secretary', location: 'factory', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['junior-college', 'business-admin'], requiredClothes: 'dress', requiredExperience: 50, requiredDependability: 50, careerPoints: 38 },
+  // ========== FACTORY ==========
+  { id: 'janitor-factory', title: 'Janitor', location: 'factory', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 8 },
+  { id: 'assembly-worker', title: 'Assembly Worker', location: 'factory', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 18 },
+  { id: 'secretary-factory', title: 'Secretary', location: 'factory', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 24 },
+  { id: 'machinists-helper', title: "Machinist's Helper", location: 'factory', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['pre-engineering'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 28 },
+  { id: 'executive-secretary', title: 'Executive Secretary', location: 'factory', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 55 },
+  { id: 'machinist', title: 'Machinist', location: 'factory', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['engineering'], requiredClothes: 'casual', requiredExperience: 50, requiredDependability: 50, careerPoints: 58 },
+  { id: 'department-manager', title: 'Department Manager', location: 'factory', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['junior-college', 'engineering'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 72 },
+  { id: 'engineer', title: 'Engineer', location: 'factory', baseWage: 23, hoursPerShift: 6, requiredDegrees: ['junior-college', 'engineering'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 78 },
+  { id: 'general-manager', title: 'General Manager', location: 'factory', baseWage: 25, hoursPerShift: 6, requiredDegrees: ['business-admin', 'engineering'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 100 },
 
-  // Manager positions - Require Business Admin + experience
-  { id: 'manager-bm', title: 'Manager', location: 'blacks-market', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['business-admin', 'junior-college'], requiredClothes: 'business', requiredExperience: 55, requiredDependability: 55, careerPoints: 50 },
-  { id: 'manager-monolith', title: 'Manager', location: 'monolith-burger', baseWage: 17, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 45 },
-  { id: 'manager-zmart', title: 'Manager', location: 'z-mart', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['business-admin', 'junior-college'], requiredClothes: 'business', requiredExperience: 55, requiredDependability: 55, careerPoints: 52 },
+  // ========== BANK ==========
+  { id: 'janitor-bank', title: 'Janitor', location: 'bank', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
+  { id: 'teller-bank', title: 'Teller', location: 'bank', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 28 },
+  { id: 'assistant-manager-bank', title: 'Assistant Manager', location: 'bank', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 42 },
+  { id: 'manager-bank', title: 'Manager', location: 'bank', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 60 },
+  { id: 'broker-bank', title: 'Broker', location: 'bank', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['business-admin', 'academic'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 85 },
 
-  // Top tier jobs
-  { id: 'department-manager', title: 'Department Manager', location: 'factory', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['junior-college', 'engineering'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 70 },
-  { id: 'engineer', title: 'Engineer', location: 'factory', baseWage: 23, hoursPerShift: 6, requiredDegrees: ['junior-college', 'engineering'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 75 },
-  { id: 'broker', title: 'Broker', location: 'bank', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['academic', 'business-admin'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 70 },
-  { id: 'professor', title: 'Professor', location: 'hi-tech-u', baseWage: 20, hoursPerShift: 6, requiredDegrees: ['research'], requiredClothes: 'business', requiredExperience: 65, requiredDependability: 65, careerPoints: 65 },
-  { id: 'general-manager', title: 'General Manager', location: 'factory', baseWage: 25, hoursPerShift: 6, requiredDegrees: ['engineering', 'business-admin'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 100 },
+  // ========== BLACK'S MARKET ==========
+  { id: 'janitor-blacks', title: 'Janitor', location: 'blacks-market', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 5 },
+  { id: 'checker-blacks', title: 'Checker', location: 'blacks-market', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 20, careerPoints: 12 },
+  { id: 'butcher-blacks', title: 'Butcher', location: 'blacks-market', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 32 },
+  { id: 'assistant-manager-blacks', title: 'Assistant Manager', location: 'blacks-market', baseWage: 15, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 45 },
+  { id: 'manager-blacks', title: 'Manager', location: 'blacks-market', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 58 },
+
+  // ========== RENT OFFICE ==========
+  { id: 'groundskeeper-rent', title: 'Groundskeeper', location: 'rent-office', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 8 },
+  { id: 'apartment-manager-rent', title: 'Apartment Manager', location: 'rent-office', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 22 },
 ];
 
 // APPLIANCES - Based on wiki prices
