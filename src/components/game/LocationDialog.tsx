@@ -35,7 +35,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
 
   if (!location || !player) return null;
 
-  const economyIndex = state.economyIndex;
+  const economyReading = state.economyReading;
 
   const handleWork = (hours: number) => {
     if (!player.job) {
@@ -50,7 +50,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
       toast.error("Not enough time!");
       return;
     }
-    const earnings = calculateWage(player.job.baseWage, economyIndex) * hours;
+    const earnings = calculateWage(player.job.baseWage, economyReading) * hours;
     dispatch({ type: 'WORK', hours });
     toast.success(`Worked ${hours} hours and earned $${earnings}!`);
   };
@@ -59,7 +59,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
     const item = FAST_FOOD.find(f => f.id === itemId);
     if (!item) return;
 
-    const cost = calculatePrice(item.basePrice, economyIndex);
+    const cost = calculatePrice(item.basePrice, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -74,7 +74,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
       toast.error("You need a refrigerator to store fresh food!");
       return;
     }
-    const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyIndex);
+    const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -94,7 +94,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
       return;
     }
 
-    const cost = calculatePrice(price, economyIndex);
+    const cost = calculatePrice(price, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -136,7 +136,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
       return;
     }
 
-    const cost = calculatePrice(degree.enrollmentFee, economyIndex);
+    const cost = calculatePrice(degree.enrollmentFee, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money for enrollment!");
       return;
@@ -174,7 +174,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
       return;
     }
 
-    const cost = calculatePrice(price, economyIndex);
+    const cost = calculatePrice(price, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -237,7 +237,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
 
   const handlePayRent = () => {
     const apartment = APARTMENTS[player.apartment];
-    const rentAmount = calculatePrice(apartment.baseRent, economyIndex);
+    const rentAmount = calculatePrice(apartment.baseRent, economyReading);
     dispatch({ type: 'PAY_RENT' });
     toast.success(`Paid $${rentAmount} rent`);
     onClose();
@@ -261,7 +261,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <h4 className="font-pixel text-xs text-primary">Fast Food Menu</h4>
               <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
                 {FAST_FOOD.map(item => {
-                  const cost = calculatePrice(item.basePrice, economyIndex);
+                  const cost = calculatePrice(item.basePrice, economyReading);
                   return (
                     <Button
                       key={item.id}
@@ -314,7 +314,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               ) : (
                 <div className="grid grid-cols-3 gap-2">
                   {[1, 2, 4].map(units => {
-                    const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyIndex);
+                    const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyReading);
                     return (
                       <Button
                         key={units}
@@ -379,7 +379,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <div className="grid grid-cols-1 gap-2">
                 {(['casual', 'dress', 'business'] as const).map(type => {
                   const info = CLOTHING[type];
-                  const cost = calculatePrice(info.qtPrice, economyIndex);
+                  const cost = calculatePrice(info.qtPrice, economyReading);
                   return (
                     <Button
                       key={type}
@@ -428,7 +428,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
                 {(['casual', 'dress'] as const).map(type => {
                   const info = CLOTHING[type];
                   if (!info.zMartPrice) return null;
-                  const cost = calculatePrice(info.zMartPrice, economyIndex);
+                  const cost = calculatePrice(info.zMartPrice, economyReading);
                   return (
                     <Button
                       key={type}
@@ -449,7 +449,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <h4 className="font-pixel text-xs text-primary">Discount Electronics</h4>
               <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
                 {APPLIANCES.filter(a => a.zMartPrice !== null).map(item => {
-                  const cost = calculatePrice(item.zMartPrice!, economyIndex);
+                  const cost = calculatePrice(item.zMartPrice!, economyReading);
                   return (
                     <Button
                       key={item.id}
@@ -493,7 +493,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <h4 className="font-pixel text-xs text-primary">Electronics</h4>
               <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
                 {APPLIANCES.filter(a => a.socketCityPrice > 0).map(item => {
-                  const cost = calculatePrice(item.socketCityPrice, economyIndex);
+                  const cost = calculatePrice(item.socketCityPrice, economyReading);
                   const owned = player.items.includes(item.id);
                   return (
                     <Button
@@ -538,7 +538,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
             {player.job && (
               <div className="bg-muted rounded p-2">
                 <p className="text-xs">Current Job: <span className="text-primary">{player.job.title}</span></p>
-                <p className="text-xs">Wage: ${calculateWage(player.job.baseWage, economyIndex)}/hr</p>
+                <p className="text-xs">Wage: ${calculateWage(player.job.baseWage, economyReading)}/hr</p>
               </div>
             )}
 
@@ -546,7 +546,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <h4 className="font-pixel text-xs text-primary">Available Jobs</h4>
               <div className="max-h-60 overflow-y-auto space-y-2">
                 {getAvailableJobs().map(job => {
-                  const wage = calculateWage(job.baseWage, economyIndex);
+                  const wage = calculateWage(job.baseWage, economyReading);
                   return (
                     <Button
                       key={job.id}
@@ -621,7 +621,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <h4 className="font-pixel text-xs text-primary">Available Degrees</h4>
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {availableDegrees.map(degree => {
-                  const cost = calculatePrice(degree.enrollmentFee, economyIndex);
+                  const cost = calculatePrice(degree.enrollmentFee, economyReading);
                   return (
                     <div key={degree.id} className="bg-muted rounded p-2">
                       <div className="flex justify-between items-center">
@@ -776,7 +776,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <div className="space-y-2">
                 <h4 className="font-pixel text-xs text-primary">Work at Factory</h4>
                 <p className="text-xs text-muted-foreground">
-                  Job: {player.job.title} | Wage: ${calculateWage(player.job.baseWage, economyIndex)}/hr
+                  Job: {player.job.title} | Wage: ${calculateWage(player.job.baseWage, economyReading)}/hr
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {[4, 6, 8].map(hours => (
@@ -802,7 +802,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
 
       case 'rent-office':
         const apartment = APARTMENTS[player.apartment];
-        const rentAmount = calculatePrice(apartment.baseRent, economyIndex);
+        const rentAmount = calculatePrice(apartment.baseRent, economyReading);
         return (
           <div className="space-y-4">
             <p className="game-text text-muted-foreground">{location.description}</p>
@@ -832,7 +832,7 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
               <h4 className="font-pixel text-xs text-primary">Change Apartment</h4>
               <div className="grid grid-cols-1 gap-2">
                 {Object.entries(APARTMENTS).map(([key, apt]) => {
-                  const rent = calculatePrice(apt.baseRent, economyIndex);
+                  const rent = calculatePrice(apt.baseRent, economyReading);
                   return (
                     <Button
                       key={key}

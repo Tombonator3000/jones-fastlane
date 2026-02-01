@@ -118,7 +118,11 @@ export interface GameState {
   isGameOver: boolean;
   winner: Player | null;
   goals: GameGoals;
-  economyIndex: number; // -30 to 90, affects prices
+  // Wiki Economy System:
+  // - economicIndex: -3 to +3 (market trend indicator, affects crash/boom probability)
+  // - economyReading: -30 to +90 (actual price multiplier, CD-ROM version)
+  economicIndex: number; // -3 to +3, trend indicator
+  economyReading: number; // -30 to +90, price multiplier (replaces old economyIndex)
   rentDue: boolean;
   weekendEvent: WeekendEvent | null;
   stockPrices: Record<string, number>;
@@ -518,7 +522,9 @@ export function createInitialGameState(goals: GameGoals): GameState {
     isGameOver: false,
     winner: null,
     goals,
-    economyIndex: 0, // Neutral economy
+    // Wiki: Economy starts neutral
+    economicIndex: 0, // -3 to +3, neutral start
+    economyReading: 0, // -30 to +90, neutral start
     rentDue: false,
     weekendEvent: null,
     stockPrices: STOCKS.reduce((acc, stock) => ({ ...acc, [stock.id]: stock.basePrice }), {}),
@@ -528,19 +534,168 @@ export function createInitialGameState(goals: GameGoals): GameState {
 }
 
 // Calculate price based on economy (50% to 250% of base)
-export function calculatePrice(basePrice: number, economyIndex: number): number {
-  // Economy index ranges from -30 to 90
-  // This maps to 50% to 250% price
-  const multiplier = 1 + (economyIndex / 100);
+// Wiki formula: Item Price = Base Price + (Base Price × Reading / 60)
+// Reading ranges from -30 to +90, giving 50% to 250% of base price
+export function calculatePrice(basePrice: number, economyReading: number): number {
+  // Wiki: Item Price = Base Price + (Base Price × Reading / 60)
+  // At Reading -30: 1 + (-30/60) = 0.5 = 50%
+  // At Reading 0: 1 + (0/60) = 1.0 = 100%
+  // At Reading +90: 1 + (90/60) = 2.5 = 250%
+  const multiplier = 1 + (economyReading / 60);
   return Math.round(basePrice * Math.max(0.5, Math.min(2.5, multiplier)));
 }
 
 // Calculate wage based on economy and experience
+// Wiki: Wages use same formula as prices
 // Experience bonus: up to 50% more wage at 100 experience
-export function calculateWage(baseWage: number, economyIndex: number, experience: number = 0): number {
-  const economyMultiplier = 1 + (economyIndex / 100);
+export function calculateWage(baseWage: number, economyReading: number, experience: number = 0): number {
+  // Wiki: Same formula as prices - Reading / 60
+  const economyMultiplier = 1 + (economyReading / 60);
   const experienceBonus = 1 + (experience / 200); // 0 exp = 1x, 100 exp = 1.5x
   return Math.round(baseWage * Math.max(0.5, Math.min(2.5, economyMultiplier)) * experienceBonus);
+}
+
+// ===== WIKI ECONOMY SYSTEM =====
+// The game calculates Economy at the start of every Turn using complex formula
+// Results: Index (-3 to +3) and Reading (-30 to +90)
+
+export interface EconomyCalculation {
+  newIndex: number;      // -3 to +3
+  newReading: number;    // -30 to +90
+  crashOccurred: boolean;
+  boomOccurred: boolean;
+  crashType?: 'minor' | 'moderate' | 'major';
+  boomType?: 'minor' | 'moderate' | 'major';
+}
+
+// Wiki: Calculate new economy state at start of each turn
+// Strong economy more likely to crash, weak economy more likely to boom
+export function calculateEconomy(
+  currentIndex: number,
+  currentReading: number,
+  week: number
+): EconomyCalculation {
+  let newIndex = currentIndex;
+  let newReading = currentReading;
+  let crashOccurred = false;
+  let boomOccurred = false;
+  let crashType: 'minor' | 'moderate' | 'major' | undefined;
+  let boomType: 'minor' | 'moderate' | 'major' | undefined;
+
+  // Wiki: "The formula is quite complex, involving multiple random factors"
+  // Step 1: Index naturally drifts based on current state
+  // Higher index tends to pull reading up, but increases crash chance
+  const indexInfluence = currentIndex * 3; // Index affects reading by ±9 at extremes
+  const randomFactor = (Math.random() - 0.5) * 10; // Random ±5
+
+  // Step 2: Calculate new reading based on index influence
+  const readingChange = indexInfluence + randomFactor;
+  newReading = Math.max(-30, Math.min(90, currentReading + readingChange));
+
+  // Step 3: Adjust index based on reading momentum
+  // If reading is high, index tends to stay high (but crash chance increases)
+  // If reading is low, index tends to stay low (but boom chance increases)
+  const readingMomentum = currentReading / 30; // -1 to +3
+  const indexRandomness = (Math.random() - 0.5) * 2; // Random ±1
+  newIndex = Math.max(-3, Math.min(3, currentIndex + (readingMomentum * 0.3) + indexRandomness));
+  newIndex = Math.round(newIndex); // Keep as integer
+
+  // Wiki: "At the start of each Turn (except on the first 3 Weeks of the game)"
+  // Market events can only happen from week 4 onwards
+  if (week >= 4) {
+    // Wiki: "A stronger economy is liable to Crash, while a weaker one is liable to Boom"
+
+    // Crash probability increases with high reading (strong economy)
+    // Base 5% chance, +1% per reading point above 30
+    const crashChance = Math.max(0, 0.05 + (currentReading - 30) * 0.01);
+
+    // Boom probability increases with low reading (weak economy)
+    // Base 5% chance, +1% per reading point below 0
+    const boomChance = Math.max(0, 0.05 + (0 - currentReading) * 0.01);
+
+    if (Math.random() < crashChance) {
+      crashOccurred = true;
+      // Determine crash severity
+      const severityRoll = Math.random();
+      if (severityRoll < 0.1) {
+        crashType = 'major';
+        // Major crash: Banks wiped, players fired
+        newReading = Math.max(-30, newReading - 40);
+        newIndex = Math.max(-3, newIndex - 2);
+      } else if (severityRoll < 0.4) {
+        crashType = 'moderate';
+        // Moderate crash: Pay cuts possible
+        newReading = Math.max(-30, newReading - 25);
+        newIndex = Math.max(-3, newIndex - 1);
+      } else {
+        crashType = 'minor';
+        // Minor crash: Small economy drop
+        newReading = Math.max(-30, newReading - 15);
+      }
+    } else if (Math.random() < boomChance) {
+      boomOccurred = true;
+      // Determine boom severity
+      const severityRoll = Math.random();
+      if (severityRoll < 0.1) {
+        boomType = 'major';
+        newReading = Math.min(90, newReading + 40);
+        newIndex = Math.min(3, newIndex + 2);
+      } else if (severityRoll < 0.4) {
+        boomType = 'moderate';
+        newReading = Math.min(90, newReading + 25);
+        newIndex = Math.min(3, newIndex + 1);
+      } else {
+        boomType = 'minor';
+        newReading = Math.min(90, newReading + 15);
+      }
+    }
+  }
+
+  // Clamp final values
+  newIndex = Math.max(-3, Math.min(3, Math.round(newIndex)));
+  newReading = Math.max(-30, Math.min(90, Math.round(newReading)));
+
+  return {
+    newIndex,
+    newReading,
+    crashOccurred,
+    boomOccurred,
+    crashType,
+    boomType,
+  };
+}
+
+// Wiki: Each stock fluctuates independently around economy baseline
+export function calculateStockPrice(
+  basePrice: number,
+  currentPrice: number,
+  economyReading: number,
+  isSafe: boolean
+): number {
+  if (isSafe) {
+    // T-Bills are safe, only minor fluctuation (±2.5%)
+    const change = (Math.random() - 0.5) * 0.05;
+    return Math.round(currentPrice * (1 + change));
+  }
+
+  // Wiki: Stock prices fluctuate independently around economy baseline
+  // The baseline is what price "should" be based on economy
+  const economyBaseline = basePrice * (1 + economyReading / 60);
+
+  // Stock can deviate from baseline by ±30%
+  const currentDeviation = (currentPrice - economyBaseline) / economyBaseline;
+
+  // Tendency to revert to baseline, plus random walk
+  const reversionStrength = 0.1; // 10% reversion per turn
+  const randomWalk = (Math.random() - 0.5) * 0.3; // ±15% random change
+
+  const newDeviation = currentDeviation * (1 - reversionStrength) + randomWalk;
+  let newPrice = Math.round(economyBaseline * (1 + newDeviation));
+
+  // Wiki: Clamp to 50%-250% of base price
+  newPrice = Math.max(Math.round(basePrice * 0.5), Math.min(Math.round(basePrice * 2.5), newPrice));
+
+  return newPrice;
 }
 
 // Check if player has required clothing level
