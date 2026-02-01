@@ -67,20 +67,28 @@ export interface GameGoals {
   career: number;
 }
 
+// Positions match the game board image (percentage based)
 export const LOCATIONS: Location[] = [
-  { id: 'low-cost-housing', name: 'Low-Cost Housing', type: 'apartment', description: 'Cheap but risky. May be robbed!', position: { x: 50, y: 5 }, color: 'location-apartment', icon: '🏚️' },
-  { id: 'pawn-shop', name: 'Pawn Shop', type: 'service', description: 'Sell your items for quick cash', position: { x: 85, y: 15 }, color: 'location-service', icon: '💎' },
-  { id: 'z-mart', name: 'Z-Mart', type: 'store', description: 'Discount store for everything', position: { x: 95, y: 35 }, color: 'location-store', icon: '🛒' },
-  { id: 'monolith-burger', name: 'Monolith Burger', type: 'food', description: 'Fast food and drinks', position: { x: 95, y: 55 }, color: 'location-food', icon: '🍔' },
-  { id: 'qt-clothing', name: 'QT Clothing', type: 'store', description: 'Buy clothes for better jobs', position: { x: 85, y: 75 }, color: 'location-store', icon: '👔' },
-  { id: 'socket-city', name: 'Socket City', type: 'store', description: 'Electronics and appliances', position: { x: 65, y: 90 }, color: 'location-store', icon: '📺' },
-  { id: 'hi-tech-u', name: 'Hi-Tech U', type: 'service', description: 'Enroll and study for degrees', position: { x: 35, y: 90 }, color: 'location-service', icon: '🎓' },
-  { id: 'employment-office', name: 'Employment Office', type: 'service', description: 'Find jobs and ask for raises', position: { x: 15, y: 75 }, color: 'location-service', icon: '💼' },
-  { id: 'factory', name: 'Factory', type: 'workplace', description: 'Work for wages', position: { x: 5, y: 55 }, color: 'location-work', icon: '🏭' },
-  { id: 'bank', name: 'Bank', type: 'service', description: 'Deposit money, loans, stocks', position: { x: 5, y: 35 }, color: 'location-service', icon: '🏦' },
-  { id: 'blacks-market', name: "Black's Market", type: 'food', description: 'Fresh groceries and lottery', position: { x: 15, y: 15 }, color: 'location-food', icon: '🥬' },
-  { id: 'security-apartments', name: 'Security Apartments', type: 'apartment', description: 'Expensive but safe from thieves', position: { x: 35, y: 5 }, color: 'location-apartment', icon: '🏢' },
-  { id: 'rent-office', name: 'Rent Office', type: 'service', description: 'Pay rent and change apartments', position: { x: 50, y: 50 }, color: 'location-service', icon: '🔑' },
+  // Top row (left to right)
+  { id: 'security-apartments', name: 'LeSecurity', type: 'apartment', description: 'Expensive but safe from thieves', position: { x: 8, y: 12 }, color: 'location-apartment', icon: '🏢' },
+  { id: 'rent-office', name: 'Rent Office', type: 'service', description: 'Pay rent and change apartments', position: { x: 24, y: 8 }, color: 'location-service', icon: '🔑' },
+  { id: 'low-cost-housing', name: 'Low-Cost Housing', type: 'apartment', description: 'Cheap but risky. May be robbed!', position: { x: 39, y: 8 }, color: 'location-apartment', icon: '🏚️' },
+  { id: 'pawn-shop', name: 'Pawn Shop', type: 'service', description: 'Sell your items for quick cash', position: { x: 56, y: 8 }, color: 'location-service', icon: '💎' },
+  { id: 'z-mart', name: 'Z-Mart', type: 'store', description: 'Discount store for everything', position: { x: 92, y: 8 }, color: 'location-store', icon: '🛒' },
+  
+  // Right side (top to bottom)
+  { id: 'monolith-burger', name: 'Monolith Burger', type: 'food', description: 'Fast food and drinks', position: { x: 92, y: 25 }, color: 'location-food', icon: '🍔' },
+  { id: 'qt-clothing', name: 'QT Clothing', type: 'store', description: 'Buy clothes for better jobs', position: { x: 92, y: 48 }, color: 'location-store', icon: '👔' },
+  { id: 'socket-city', name: 'Socket City', type: 'store', description: 'Electronics and appliances', position: { x: 92, y: 78 }, color: 'location-store', icon: '📺' },
+  
+  // Bottom row (right to left)
+  { id: 'hi-tech-u', name: 'Hi-Tech U', type: 'service', description: 'Enroll and study for degrees', position: { x: 62, y: 92 }, color: 'location-service', icon: '🎓' },
+  { id: 'employment-office', name: 'Employment Office', type: 'service', description: 'Find jobs and ask for raises', position: { x: 32, y: 92 }, color: 'location-service', icon: '💼' },
+  { id: 'factory', name: 'Factory', type: 'workplace', description: 'Work for wages', position: { x: 8, y: 92 }, color: 'location-work', icon: '🏭' },
+  
+  // Left side (bottom to top)
+  { id: 'bank', name: 'Bank', type: 'service', description: 'Deposit money, loans, stocks', position: { x: 8, y: 58 }, color: 'location-service', icon: '🏦' },
+  { id: 'blacks-market', name: "Black's Market", type: 'food', description: 'Fresh groceries and lottery', position: { x: 8, y: 35 }, color: 'location-food', icon: '🥬' },
 ];
 
 export const JOBS: Job[] = [
