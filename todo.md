@@ -12,26 +12,26 @@
 - [x] Jones AI motstander
 - [x] Ukesyklus og helgehendelser
 - [x] Økonomi-indeks system
-- [ ] Wild Willy tilfeldige røverier
-- [ ] Leilighetsskifte-mekanikk
-- [ ] Pantelåner fullstendig implementasjon
+- [x] Wild Willy tilfeldige røverier (apartment robbery i END_TURN)
+- [x] Leilighetsskifte-mekanikk
+- [x] Pantelåner fullstendig implementasjon
 
 ### Lokasjoner
 - [x] Alle 13 lokasjoner definert
-- [ ] Navigasjon mellom lokasjoner
-- [ ] Visuell lokasjonsdialog for hver plass
+- [x] Navigasjon mellom lokasjoner (MOVE_TO_LOCATION)
+- [x] Visuell lokasjonsdialog for hver plass (LocationDialog.tsx)
 
 ### Jobber og karriere
 - [x] 30+ jobber med krav
-- [ ] Jobbsøking ved Employment Office
-- [ ] Lønnsøkning basert på erfaring
-- [ ] Oppsigelse/sparking mekanikk
+- [x] Jobbsøking ved Employment Office (APPLY_FOR_JOB)
+- [x] Lønnsøkning basert på erfaring (experience bonus opptil 50%)
+- [x] Oppsigelse/sparking mekanikk (dependability < 10)
 
 ### Utdanning
 - [x] 11 grader med prereqs
-- [ ] Innskriving ved Hi-Tech U
-- [ ] Studiefremdrift tracking
-- [ ] Eksamen og graduering
+- [x] Innskriving ved Hi-Tech U (ENROLL_DEGREE)
+- [x] Studiefremdrift tracking (studyProgress)
+- [x] Eksamen og graduering (automatisk ved fullført timer)
 
 ---
 
@@ -109,6 +109,10 @@
 - [x] Jones AI grunnleggende logikk
 - [x] Wiki-basert spilldata
 - [x] Dokumentasjonsfiler opprettet
+- [x] Wild Willy apartment robbery triggering (2026-02-01)
+- [x] Erfaringsbasert lønnsbonus - opptil 50% (2026-02-01)
+- [x] Oppsigelse ved lav dependability (2026-02-01)
+- [x] Doktor-triggering ved sult (2026-02-01)
 
 ---
 
