@@ -2,6 +2,112 @@
 
 ---
 
+## 2026-02-01 - AI Gameplay Test Session
+
+### Mål
+Spille et helt spill mot Jones AI for å verifisere at:
+1. AI-beslutningslogikken fungerer korrekt
+2. Jones tar fornuftige valg gjennom hele spillet
+3. Alle nylig implementerte features fungerer (Wild Willy, erfaringsbonus, sparking, doktor)
+4. Spillet kan fullføres uten feil
+
+### Testoppsett
+- Mål: wealth: 500, happiness: 50, education: 30, career: 30
+- Spillere: Player vs Jones (begge bruker AI-logikk)
+- Max uker: 100
+- Simuleringsscript: `test-ai-simulation.mjs`
+
+### Simuleringsresultater
+
+**Resultat: INGEN VINNER etter 100 uker**
+
+#### Endelig spillerstatus (Uke 101):
+
+| Spiller | Penger | Happiness | Education | Career | Job | Degrees |
+|---------|--------|-----------|-----------|--------|-----|---------|
+| Player | $149 (bank: -$390) | 0 | 37 | 10 | Stock Clerk | 4 grader |
+| Jones | $180 | 0 | 37 | 10 | Stock Clerk | 4 grader |
+
+#### Progress mot mål:
+- **Wealth**: Player -48%, Jones 36% (mål: $500)
+- **Happiness**: Begge 0% (mål: 50)
+- **Education**: Begge 123% - OPPNÅDD
+- **Career**: Begge 33% (mål: 30) - OPPNÅDD
+
+### AI Atferdsanalyse
+
+**Jones sine handlinger over 100 uker:**
+- Totalt: 1304 handlinger
+- Arbeidshandlinger: 554 (42%)
+- Studiehandlinger: 12 (1%)
+- Kjøpshandlinger: 39 (3%)
+- Jobbsøknader: 1
+
+### Identifiserte Problemer
+
+#### KRITISK: Happiness kollaps
+Begge spillere endte med 0 happiness. Årsaker:
+1. Weekend events trekker fra happiness (-4 fra medisinsk nødstilfelle)
+2. Wild Willy tyveri gir -4 happiness per stjålet gjenstand
+3. Sult gir -4 happiness (DOCTOR_VISIT.happinessLoss)
+4. AI kjøper appliances, men happiness-gevinsten (+1-3 per item) er for lav
+
+#### KRITISK: Karrierestagnasjon
+Begge spillere sitter fast på Stock Clerk (8 career points):
+1. AI søker ikke etter bedre jobber etter første ansettelse
+2. Erfaring og dependability bygges opp, men AI oppgraderer ikke jobb
+3. Høyere jobber krever dress/business klær som AI ikke kjøper
+
+#### BUG: Wild Willy er for aggressiv
+Med 25% sjanse per item per uke i low-cost housing:
+- Gjenstander stjeles konstant
+- Spillere mister items de nettopp kjøpte
+- Ingen incentiv til å flytte til security apartments
+
+#### OBSERVASJON: Duplikat-kjøp
+Simuleringen viser at spillere "kjøper Freezer" gjentatte ganger - dette indikerer enten:
+1. Bug i simuleringen (sjekker ikke om item er kjøpt)
+2. Items blir stjålet og må kjøpes på nytt
+
+### Foreslåtte Forbedringer
+
+1. **AI bør prioritere happiness mer**
+   - Kjøpe items aktivt når happiness synker
+   - Bytte til security apartment når man har råd
+
+2. **AI bør oppgradere jobb**
+   - Sjekke etter bedre jobber når erfaring/dependability øker
+   - Kjøpe dress/business klær for høyere jobber
+
+3. **Juster Wild Willy-mekanikk**
+   - Reduser sjanse fra 25% til 10%
+   - Eller: Lag AI som flytter til security apartments
+
+4. **Balansering av happiness**
+   - Weekend events bør gi mer happiness
+   - Appliances bør gi mer happiness-bonus
+
+### Konklusjon
+
+AI-simuleringen avslørte at Jones AI fungerer teknisk korrekt, men har strategiske svakheter:
+
+**Fungerer som forventet:**
+- Jobbsøking ved oppstart
+- Studier og fullføring av grader
+- Arbeid for å tjene penger
+- Kjøp av items
+
+**Trenger forbedring:**
+- Happiness-håndtering (kritisk)
+- Jobboppgradering
+- Klesoppgradering for karriere
+- Flytte til security apartments
+
+**Neste steg:**
+Se todo.md for identifiserte bugs og foreslåtte løsninger.
+
+---
+
 ## 2026-02-01 - Fix React Error #31
 
 ### Problem

@@ -95,6 +95,26 @@
 
 ## Bugs
 
+### Aktive (identifisert via AI-simulering 2026-02-01)
+
+#### KRITISK
+- [ ] **AI: Happiness kollaps** - AI prioriterer ikke happiness, spillere ender på 0
+  - Årsak: Weekend events og Wild Willy trekker mer happiness enn AI kompenserer
+  - Løsning: AI bør kjøpe items mer aktivt, flytte til security apartments
+
+- [ ] **AI: Karrierestagnasjon** - AI oppgraderer aldri jobb etter første ansettelse
+  - Årsak: `useJonesAI.ts` sjekker kun for jobb hvis `!player.job`
+  - Løsning: Legg til logikk for å søke bedre jobb når kvalifisert
+
+#### MEDIUM
+- [ ] **AI: Kjøper ikke dress/business klær** - Hindrer karriereprogresjon
+  - Årsak: AI kjøper kun klær når ingen klær (`currentClothing === 'none'`)
+  - Løsning: Oppgrader klær når det åpner for bedre jobber
+
+- [ ] **Balansering: Wild Willy for aggressiv** - 25% sjanse per item per uke
+  - Resultat: Items stjeles konstant i low-cost housing
+  - Forslag: Reduser til 10% eller øk incentiv for security apartments
+
 ### Fikset
 - [x] React Error #31 - `player.clothes` objekt rendret direkte i PlayerStats.tsx (2026-02-01)
 
