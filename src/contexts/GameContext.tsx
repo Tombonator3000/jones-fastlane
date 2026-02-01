@@ -16,6 +16,7 @@ import {
   DOCTOR_VISIT,
   LOTTERY_PRIZES,
   FRESH_FOOD,
+  APPLIANCES,
   calculatePrice,
   calculateWage,
   hasRequiredClothing,
@@ -188,7 +189,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
-      const earnings = calculateWage(currentPlayer.job.baseWage, state.economyIndex) * action.hours;
+      // Calculate earnings with experience bonus
+      const earnings = calculateWage(currentPlayer.job.baseWage, state.economyIndex, currentPlayer.experience) * action.hours;
 
       // Working increases experience and dependability
       const experienceGain = Math.floor(action.hours / 2);
@@ -680,6 +682,27 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const event = selectWeekendEvent(currentPlayer);
       const eventCost = Math.min(currentPlayer.money + lotteryWinnings, event.cost);
 
+      // Wild Willy apartment robbery (only low-cost housing)
+      let wildWillyRobbery = false;
+      let stolenItems: string[] = [];
+      if (currentPlayer.apartment === 'low-cost' && state.week >= 4) {
+        // 25% chance per item that can be stolen
+        const stealableItems = currentPlayer.items.filter(item => {
+          const appliance = APPLIANCES.find(a => a.id === item);
+          return appliance?.canBeStolen !== false;
+        });
+
+        for (const item of stealableItems) {
+          if (Math.random() < WILD_WILLY.apartmentRobbery.chancePerItem) {
+            stolenItems.push(item);
+          }
+        }
+
+        if (stolenItems.length > 0) {
+          wildWillyRobbery = true;
+        }
+      }
+
       // Decrease food (fresh food)
       let newFood = currentPlayer.food;
       let starvation = false;
@@ -712,24 +735,43 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         .filter(p => p.weeksRemaining > 0);
 
       // Hours penalty for starvation
-      const starvationPenalty = starvation ? 10 : 0;
-      const happinessPenalty = starvation ? 5 : 0;
+      const starvationPenalty = starvation ? DOCTOR_VISIT.hoursLost : 0;
+      const starvationHappinessPenalty = starvation ? DOCTOR_VISIT.happinessLoss : 0;
+
+      // Doctor cost for starvation (random between min and max)
+      const doctorCost = starvation
+        ? Math.floor(Math.random() * (DOCTOR_VISIT.maxCost - DOCTOR_VISIT.minCost + 1)) + DOCTOR_VISIT.minCost
+        : 0;
+
+      // Wild Willy happiness penalty
+      const wildWillyHappinessPenalty = wildWillyRobbery ? WILD_WILLY.apartmentRobbery.happinessLoss : 0;
+
+      // Remove stolen items from player's inventory
+      const itemsAfterRobbery = wildWillyRobbery
+        ? currentPlayer.items.filter(item => !stolenItems.includes(item))
+        : currentPlayer.items;
+
+      // Check for job loss due to low dependability (below 10)
+      const loseJob = newDependability < 10 && currentPlayer.job !== null;
+      const newJob = loseJob ? null : currentPlayer.job;
 
       // Update current player
       const updatedPlayers = [...state.players];
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
-        money: Math.max(0, currentPlayer.money + lotteryWinnings - eventCost),
+        money: Math.max(0, currentPlayer.money + lotteryWinnings - eventCost - doctorCost),
         food: newFood,
         hasFastFood: false, // Reset for next turn
         clothes: newClothes,
         hoursRemaining: 60 - starvationPenalty,
-        happiness: Math.max(0, Math.min(100, currentPlayer.happiness + event.happinessChange - happinessPenalty)),
+        happiness: Math.max(0, Math.min(100, currentPlayer.happiness + event.happinessChange - starvationHappinessPenalty - wildWillyHappinessPenalty)),
         dependability: newDependability,
         relaxation: newRelaxation,
         lotteryTickets: 0, // Reset lottery tickets
         pawnedItems: updatedPawnedItems,
         currentLocation: currentPlayer.apartment === 'low-cost' ? 'low-cost-housing' : 'security-apartments',
+        items: itemsAfterRobbery,
+        job: newJob,
       };
 
       // Move to next player
@@ -755,6 +797,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Update stock prices
       const newStockPrices = updateStockPrices(state.stockPrices, newEconomyIndex);
 
+      // Build newspaper message
+      let newspaperMessages: string[] = [];
+      if (lotteryWinnings > 0) {
+        newspaperMessages.push(`Lottery winner! You won $${lotteryWinnings}!`);
+      }
+      if (wildWillyRobbery) {
+        newspaperMessages.push(`${WILD_WILLY.apartmentRobbery.description} Items stolen: ${stolenItems.join(', ')}`);
+      }
+      if (starvation) {
+        newspaperMessages.push(`You starved and had to visit the doctor! Cost: $${doctorCost}`);
+      }
+      if (loseJob) {
+        newspaperMessages.push(`You were fired from your job due to low dependability!`);
+      }
+
       return {
         ...state,
         players: updatedPlayers,
@@ -765,7 +822,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         weekendEvent: event,
         economyIndex: newEconomyIndex,
         stockPrices: newStockPrices,
-        newspaper: lotteryWinnings > 0 ? `Lottery winner! You won $${lotteryWinnings}!` : null,
+        newspaper: newspaperMessages.length > 0 ? newspaperMessages.join(' | ') : null,
       };
     }
 

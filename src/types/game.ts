@@ -485,10 +485,12 @@ export function calculatePrice(basePrice: number, economyIndex: number): number 
   return Math.round(basePrice * Math.max(0.5, Math.min(2.5, multiplier)));
 }
 
-// Calculate wage based on economy
-export function calculateWage(baseWage: number, economyIndex: number): number {
-  const multiplier = 1 + (economyIndex / 100);
-  return Math.round(baseWage * Math.max(0.5, Math.min(2.5, multiplier)));
+// Calculate wage based on economy and experience
+// Experience bonus: up to 50% more wage at 100 experience
+export function calculateWage(baseWage: number, economyIndex: number, experience: number = 0): number {
+  const economyMultiplier = 1 + (economyIndex / 100);
+  const experienceBonus = 1 + (experience / 200); // 0 exp = 1x, 100 exp = 1.5x
+  return Math.round(baseWage * Math.max(0.5, Math.min(2.5, economyMultiplier)) * experienceBonus);
 }
 
 // Check if player has required clothing level
