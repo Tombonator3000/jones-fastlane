@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { GameProvider, useGame } from '@/contexts/GameContext';
 import { GameBoard } from '@/components/game/GameBoard';
 import { PlayerStats } from '@/components/game/PlayerStats';
-import { LocationDialog } from '@/components/game/LocationDialog';
 import { GameSetup } from '@/components/game/GameSetup';
 import { WeekendEventDialog } from '@/components/game/WeekendEventDialog';
 import { GameOverDialog } from '@/components/game/GameOverDialog';
@@ -197,7 +196,11 @@ function GameContent() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
           >
-            <GameBoard onLocationClick={handleLocationClick} />
+            <GameBoard
+              onLocationClick={handleLocationClick}
+              selectedLocation={selectedLocation}
+              onCloseLocation={() => setSelectedLocation(null)}
+            />
             
             {/* Quick info bar */}
             <div className="mt-4 flex flex-wrap justify-center gap-4 bg-card/50 rounded-lg p-3 pixel-border">
@@ -213,12 +216,6 @@ function GameContent() {
       </div>
 
       {/* Dialogs */}
-      <LocationDialog
-        location={selectedLocation}
-        open={!!selectedLocation}
-        onClose={() => setSelectedLocation(null)}
-      />
-
       <WeekendEventDialog
         open={showWeekendEvent}
         onClose={() => {

@@ -212,4 +212,131 @@
   .float-animation {
     animation: float 3s ease-in-out infinite;
   }
+
+  /* Location Menu - Retro Panel Style */
+  .location-menu-panel {
+    background: linear-gradient(180deg, #f5f0e6 0%, #e8e0d0 100%);
+    border: 4px solid #2a2a3e;
+    box-shadow:
+      inset 2px 2px 0 rgba(255, 255, 255, 0.5),
+      inset -2px -2px 0 rgba(0, 0, 0, 0.2),
+      4px 4px 0 rgba(0, 0, 0, 0.3);
+    min-width: 280px;
+    max-width: 320px;
+    max-height: 400px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .location-menu-header {
+    background: linear-gradient(180deg, #4a9a9a 0%, #3a8a8a 100%);
+    padding: 8px 12px;
+    border-bottom: 3px solid #2a2a3e;
+  }
+
+  .location-menu-content {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: #3a8a8a #e8e0d0;
+  }
+
+  .location-menu-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .location-menu-content::-webkit-scrollbar-track {
+    background: #e8e0d0;
+  }
+
+  .location-menu-content::-webkit-scrollbar-thumb {
+    background: #3a8a8a;
+    border: 1px solid #2a2a3e;
+  }
+
+  .location-menu-section {
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid #2a2a3e;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  .location-menu-section-title {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .location-menu-button {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    background: linear-gradient(180deg, #4a9a9a 0%, #3a8a8a 100%);
+    color: #f5f0e6;
+    border: 2px solid #2a2a3e;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+  }
+
+  .location-menu-button:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, #5abaaa 0%, #4a9a9a 100%);
+  }
+
+  .location-menu-button:active:not(:disabled) {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+  }
+
+  .location-menu-button:disabled {
+    background: #8a8a8a;
+    color: #5a5a5a;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .location-menu-close {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    background: linear-gradient(180deg, #8a4a4a 0%, #7a3a3a 100%);
+    color: #f5f0e6;
+    border: 2px solid #2a2a3e;
+    padding: 4px 8px;
+  }
+
+  .location-menu-close:hover {
+    background: linear-gradient(180deg, #9a5a5a 0%, #8a4a4a 100%);
+  }
+
+  .location-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 6px 8px;
+    background: #f5f0e6;
+    border: 1px solid #2a2a3e;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    color: #1a1a2e;
+    transition: all 0.1s ease;
+  }
+
+  .location-menu-item:hover:not(:disabled) {
+    background: #4a9a9a;
+    color: #f5f0e6;
+  }
+
+  .location-menu-item:disabled {
+    background: #d8d0c0;
+    color: #8a8a8a;
+    cursor: not-allowed;
+  }
 }

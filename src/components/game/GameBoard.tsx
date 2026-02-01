@@ -1,18 +1,21 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LOCATIONS, Location } from '@/types/game';
 import { useGame } from '@/contexts/GameContext';
+import { LocationMenu } from './LocationMenu';
 import gameBoardImage from '@/assets/game-board.jpg';
 
 interface GameBoardProps {
   onLocationClick: (location: Location) => void;
+  selectedLocation: Location | null;
+  onCloseLocation: () => void;
 }
 
-export function GameBoard({ onLocationClick }: GameBoardProps) {
+export function GameBoard({ onLocationClick, selectedLocation, onCloseLocation }: GameBoardProps) {
   const { state, getCurrentPlayer } = useGame();
   const currentPlayer = getCurrentPlayer();
 
   return (
-    <div 
+    <div
       className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-lg overflow-hidden"
       style={{
         backgroundImage: `url(${gameBoardImage})`,
@@ -20,24 +23,55 @@ export function GameBoard({ onLocationClick }: GameBoardProps) {
         backgroundPosition: 'center',
       }}
     >
-      {/* Center info panel - game status */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/95 rounded-lg pixel-border p-4 min-w-[200px] text-center">
-        <h2 className="font-pixel text-xs md:text-sm text-primary mb-2">
-          JONES IN THE FAST LANE
-        </h2>
-        <div className="game-text">
-          <p className="text-muted-foreground text-sm">Week {state.week} • Month {state.month}</p>
-          {currentPlayer && (
-            <p className="text-primary mt-2 text-lg font-bold">
-              {currentPlayer.avatar} {currentPlayer.name}&apos;s Turn
-            </p>
+      {/* Center panel - shows location menu or game status */}
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+        <AnimatePresence mode="wait">
+          {selectedLocation ? (
+            <motion.div
+              key="location-menu"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+            >
+              <LocationMenu
+                location={selectedLocation}
+                onClose={onCloseLocation}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="game-status"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="location-menu-panel text-center"
+            >
+              <div className="location-menu-header">
+                <h2 className="font-pixel text-[10px] md:text-xs text-[#f5f0e6]">
+                  JONES IN THE FAST LANE
+                </h2>
+              </div>
+              <div className="location-menu-content">
+                <p className="text-[#4a4a5a] text-sm">Week {state.week} • Month {state.month}</p>
+                {currentPlayer && (
+                  <>
+                    <p className="text-[#1a1a2e] mt-2 text-lg font-bold">
+                      {currentPlayer.avatar} {currentPlayer.name}&apos;s Turn
+                    </p>
+                    <p className="text-[#4a4a5a] text-sm mt-1">
+                      {currentPlayer.hoursRemaining} hours left
+                    </p>
+                  </>
+                )}
+                <p className="text-[#6a6a7a] text-xs mt-4 italic">
+                  Click a location to interact
+                </p>
+              </div>
+            </motion.div>
           )}
-          {currentPlayer && (
-            <p className="text-muted-foreground text-xs mt-1">
-              {currentPlayer.hoursRemaining} hours left
-            </p>
-          )}
-        </div>
+        </AnimatePresence>
       </div>
 
       {/* Clickable location hotspots */}
