@@ -85,13 +85,13 @@ const DOCTOR_VISIT = { minCost: 30, maxCost: 200, hoursLost: 10, happinessLoss: 
 
 // ========== HELPER FUNCTIONS ==========
 
-function calculatePrice(basePrice, economyIndex) {
-  const multiplier = 1 + (economyIndex / 100);
+function calculatePrice(basePrice, economyReading) {
+  const multiplier = 1 + (economyReading / 100);
   return Math.round(basePrice * Math.max(0.5, Math.min(2.5, multiplier)));
 }
 
-function calculateWage(baseWage, economyIndex, experience = 0) {
-  const economyMultiplier = 1 + (economyIndex / 100);
+function calculateWage(baseWage, economyReading, experience = 0) {
+  const economyMultiplier = 1 + (economyReading / 100);
   const experienceBonus = 1 + (experience / 200);
   return Math.round(baseWage * Math.max(0.5, Math.min(2.5, economyMultiplier)) * experienceBonus);
 }
@@ -195,7 +195,7 @@ function calculatePriority(player, goals) {
 }
 
 // Simulerer en hel tur for en spiller - returnerer alle handlinger som gjøres
-function simulateFullTurn(player, goals, rentDue, economyIndex) {
+function simulateFullTurn(player, goals, rentDue, economyReading) {
   const actions = [];
   let simulatedPlayer = JSON.parse(JSON.stringify(player)); // Deep copy
 
@@ -216,7 +216,7 @@ function simulateFullTurn(player, goals, rentDue, economyIndex) {
     if (simulatedPlayer.food <= 1 && !simulatedPlayer.hasFastFood) {
       if (maxStorage === 0) {
         const burger = FAST_FOOD.find(f => f.id === 'burger');
-        const cost = calculatePrice(burger.basePrice, economyIndex);
+        const cost = calculatePrice(burger.basePrice, economyReading);
         if (simulatedPlayer.money >= cost) {
           actions.push({ action: 'MOVE_TO_LOCATION', params: { locationId: 'monolith-burger' }, message: 'Needs food' });
           actions.push({ action: 'BUY_FAST_FOOD', params: { itemId: 'burger', cost }, message: 'Buys a burger' });
@@ -247,7 +247,7 @@ function simulateFullTurn(player, goals, rentDue, economyIndex) {
       // Need clothes for jobs?
       const currentClothing = getCurrentClothingLevel(simulatedPlayer);
       if (currentClothing === 'none') {
-        const cost = calculatePrice(CLOTHING.casual.qtPrice, economyIndex);
+        const cost = calculatePrice(CLOTHING.casual.qtPrice, economyReading);
         if (simulatedPlayer.money >= cost) {
           actions.push({ action: 'MOVE_TO_LOCATION', params: { locationId: 'qt-clothing' }, message: 'Needs clothes for a job' });
           actions.push({ action: 'BUY_CLOTHES', params: { clothingType: 'casual', cost, weeks: CLOTHING.casual.qtDuration }, message: 'Buys casual clothes' });
@@ -264,7 +264,7 @@ function simulateFullTurn(player, goals, rentDue, economyIndex) {
       actions.push({ action: 'MOVE_TO_LOCATION', params: { locationId: simulatedPlayer.job.location }, message: `Goes to work` });
       const workHours = Math.min(simulatedPlayer.hoursRemaining - 4, simulatedPlayer.job.hoursPerShift);
       actions.push({ action: 'WORK', params: { hours: workHours }, message: `Works ${workHours} hours as ${simulatedPlayer.job.title}` });
-      const earnings = calculateWage(simulatedPlayer.job.baseWage, economyIndex, simulatedPlayer.experience) * workHours;
+      const earnings = calculateWage(simulatedPlayer.job.baseWage, economyReading, simulatedPlayer.experience) * workHours;
       simulatedPlayer.money += earnings;
       simulatedPlayer.experience = Math.min(100, simulatedPlayer.experience + Math.floor(workHours / 2));
       simulatedPlayer.dependability = Math.min(100, simulatedPlayer.dependability + 1);
@@ -303,7 +303,7 @@ function simulateFullTurn(player, goals, rentDue, economyIndex) {
         }
       } else if (availableDegrees.length > 0) {
         const degree = availableDegrees[0];
-        const cost = calculatePrice(degree.enrollmentFee, economyIndex);
+        const cost = calculatePrice(degree.enrollmentFee, economyReading);
         if (simulatedPlayer.money >= cost) {
           actions.push({ action: 'MOVE_TO_LOCATION', params: { locationId: 'hi-tech-u' }, message: 'Enrolls in a course' });
           actions.push({ action: 'ENROLL_DEGREE', params: { degreeId: degree.id, cost }, message: `Enrolls in ${degree.name}` });
@@ -321,7 +321,7 @@ function simulateFullTurn(player, goals, rentDue, economyIndex) {
       const unpurchasedItems = APPLIANCES.filter(item => !simulatedPlayer.items.includes(item.id) && item.socketCityPrice > 0);
       if (unpurchasedItems.length > 0) {
         const item = unpurchasedItems[0];
-        const cost = calculatePrice(item.socketCityPrice, economyIndex);
+        const cost = calculatePrice(item.socketCityPrice, economyReading);
         if (simulatedPlayer.money >= cost) {
           actions.push({ action: 'MOVE_TO_LOCATION', params: { locationId: 'socket-city' }, message: 'Goes shopping' });
           actions.push({ action: 'BUY_APPLIANCE', params: { itemId: item.id, cost, happiness: item.happiness }, message: `Buys a ${item.name}` });
@@ -339,7 +339,7 @@ function simulateFullTurn(player, goals, rentDue, economyIndex) {
       actions.push({ action: 'MOVE_TO_LOCATION', params: { locationId: simulatedPlayer.job.location }, message: 'Goes to work' });
       const workHours = Math.min(simulatedPlayer.hoursRemaining - 4, simulatedPlayer.job.hoursPerShift);
       actions.push({ action: 'WORK', params: { hours: workHours }, message: `Works ${workHours} hours` });
-      const earnings = calculateWage(simulatedPlayer.job.baseWage, economyIndex, simulatedPlayer.experience) * workHours;
+      const earnings = calculateWage(simulatedPlayer.job.baseWage, economyReading, simulatedPlayer.experience) * workHours;
       simulatedPlayer.money += earnings;
       simulatedPlayer.experience = Math.min(100, simulatedPlayer.experience + Math.floor(workHours / 2));
       simulatedPlayer.hoursRemaining -= workHours + 4;
@@ -427,7 +427,7 @@ function processAction(state, action, playerIndex) {
 
     case 'WORK':
       if (player.job) {
-        const earnings = calculateWage(player.job.baseWage, state.economyIndex, player.experience) * action.params.hours;
+        const earnings = calculateWage(player.job.baseWage, state.economyReading, player.experience) * action.params.hours;
         player.money += earnings;
         player.hoursRemaining -= action.params.hours;
         player.career = Math.max(player.career, player.job.careerPoints);
@@ -494,7 +494,7 @@ function processAction(state, action, playerIndex) {
 
     case 'PAY_RENT':
       const apartment = APARTMENTS[player.apartment];
-      const rentAmount = calculatePrice(apartment.baseRent, state.economyIndex);
+      const rentAmount = calculatePrice(apartment.baseRent, state.economyReading);
       player.money -= rentAmount;
       if (player.money < 0) {
         player.bankBalance += player.money;
@@ -514,8 +514,8 @@ function processAction(state, action, playerIndex) {
           state.rentDue = true;
         }
         // Economy fluctuation
-        state.economyIndex += (Math.random() - 0.5) * 10;
-        state.economyIndex = Math.max(-30, Math.min(90, state.economyIndex));
+        state.economyReading += (Math.random() - 0.5) * 10;
+        state.economyReading = Math.max(-30, Math.min(90, state.economyReading));
       }
       break;
   }
@@ -538,7 +538,7 @@ function runSimulation() {
     ],
     currentPlayerIndex: 0,
     week: 1,
-    economyIndex: 0,
+    economyReading: 0,
     rentDue: false,
     isGameOver: false,
     winner: null,
@@ -554,7 +554,7 @@ function runSimulation() {
     const currentPlayer = state.players[state.currentPlayerIndex];
 
     // Simuler hele turen for denne spilleren
-    const turnActions = simulateFullTurn(currentPlayer, goals, state.rentDue, state.economyIndex);
+    const turnActions = simulateFullTurn(currentPlayer, goals, state.rentDue, state.economyReading);
 
     for (const action of turnActions) {
       const logEntry = `[Week ${state.week}] ${currentPlayer.name}: ${action.message}`;

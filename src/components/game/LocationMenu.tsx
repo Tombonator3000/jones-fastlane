@@ -56,7 +56,8 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
     );
   }
 
-  const economyIndex = state.economyIndex;
+  // Wiki: Use economyReading for all price/wage calculations
+  const economyReading = state.economyReading;
 
   const handleWork = (hours: number) => {
     if (!player.job) {
@@ -71,7 +72,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       toast.error("Not enough time!");
       return;
     }
-    const earnings = calculateWage(player.job.baseWage, economyIndex) * hours;
+    const earnings = calculateWage(player.job.baseWage, economyReading) * hours;
     dispatch({ type: 'WORK', hours });
     toast.success(`Worked ${hours} hours and earned $${earnings}!`);
   };
@@ -80,7 +81,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
     const item = FAST_FOOD.find(f => f.id === itemId);
     if (!item) return;
 
-    const cost = calculatePrice(item.basePrice, economyIndex);
+    const cost = calculatePrice(item.basePrice, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -95,7 +96,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       toast.error("You need a refrigerator to store fresh food!");
       return;
     }
-    const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyIndex);
+    const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -115,7 +116,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       return;
     }
 
-    const cost = calculatePrice(price, economyIndex);
+    const cost = calculatePrice(price, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -157,7 +158,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       return;
     }
 
-    const cost = calculatePrice(degree.enrollmentFee, economyIndex);
+    const cost = calculatePrice(degree.enrollmentFee, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money for enrollment!");
       return;
@@ -195,7 +196,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       return;
     }
 
-    const cost = calculatePrice(price, economyIndex);
+    const cost = calculatePrice(price, economyReading);
     if (player.money < cost) {
       toast.error("Not enough money!");
       return;
@@ -258,7 +259,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
 
   const handlePayRent = () => {
     const apartment = APARTMENTS[player.apartment];
-    const rentAmount = calculatePrice(apartment.baseRent, economyIndex);
+    const rentAmount = calculatePrice(apartment.baseRent, economyReading);
     dispatch({ type: 'PAY_RENT' });
     toast.success(`Paid $${rentAmount} rent`);
     onClose();
@@ -276,7 +277,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       <div className="location-menu-section">
         <h4 className="location-menu-section-title">WORK HERE</h4>
         <p className="text-[#4a4a5a] text-sm mb-2">
-          {player.job.title} - ${calculateWage(player.job.baseWage, economyIndex)}/hr
+          {player.job.title} - ${calculateWage(player.job.baseWage, economyReading)}/hr
         </p>
         <div className="flex gap-2">
           {[4, 6, 8].map(hours => (
@@ -307,7 +308,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <ScrollArea className="h-32">
                 <div className="space-y-1">
                   {FAST_FOOD.map(item => {
-                    const cost = calculatePrice(item.basePrice, economyIndex);
+                    const cost = calculatePrice(item.basePrice, economyReading);
                     return (
                       <button
                         key={item.id}
@@ -342,7 +343,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
                 <>
                   <div className="flex gap-2">
                     {[1, 2, 4].map(units => {
-                      const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyIndex);
+                      const cost = units * calculatePrice(FRESH_FOOD.pricePerUnit, economyReading);
                       return (
                         <Button
                           key={units}
@@ -386,7 +387,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <div className="space-y-1">
                 {(['casual', 'dress', 'business'] as const).map(type => {
                   const info = CLOTHING[type];
-                  const cost = calculatePrice(info.qtPrice, economyIndex);
+                  const cost = calculatePrice(info.qtPrice, economyReading);
                   return (
                     <button
                       key={type}
@@ -420,7 +421,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
                 {(['casual', 'dress'] as const).map(type => {
                   const info = CLOTHING[type];
                   if (!info.zMartPrice) return null;
-                  const cost = calculatePrice(info.zMartPrice, economyIndex);
+                  const cost = calculatePrice(info.zMartPrice, economyReading);
                   return (
                     <button
                       key={type}
@@ -440,7 +441,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <ScrollArea className="h-24">
                 <div className="space-y-1">
                   {APPLIANCES.filter(a => a.zMartPrice !== null).map(item => {
-                    const cost = calculatePrice(item.zMartPrice!, economyIndex);
+                    const cost = calculatePrice(item.zMartPrice!, economyReading);
                     const owned = player.items.includes(item.id);
                     return (
                       <button
@@ -472,7 +473,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <ScrollArea className="h-40">
                 <div className="space-y-1">
                   {APPLIANCES.filter(a => a.socketCityPrice > 0).map(item => {
-                    const cost = calculatePrice(item.socketCityPrice, economyIndex);
+                    const cost = calculatePrice(item.socketCityPrice, economyReading);
                     const owned = player.items.includes(item.id);
                     return (
                       <button
@@ -505,7 +506,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
                   Current: <span className="font-bold">{player.job.title}</span>
                 </p>
                 <p className="text-[#4a4a5a] text-xs">
-                  ${calculateWage(player.job.baseWage, economyIndex)}/hr
+                  ${calculateWage(player.job.baseWage, economyReading)}/hr
                 </p>
               </div>
             )}
@@ -514,7 +515,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <ScrollArea className="h-32">
                 <div className="space-y-1">
                   {getAvailableJobs().map(job => {
-                    const wage = calculateWage(job.baseWage, economyIndex);
+                    const wage = calculateWage(job.baseWage, economyReading);
                     return (
                       <button
                         key={job.id}
@@ -590,7 +591,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <ScrollArea className="h-24">
                 <div className="space-y-1">
                   {availableDegrees.map(degree => {
-                    const cost = calculatePrice(degree.enrollmentFee, economyIndex);
+                    const cost = calculatePrice(degree.enrollmentFee, economyReading);
                     return (
                       <button
                         key={degree.id}
@@ -707,7 +708,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <div className="location-menu-section">
                 <h4 className="location-menu-section-title">WORK AT FACTORY</h4>
                 <p className="text-[#1a1a2e] text-sm mb-2">
-                  {player.job.title} - ${calculateWage(player.job.baseWage, economyIndex)}/hr
+                  {player.job.title} - ${calculateWage(player.job.baseWage, economyReading)}/hr
                 </p>
                 <div className="flex gap-2">
                   {[4, 6, 8].map(hours => (
@@ -732,7 +733,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
 
       case 'rent-office':
         const apartment = APARTMENTS[player.apartment];
-        const rentAmount = calculatePrice(apartment.baseRent, economyIndex);
+        const rentAmount = calculatePrice(apartment.baseRent, economyReading);
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
@@ -760,7 +761,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               <h4 className="location-menu-section-title">CHANGE APARTMENT</h4>
               <div className="space-y-1">
                 {Object.entries(APARTMENTS).map(([key, apt]) => {
-                  const rent = calculatePrice(apt.baseRent, economyIndex);
+                  const rent = calculatePrice(apt.baseRent, economyReading);
                   return (
                     <button
                       key={key}

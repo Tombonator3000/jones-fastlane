@@ -23,6 +23,8 @@ import {
   APPLIANCES,
   calculatePrice,
   calculateWage,
+  calculateEconomy,
+  calculateStockPrice,
   hasRequiredClothing,
   getCurrentClothingLevel,
   meetsJobRequirements,
@@ -139,27 +141,18 @@ function processLottery(tickets: number): number {
   return 0;
 }
 
-function updateStockPrices(currentPrices: Record<string, number>, economyIndex: number): Record<string, number> {
+// Wiki: Each stock fluctuates independently around economy baseline
+function updateStockPrices(currentPrices: Record<string, number>, economyReading: number): Record<string, number> {
   const newPrices: Record<string, number> = {};
 
   for (const stock of STOCKS) {
     const currentPrice = currentPrices[stock.id] || stock.basePrice;
-
-    if (stock.isSafe) {
-      // T-Bills are stable, minor fluctuation
-      const change = (Math.random() - 0.5) * 0.05;
-      newPrices[stock.id] = Math.round(currentPrice * (1 + change));
-    } else {
-      // Other stocks fluctuate more, trending toward economy
-      const economyTrend = economyIndex / 200;
-      const randomChange = (Math.random() - 0.5) * 0.3;
-      const totalChange = economyTrend + randomChange;
-
-      let newPrice = Math.round(currentPrice * (1 + totalChange));
-      // Clamp to 50% - 250% of base price
-      newPrice = Math.max(Math.round(stock.basePrice * 0.5), Math.min(Math.round(stock.basePrice * 2.5), newPrice));
-      newPrices[stock.id] = newPrice;
-    }
+    newPrices[stock.id] = calculateStockPrice(
+      stock.basePrice,
+      currentPrice,
+      economyReading,
+      stock.isSafe
+    );
   }
 
   return newPrices;
@@ -216,7 +209,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       // Calculate earnings with experience bonus
-      let earnings = calculateWage(currentPlayer.job.baseWage, state.economyIndex, currentPlayer.experience) * action.hours;
+      // Wiki: Use economyReading for wage calculation
+      let earnings = calculateWage(currentPlayer.job.baseWage, state.economyReading, currentPlayer.experience) * action.hours;
 
       // Wiki: Garnishment - if player has rent debt, 25% of wages go to paying it off
       let newRentDebt = currentPlayer.rentDebt;
@@ -458,7 +452,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'PAY_RENT': {
       const currentPlayer = state.players[state.currentPlayerIndex];
       const apartment = APARTMENTS[currentPlayer.apartment];
-      const rentAmount = calculatePrice(apartment.baseRent, state.economyIndex);
+      // Wiki: Rent uses economyReading for price calculation
+      const rentAmount = calculatePrice(apartment.baseRent, state.economyReading);
 
       // Include any existing rent debt
       const totalOwed = rentAmount + currentPlayer.rentDebt;
@@ -887,66 +882,72 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const nextMonth = nextWeek > state.month * 4 ? state.month + 1 : state.month;
       const rentDue = nextWeek % 4 === 0 && nextWeek !== state.week;
 
-      // ===== Wiki: Market Crash/Boom system =====
-      let newEconomyIndex = state.economyIndex;
+      // ===== Wiki: Complex Economy System =====
+      // Calculate new economy state using wiki formula
+      const economyResult = calculateEconomy(
+        state.economicIndex,
+        state.economyReading,
+        nextWeek
+      );
+
+      let newEconomicIndex = economyResult.newIndex;
+      let newEconomyReading = economyResult.newReading;
       let marketEvent: string | null = null;
       let bankWiped = false;
       let playersFired = false;
+      let payCutApplied = false;
 
-      // Wiki: Market crashes only happen on week 8+
-      if (nextWeek >= MARKET_EVENTS.minWeekForCrash && Math.random() < 0.05) {
-        // 5% chance of market crash
-        const crashRoll = Math.random();
-        let crashType: 'minor' | 'moderate' | 'major';
-        if (crashRoll < 0.1) {
-          crashType = 'major';
-          marketEvent = 'MAJOR MARKET CRASH! Banks wiped, all jobs lost!';
-          bankWiped = true;
-          playersFired = true;
-        } else if (crashRoll < 0.4) {
-          crashType = 'moderate';
-          marketEvent = 'Market Crash! Economy takes a hit.';
-        } else {
-          crashType = 'minor';
-          marketEvent = 'Minor market downturn.';
+      // Wiki: Handle market crash effects
+      if (economyResult.crashOccurred && economyResult.crashType) {
+        switch (economyResult.crashType) {
+          case 'major':
+            marketEvent = 'MAJOR MARKET CRASH! Banks wiped, all jobs lost!';
+            bankWiped = true;
+            playersFired = true;
+            break;
+          case 'moderate':
+            marketEvent = 'Market Crash! Economy takes a hit. Some workers receive pay cuts.';
+            payCutApplied = true;
+            break;
+          case 'minor':
+            marketEvent = 'Minor market downturn.';
+            break;
         }
-        const crashInfo = MARKET_EVENTS.crashTypes[crashType];
-        newEconomyIndex = Math.max(-30, state.economyIndex - crashInfo.economyDrop);
-      } else if (nextWeek >= MARKET_EVENTS.minWeekForBoom && Math.random() < 0.05) {
-        // 5% chance of economic boom
-        const boomRoll = Math.random();
-        let boomType: 'minor' | 'moderate' | 'major';
-        if (boomRoll < 0.1) {
-          boomType = 'major';
-          marketEvent = 'ECONOMIC BOOM! Great times ahead!';
-        } else if (boomRoll < 0.4) {
-          boomType = 'moderate';
-          marketEvent = 'Economic upturn! Business is booming!';
-        } else {
-          boomType = 'minor';
-          marketEvent = 'Minor economic improvement.';
+      } else if (economyResult.boomOccurred && economyResult.boomType) {
+        switch (economyResult.boomType) {
+          case 'major':
+            marketEvent = 'ECONOMIC BOOM! Great times ahead!';
+            break;
+          case 'moderate':
+            marketEvent = 'Economic upturn! Business is booming!';
+            break;
+          case 'minor':
+            marketEvent = 'Minor economic improvement.';
+            break;
         }
-        const boomInfo = MARKET_EVENTS.boomTypes[boomType];
-        newEconomyIndex = Math.min(90, state.economyIndex + boomInfo.economyBoost);
-      } else {
-        // Small random fluctuation
-        newEconomyIndex = Math.max(-30, Math.min(90, state.economyIndex + (Math.random() - 0.5) * 10));
       }
 
-      // Apply major crash effects to all players
-      if (bankWiped || playersFired) {
-        for (let i = 0; i < updatedPlayers.length; i++) {
-          if (bankWiped) {
-            updatedPlayers[i] = { ...updatedPlayers[i], bankBalance: 0 };
-          }
-          if (playersFired) {
-            updatedPlayers[i] = { ...updatedPlayers[i], job: null, currentWage: null };
+      // Apply crash effects to all players
+      for (let i = 0; i < updatedPlayers.length; i++) {
+        if (bankWiped) {
+          updatedPlayers[i] = { ...updatedPlayers[i], bankBalance: 0 };
+        }
+        if (playersFired) {
+          updatedPlayers[i] = { ...updatedPlayers[i], job: null, currentWage: null };
+        }
+        // Wiki: Moderate crash can cause pay cuts (80% of current wage)
+        if (payCutApplied && updatedPlayers[i].job && Math.random() < MARKET_EVENTS.crashTypes.moderate.payCutChance) {
+          const currentWage = updatedPlayers[i].currentWage || updatedPlayers[i].job!.baseWage;
+          const newWage = Math.round(currentWage * MARKET_EVENTS.payCutMultiplier);
+          updatedPlayers[i] = { ...updatedPlayers[i], currentWage: newWage };
+          if (i === state.currentPlayerIndex) {
+            marketEvent = (marketEvent || '') + ' Your wage was cut to $' + newWage + '/hour!';
           }
         }
       }
 
-      // Update stock prices
-      const newStockPrices = updateStockPrices(state.stockPrices, newEconomyIndex);
+      // Update stock prices using new economy reading
+      const newStockPrices = updateStockPrices(state.stockPrices, newEconomyReading);
 
       // Build newspaper message
       let newspaperMessages: string[] = [];
@@ -977,7 +978,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         month: nextMonth,
         rentDue: rentDue,
         weekendEvent: event,
-        economyIndex: newEconomyIndex,
+        // Wiki: Update both economicIndex and economyReading
+        economicIndex: newEconomicIndex,
+        economyReading: newEconomyReading,
         stockPrices: newStockPrices,
         newspaper: newspaperMessages.length > 0 ? newspaperMessages.join(' | ') : null,
       };

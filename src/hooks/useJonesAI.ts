@@ -130,7 +130,7 @@ export function useJonesAI() {
     };
   };
 
-  const decideNextAction = useCallback((player: Player, goals: { wealth: number; happiness: number; education: number; career: number }, rentDue: boolean, economyIndex: number = 0): AIDecision[] => {
+  const decideNextAction = useCallback((player: Player, goals: { wealth: number; happiness: number; education: number; career: number }, rentDue: boolean, economyReading: number = 0): AIDecision[] => {
     const decisions: AIDecision[] = [];
     const priority = calculatePriority(player, goals);
 
@@ -162,10 +162,10 @@ export function useJonesAI() {
           message: 'Jones needs food and goes to Monolith Burgers...',
         });
         const burger = FAST_FOOD.find(f => f.id === 'burger');
-        if (burger && player.money >= calculatePrice(burger.basePrice, economyIndex)) {
+        if (burger && player.money >= calculatePrice(burger.basePrice, economyReading)) {
           decisions.push({
             action: 'BUY_FAST_FOOD',
-            params: { itemId: 'burger', cost: calculatePrice(burger.basePrice, economyIndex), happiness: burger.happinessBonus },
+            params: { itemId: 'burger', cost: calculatePrice(burger.basePrice, economyReading), happiness: burger.happinessBonus },
             delay: 600,
             message: 'Jones buys a burger.',
           });
@@ -181,7 +181,7 @@ export function useJonesAI() {
         message: 'Jones needs food and goes to Black\'s Market...',
       });
       const foodAmount = Math.min(4, maxStorage - player.food);
-      const foodCost = foodAmount * calculatePrice(20, economyIndex);
+      const foodCost = foodAmount * calculatePrice(20, economyReading);
       if (player.money >= foodCost) {
         decisions.push({
           action: 'BUY_FRESH_FOOD',
@@ -214,7 +214,7 @@ export function useJonesAI() {
 
       if (happinessItems.length > 0) {
         const item = happinessItems[0];
-        const cost = calculatePrice(item.socketCityPrice, economyIndex);
+        const cost = calculatePrice(item.socketCityPrice, economyReading);
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
@@ -234,7 +234,7 @@ export function useJonesAI() {
 
       // If no appliances available, buy fast food for happiness
       const deluxeMeal = FAST_FOOD.find(f => f.id === 'deluxe-meal');
-      if (deluxeMeal && player.money >= calculatePrice(deluxeMeal.basePrice, economyIndex)) {
+      if (deluxeMeal && player.money >= calculatePrice(deluxeMeal.basePrice, economyReading)) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
           params: { locationId: 'monolith-burger' },
@@ -243,7 +243,7 @@ export function useJonesAI() {
         });
         decisions.push({
           action: 'BUY_FAST_FOOD',
-          params: { itemId: 'deluxe-meal', cost: calculatePrice(deluxeMeal.basePrice, economyIndex), happiness: deluxeMeal.happinessBonus },
+          params: { itemId: 'deluxe-meal', cost: calculatePrice(deluxeMeal.basePrice, economyReading), happiness: deluxeMeal.happinessBonus },
           delay: 600,
           message: 'Jones buys a deluxe meal for happiness!',
         });
@@ -253,7 +253,7 @@ export function useJonesAI() {
 
     // CRITICAL: Consider moving to security apartments if being robbed frequently
     if (player.apartment === 'low-cost' && player.happiness < 20 && player.items.length > 0) {
-      const securityRent = calculatePrice(APARTMENTS.security.baseRent, economyIndex);
+      const securityRent = calculatePrice(APARTMENTS.security.baseRent, economyReading);
       // Move to security if we have items to protect and can afford it
       if (player.money + player.bankBalance >= securityRent * 2) {
         decisions.push({
@@ -293,7 +293,7 @@ export function useJonesAI() {
 
       // Need clothes for jobs
       const currentClothing = getCurrentClothingLevel(player);
-      if (currentClothing === 'none' && player.money >= calculatePrice(CLOTHING.casual.qtPrice, economyIndex)) {
+      if (currentClothing === 'none' && player.money >= calculatePrice(CLOTHING.casual.qtPrice, economyReading)) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
           params: { locationId: 'qt-clothing' },
@@ -305,7 +305,7 @@ export function useJonesAI() {
           params: {
             clothingType: 'casual',
             store: 'qt',
-            cost: calculatePrice(CLOTHING.casual.qtPrice, economyIndex),
+            cost: calculatePrice(CLOTHING.casual.qtPrice, economyReading),
             weeks: CLOTHING.casual.qtDuration,
             happiness: CLOTHING.casual.happiness
           },
@@ -339,7 +339,7 @@ export function useJonesAI() {
       const neededClothes = getClothingForBetterJobs(player);
       if (neededClothes) {
         const clothingInfo = CLOTHING[neededClothes];
-        const cost = calculatePrice(clothingInfo.qtPrice, economyIndex);
+        const cost = calculatePrice(clothingInfo.qtPrice, economyReading);
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
@@ -408,7 +408,7 @@ export function useJonesAI() {
         }
       } else if (availableDegrees.length > 0) {
         const degree = availableDegrees[0];
-        const cost = calculatePrice(degree.enrollmentFee, economyIndex);
+        const cost = calculatePrice(degree.enrollmentFee, economyReading);
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
@@ -432,7 +432,7 @@ export function useJonesAI() {
       const nextClothes = getNextClothesLevel(player);
       if (nextClothes) {
         const clothingInfo = CLOTHING[nextClothes];
-        const cost = calculatePrice(clothingInfo.qtPrice, economyIndex);
+        const cost = calculatePrice(clothingInfo.qtPrice, economyReading);
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
@@ -464,7 +464,7 @@ export function useJonesAI() {
       );
       if (unpurchasedItems.length > 0) {
         const item = unpurchasedItems[0];
-        const cost = calculatePrice(item.socketCityPrice, economyIndex);
+        const cost = calculatePrice(item.socketCityPrice, economyReading);
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
@@ -484,9 +484,9 @@ export function useJonesAI() {
     }
 
     // Priority 6: Buy refrigerator if needed for food storage
-    if (!player.items.includes('refrigerator') && player.money >= calculatePrice(APPLIANCES.find(a => a.id === 'refrigerator')?.socketCityPrice || 876, economyIndex)) {
+    if (!player.items.includes('refrigerator') && player.money >= calculatePrice(APPLIANCES.find(a => a.id === 'refrigerator')?.socketCityPrice || 876, economyReading)) {
       const fridge = APPLIANCES.find(a => a.id === 'refrigerator')!;
-      const cost = calculatePrice(fridge.socketCityPrice, economyIndex);
+      const cost = calculatePrice(fridge.socketCityPrice, economyReading);
       decisions.push({
         action: 'MOVE_TO_LOCATION',
         params: { locationId: 'socket-city' },

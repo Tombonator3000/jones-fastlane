@@ -153,6 +153,17 @@
 - [x] Market crash/boom system (uke 8+)
 - [x] Rent garnishment system
 
+### Wiki Economy System Implementation (2026-02-01)
+- [x] Economic Index (-3 til +3) - Markedstrend-indikator
+- [x] Economic Reading (-30 til +90) - Faktisk prismultiplikator
+- [x] Prisformel fikset: `/60` i stedet for `/100` (50%-250% range)
+- [x] Crash/boom fra uke 4+ (var uke 8+)
+- [x] Crash-sjanse øker med sterk økonomi
+- [x] Boom-sjanse øker med svak økonomi
+- [x] Pay cut system for moderate crashes (80% av lønn)
+- [x] Aksjer fluktuerer uavhengig rundt økonomi-baseline
+- [x] Alle UI-komponenter oppdatert til economyReading
+
 ---
 
 *Sist oppdatert: 2026-02-01*

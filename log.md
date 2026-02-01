@@ -2,6 +2,162 @@
 
 ---
 
+## 2026-02-01 - Wiki Economy System Implementation
+
+### Oppgave
+Implementere det fullstendige økonomisystemet fra wiki: https://jonesinthefastlane.fandom.com/wiki/Economy
+
+### Wiki-analyse
+
+Økonomisystemet har to sentrale verdier:
+1. **Economic Index** (-3 til +3): Markedstrend-indikator
+2. **Economic Reading** (-30 til +90): Faktisk prismultiplikator
+
+**Prisformel fra wiki:**
+```
+Item Price = Base Price + (Base Price × Reading / 60)
+```
+- Ved Reading -30: Pris = 50% av basispris
+- Ved Reading 0: Pris = 100% av basispris
+- Ved Reading +90: Pris = 250% av basispris
+
+**Crash/Boom regler:**
+- Kan kun skje fra uke 4+ (første 3 ukene er unntatt)
+- Sterk økonomi → større sjanse for crash
+- Svak økonomi → større sjanse for boom
+- Major crash: Bank tømmes, alle mister jobb
+- Moderate crash: Mulig lønnskutt til 80%
+- Minor crash: Liten økonomisk nedgang
+
+### Implementerte endringer
+
+#### 1. Nye typer og funksjoner i `types/game.ts`
+
+**GameState oppdatert:**
+```typescript
+interface GameState {
+  economicIndex: number;   // -3 til +3, trend-indikator
+  economyReading: number;  // -30 til +90, prismultiplikator
+  // ... andre felt
+}
+```
+
+**Ny prisformel (fikset fra /100 til /60):**
+```typescript
+export function calculatePrice(basePrice: number, economyReading: number): number {
+  const multiplier = 1 + (economyReading / 60);
+  return Math.round(basePrice * Math.max(0.5, Math.min(2.5, multiplier)));
+}
+```
+
+**Ny økonomi-beregningsfunksjon:**
+```typescript
+export function calculateEconomy(
+  currentIndex: number,
+  currentReading: number,
+  week: number
+): EconomyCalculation {
+  // Kompleks formel som:
+  // 1. Index påvirker Reading-endring
+  // 2. Reading-momentum påvirker Index
+  // 3. Crash-sjanse øker med høy Reading
+  // 4. Boom-sjanse øker med lav Reading
+  // 5. Kun events fra uke 4+
+}
+```
+
+**Ny stock-pris beregning:**
+```typescript
+export function calculateStockPrice(
+  basePrice: number,
+  currentPrice: number,
+  economyReading: number,
+  isSafe: boolean
+): number {
+  // Aksjer fluktuerer uavhengig rundt økonomi-baseline
+  // T-Bills er stabile (±2.5%)
+  // Andre aksjer kan variere mer, men trekkes mot baseline
+}
+```
+
+#### 2. GameContext oppdateringer
+
+**END_TURN bruker nå ny økonomi-beregning:**
+```typescript
+const economyResult = calculateEconomy(
+  state.economicIndex,
+  state.economyReading,
+  nextWeek
+);
+
+// Håndter crash-effekter
+if (economyResult.crashType === 'moderate') {
+  // Pay cut til 80% for noen arbeidere
+  if (Math.random() < 0.3 && player.job) {
+    player.currentWage = player.currentWage * 0.8;
+  }
+}
+```
+
+**Alle filer oppdatert til å bruke `economyReading`:**
+- `GameContext.tsx` - Hovedlogikk
+- `LocationMenu.tsx` - UI prisvisning
+- `LocationDialog.tsx` - UI prisvisning
+- `useJonesAI.ts` - AI-beslutninger
+
+#### 3. Crash/Boom tidspunkt
+
+**Endret fra uke 8+ til uke 4+ (per wiki):**
+- Første 3 uker er nå trygge
+- Fra uke 4 kan market events skje
+- Sannsynlighet øker med økonomisk styrke/svakhet
+
+#### 4. Pay cut system
+
+**Moderate crash kan nå gi lønnskutt:**
+```typescript
+if (payCutApplied && player.job && Math.random() < 0.3) {
+  const currentWage = player.currentWage || player.job.baseWage;
+  player.currentWage = currentWage * 0.8; // 80% av nåværende
+}
+```
+
+### Formler oppsummert
+
+| Formel | Beskrivelse |
+|--------|-------------|
+| `Price = Base × (1 + Reading/60)` | Itempriser |
+| `Wage = Base × (1 + Reading/60) × ExpBonus` | Lønninger |
+| `CrashChance = 0.05 + (Reading - 30) × 0.01` | Crash-sannsynlighet |
+| `BoomChance = 0.05 + (0 - Reading) × 0.01` | Boom-sannsynlighet |
+| `PayCut = CurrentWage × 0.8` | Moderate crash lønnskutt |
+
+### Priseksempler
+
+Ved ulike Reading-verdier:
+
+| Reading | Multiplikator | Eksempel ($100 base) |
+|---------|---------------|---------------------|
+| -30 | 0.5 | $50 |
+| -15 | 0.75 | $75 |
+| 0 | 1.0 | $100 |
+| +30 | 1.5 | $150 |
+| +60 | 2.0 | $200 |
+| +90 | 2.5 | $250 |
+
+### Filer endret
+- `src/types/game.ts` - Nye typer, formler, funksjoner
+- `src/contexts/GameContext.tsx` - Ny økonomi-logikk
+- `src/components/game/LocationMenu.tsx` - economyReading
+- `src/components/game/LocationDialog.tsx` - economyReading
+- `src/hooks/useJonesAI.ts` - economyReading
+- `test-ai-simulation.mjs` - economyReading
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - Location Menu i Center Panel
 
 ### Oppgave
