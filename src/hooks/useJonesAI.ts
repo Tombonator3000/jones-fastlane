@@ -15,6 +15,7 @@ import {
   getLessonsRequired,
   getMaxFoodStorage,
   calculatePrice,
+  getCurrentClothingLevel as getClothingLevel,
 } from '@/types/game';
 
 interface AIDecision {
@@ -38,6 +39,60 @@ export function useJonesAI() {
     return availableJobs.reduce((best, job) =>
       job.baseWage > best.baseWage ? job : best
     );
+  };
+
+  // Check if there's a better job available than current
+  const getBetterJob = (player: Player): Job | null => {
+    if (!player.job) return getBestAvailableJob(player);
+
+    const availableJobs = getAIAvailableJobs(player);
+    const betterJobs = availableJobs.filter(job =>
+      job.baseWage > player.job!.baseWage || job.careerPoints > player.job!.careerPoints
+    );
+
+    if (betterJobs.length === 0) return null;
+
+    // Prefer higher career points, then wage
+    return betterJobs.reduce((best, job) => {
+      if (job.careerPoints > best.careerPoints) return job;
+      if (job.careerPoints === best.careerPoints && job.baseWage > best.baseWage) return job;
+      return best;
+    });
+  };
+
+  // Check what clothing level would unlock better jobs
+  const getClothingForBetterJobs = (player: Player): 'dress' | 'business' | null => {
+    const currentClothing = getCurrentClothingLevel(player);
+
+    // Find jobs we could get with better clothes
+    const potentialJobs = JOBS.filter(job => {
+      // Check degrees
+      const hasDegrees = job.requiredDegrees.every(d => player.degrees.includes(d));
+      if (!hasDegrees) return false;
+
+      // Check experience and dependability
+      if (player.experience < job.requiredExperience) return false;
+      if (player.dependability < job.requiredDependability) return false;
+
+      // Check if this job would be better
+      if (player.job && job.careerPoints <= player.job.careerPoints) return false;
+
+      return true;
+    });
+
+    // Check if dress clothes would help
+    if (currentClothing !== 'dress' && currentClothing !== 'business') {
+      const dressJobs = potentialJobs.filter(j => j.requiredClothes === 'dress');
+      if (dressJobs.length > 0) return 'dress';
+    }
+
+    // Check if business clothes would help
+    if (currentClothing !== 'business') {
+      const businessJobs = potentialJobs.filter(j => j.requiredClothes === 'business');
+      if (businessJobs.length > 0) return 'business';
+    }
+
+    return null;
   };
 
   const getCurrentClothingLevel = (player: Player): ClothingLevel => {
@@ -150,6 +205,73 @@ export function useJonesAI() {
       return decisions;
     }
 
+    // CRITICAL: Buy happiness items when happiness is dangerously low (< 15)
+    if (player.happiness < 15 && player.money >= 150) {
+      // First priority: Buy appliances we don't have
+      const happinessItems = APPLIANCES
+        .filter(item => !player.items.includes(item.id) && item.happiness >= 2 && item.socketCityPrice > 0)
+        .sort((a, b) => b.happiness - a.happiness);
+
+      if (happinessItems.length > 0) {
+        const item = happinessItems[0];
+        const cost = calculatePrice(item.socketCityPrice, economyIndex);
+        if (player.money >= cost) {
+          decisions.push({
+            action: 'MOVE_TO_LOCATION',
+            params: { locationId: 'socket-city' },
+            delay: 800,
+            message: 'Jones urgently needs happiness and goes shopping...',
+          });
+          decisions.push({
+            action: 'BUY_APPLIANCE',
+            params: { itemId: item.id, cost, happiness: item.happiness, store: 'socket-city' },
+            delay: 600,
+            message: `Jones buys a ${item.name} to boost happiness!`,
+          });
+          return decisions;
+        }
+      }
+
+      // If no appliances available, buy fast food for happiness
+      const deluxeMeal = FAST_FOOD.find(f => f.id === 'deluxe-meal');
+      if (deluxeMeal && player.money >= calculatePrice(deluxeMeal.basePrice, economyIndex)) {
+        decisions.push({
+          action: 'MOVE_TO_LOCATION',
+          params: { locationId: 'monolith-burger' },
+          delay: 800,
+          message: 'Jones treats himself to feel better...',
+        });
+        decisions.push({
+          action: 'BUY_FAST_FOOD',
+          params: { itemId: 'deluxe-meal', cost: calculatePrice(deluxeMeal.basePrice, economyIndex), happiness: deluxeMeal.happinessBonus },
+          delay: 600,
+          message: 'Jones buys a deluxe meal for happiness!',
+        });
+        return decisions;
+      }
+    }
+
+    // CRITICAL: Consider moving to security apartments if being robbed frequently
+    if (player.apartment === 'low-cost' && player.happiness < 20 && player.items.length > 0) {
+      const securityRent = calculatePrice(APARTMENTS.security.baseRent, economyIndex);
+      // Move to security if we have items to protect and can afford it
+      if (player.money + player.bankBalance >= securityRent * 2) {
+        decisions.push({
+          action: 'MOVE_TO_LOCATION',
+          params: { locationId: 'rent-office' },
+          delay: 800,
+          message: 'Jones decides to move to a safer apartment...',
+        });
+        decisions.push({
+          action: 'CHANGE_APARTMENT',
+          params: { apartment: 'security' },
+          delay: 600,
+          message: 'Jones moves to LeSecurity Apartments!',
+        });
+        return decisions;
+      }
+    }
+
     // Priority 1: Get a job if none
     if (!player.job) {
       const bestJob = getBestAvailableJob(player);
@@ -191,6 +313,54 @@ export function useJonesAI() {
           message: 'Jones buys casual clothes!',
         });
         return decisions;
+      }
+    }
+
+    // Priority 1.5: Upgrade job if better one is available
+    if (player.job && priority.needsCareer) {
+      const betterJob = getBetterJob(player);
+      if (betterJob && betterJob.id !== player.job.id) {
+        decisions.push({
+          action: 'MOVE_TO_LOCATION',
+          params: { locationId: 'employment-office' },
+          delay: 800,
+          message: 'Jones looks for a better job at Employment Office...',
+        });
+        decisions.push({
+          action: 'APPLY_FOR_JOB',
+          params: { job: betterJob },
+          delay: 600,
+          message: `Jones gets promoted to ${betterJob.title}!`,
+        });
+        return decisions;
+      }
+
+      // Buy clothes if they would unlock better jobs
+      const neededClothes = getClothingForBetterJobs(player);
+      if (neededClothes) {
+        const clothingInfo = CLOTHING[neededClothes];
+        const cost = calculatePrice(clothingInfo.qtPrice, economyIndex);
+        if (player.money >= cost) {
+          decisions.push({
+            action: 'MOVE_TO_LOCATION',
+            params: { locationId: 'qt-clothing' },
+            delay: 800,
+            message: `Jones needs ${neededClothes} clothes for a better job...`,
+          });
+          decisions.push({
+            action: 'BUY_CLOTHES',
+            params: {
+              clothingType: neededClothes,
+              store: 'qt',
+              cost,
+              weeks: clothingInfo.qtDuration,
+              happiness: clothingInfo.happiness
+            },
+            delay: 600,
+            message: `Jones buys ${neededClothes} clothes!`,
+          });
+          return decisions;
+        }
       }
     }
 

@@ -2,6 +2,62 @@
 
 ---
 
+## 2026-02-01 - AI Forbedringer og Wild Willy Balansering
+
+### Analyse
+Basert på todo.md og AI-simuleringen ble følgende kritiske problemer identifisert:
+1. AI: Happiness kollaps - AI prioriterer ikke happiness
+2. AI: Karrierestagnasjon - AI oppgraderer aldri jobb etter første ansettelse
+3. AI: Kjøper ikke dress/business klær - Hindrer karriereprogresjon
+4. Wild Willy for aggressiv - 25% sjanse per item per uke
+
+### Implementerte løsninger
+
+#### 1. AI Happiness-håndtering (useJonesAI.ts:208-273)
+- Ny kritisk happiness-sjekk: Når happiness < 15 og har penger:
+  - AI kjøper først appliances med høyest happiness-bonus
+  - Hvis ingen appliances tilgjengelig, kjøper deluxe meal
+- AI vurderer å flytte til LeSecurity Apartments når:
+  - Bor i low-cost housing
+  - Happiness < 20
+  - Har items som kan stjeles
+  - Har råd til security rent × 2
+
+#### 2. AI Jobboppgradering (useJonesAI.ts:319-365)
+- Ny `getBetterJob()` funksjon som finner bedre jobber enn nåværende
+- AI sjekker etter bedre jobb når `needsCareer` er true
+- Prioriterer høyere career points, deretter lønn
+- AI søker automatisk på bedre jobb når kvalifisert
+
+#### 3. AI Klesoppgradering for karriere (useJonesAI.ts:63-96, 338-364)
+- Ny `getClothingForBetterJobs()` funksjon
+- Sjekker om bedre klær ville åpne for bedre jobber
+- AI kjøper dress/business klær proaktivt når det trengs for karriere
+- Tar hensyn til grader, erfaring og dependability
+
+#### 4. Wild Willy Balansering (types/game.ts:403)
+- Redusert `chancePerItem` fra 0.25 (25%) til 0.10 (10%)
+- Gjør low-cost housing mer spillbart
+- Gir spillere tid til å spare til security apartments
+
+### Nye hjelpefunksjoner i useJonesAI.ts
+```typescript
+getBetterJob(player: Player): Job | null
+// Finner jobb med høyere lønn eller career points
+
+getClothingForBetterJobs(player: Player): 'dress' | 'business' | null
+// Sjekker hvilke klær som trengs for bedre jobber
+```
+
+### Filer endret
+- `src/hooks/useJonesAI.ts` - AI forbedringer
+- `src/types/game.ts` - Wild Willy balansering
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-01 - Fix React Error #31 (WeekendEvent)
 
 ### Problem
