@@ -2,17 +2,30 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LOCATIONS, Location } from '@/types/game';
 import { useGame } from '@/contexts/GameContext';
 import { LocationMenu } from './LocationMenu';
+import { PlayerToken } from './PlayerToken';
+import { MovementAnimation } from '@/hooks/useMovementAnimation';
 import gameBoardImage from '@/assets/game-board.jpg';
 
 interface GameBoardProps {
   onLocationClick: (location: Location) => void;
   selectedLocation: Location | null;
   onCloseLocation: () => void;
+  movementAnimation?: MovementAnimation | null;
+  onAnimationComplete?: () => void;
 }
 
-export function GameBoard({ onLocationClick, selectedLocation, onCloseLocation }: GameBoardProps) {
+export function GameBoard({
+  onLocationClick,
+  selectedLocation,
+  onCloseLocation,
+  movementAnimation,
+  onAnimationComplete,
+}: GameBoardProps) {
   const { state, getCurrentPlayer } = useGame();
   const currentPlayer = getCurrentPlayer();
+
+  // Check if a player is currently animating (should hide their static marker)
+  const animatingPlayerId = movementAnimation?.playerId;
 
   return (
     <div
@@ -77,7 +90,10 @@ export function GameBoard({ onLocationClick, selectedLocation, onCloseLocation }
       {/* Clickable location hotspots */}
       {LOCATIONS.map((location) => {
         const isCurrentLocation = currentPlayer?.currentLocation === location.id;
-        const playersHere = state.players.filter(p => p.currentLocation === location.id);
+        // Filter out players who are currently animating - they'll be shown as moving tokens
+        const playersHere = state.players.filter(
+          p => p.currentLocation === location.id && p.id !== animatingPlayerId
+        );
 
         return (
           <motion.button
@@ -90,7 +106,7 @@ export function GameBoard({ onLocationClick, selectedLocation, onCloseLocation }
             }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            animate={isCurrentLocation ? { 
+            animate={isCurrentLocation && !animatingPlayerId ? {
               boxShadow: ['0 0 10px hsl(45, 100%, 50%)', '0 0 25px hsl(45, 100%, 50%)', '0 0 10px hsl(45, 100%, 50%)'],
               borderColor: 'hsl(45, 100%, 50%)'
             } : {}}
@@ -116,6 +132,18 @@ export function GameBoard({ onLocationClick, selectedLocation, onCloseLocation }
           </motion.button>
         );
       })}
+
+      {/* Animated player token for movement */}
+      {movementAnimation && onAnimationComplete && (
+        <PlayerToken
+          playerId={movementAnimation.playerId}
+          avatar={movementAnimation.avatar}
+          path={movementAnimation.path}
+          isAnimating={true}
+          onAnimationComplete={onAnimationComplete}
+          isCurrentPlayer={movementAnimation.playerId === currentPlayer?.id}
+        />
+      )}
     </div>
   );
 }
