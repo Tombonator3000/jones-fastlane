@@ -18,9 +18,17 @@ Jones bruker en prioritetsbasert beslutningsmodell:
 - **Betale husleie** - Hvis husleie er forfalt
 - **Kjøpe mat** - Hvis Jones sulter (food <= 1 og ingen fast food)
 
-#### 2. Jobbsøking
+#### 1.5 Kritisk Happiness (NY!)
+- **Kjøpe appliances** - Hvis happiness < 15 og har penger
+  - Prioriterer items med høyest happiness-bonus
+  - Fallback: Kjøper deluxe meal for happiness
+- **Flytte til security** - Hvis happiness < 20, bor i low-cost og har items
+
+#### 2. Jobbsøking og oppgradering
 - Hvis Jones ikke har jobb, søker han etter beste tilgjengelige jobb
 - Kjøper klær hvis nødvendig for å kvalifisere til jobber
+- **Søker etter bedre jobb** når kvalifisert (NY!)
+- **Kjøper klær** som åpner for bedre jobber (NY!)
 
 #### 3. Arbeid
 - Arbeider når han trenger penger og har jobb
@@ -72,14 +80,20 @@ const priority = {
 
 ## Fremtidige AI-forbedringer
 
+### Implementert (2026-02-01)
+- [x] Kritisk happiness-håndtering
+- [x] Jobboppgradering logikk
+- [x] Klesoppgradering for karriere
+- [x] Security apartment-vurdering
+- [x] Wild Willy balansering (10% istedenfor 25%)
+
 ### Planlagt
-- [ ] Mer avansert strategivalg
+- [ ] Vanskelighetsgrader (Easy/Medium/Hard)
 - [ ] Tilpassing til spillerens strategi
-- [ ] Risikohåndtering for Wild Willy
 - [ ] Aksjehandel-strategi
 - [ ] Lotteri-strategi
 
-### Vanskelighetsgrader
+### Vanskelighetsgrader (planlagt)
 - **Easy**: Jones tar tilfeldige valg
 - **Medium**: Standard prioritetsbasert (nåværende)
 - **Hard**: Optimal strategi med langsiktig planlegging

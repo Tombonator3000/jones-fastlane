@@ -390,7 +390,7 @@ export const LOTTERY_PRIZES = [
   { tickets: 500, prizes: [{ amount: 5000, chance: 0.05 }, { amount: 500, chance: 0.2 }, { amount: 200, chance: 1.0 }] }, // Guaranteed $200 at 500 tickets
 ];
 
-// WILD WILLY events - Based on wiki
+// WILD WILLY events - Based on wiki (balanced for better gameplay)
 export const WILD_WILLY = {
   streetRobbery: {
     locations: ['bank', 'blacks-market'],
@@ -400,7 +400,7 @@ export const WILD_WILLY = {
   },
   apartmentRobbery: {
     location: 'low-cost-housing',
-    chancePerItem: 0.25, // 25% per item type
+    chancePerItem: 0.10, // 10% per item type (reduced from 25% for balance)
     happinessLoss: 4,
     description: 'Wild Willy broke into your apartment!',
   },

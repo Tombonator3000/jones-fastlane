@@ -98,22 +98,22 @@
 ### Aktive (identifisert via AI-simulering 2026-02-01)
 
 #### KRITISK
-- [ ] **AI: Happiness kollaps** - AI prioriterer ikke happiness, spillere ender på 0
+- [x] **AI: Happiness kollaps** - AI prioriterer ikke happiness, spillere ender på 0 (FIKSET 2026-02-01)
   - Årsak: Weekend events og Wild Willy trekker mer happiness enn AI kompenserer
-  - Løsning: AI bør kjøpe items mer aktivt, flytte til security apartments
+  - Løsning: Implementert kritisk happiness-sjekk ved < 15, kjøper appliances/mat aktivt
 
-- [ ] **AI: Karrierestagnasjon** - AI oppgraderer aldri jobb etter første ansettelse
-  - Årsak: `useJonesAI.ts` sjekker kun for jobb hvis `!player.job`
-  - Løsning: Legg til logikk for å søke bedre jobb når kvalifisert
+- [x] **AI: Karrierestagnasjon** - AI oppgraderer aldri jobb etter første ansettelse (FIKSET 2026-02-01)
+  - Årsak: `useJonesAI.ts` sjekket kun for jobb hvis `!player.job`
+  - Løsning: Ny `getBetterJob()` funksjon og Priority 1.5 for jobboppgradering
 
 #### MEDIUM
-- [ ] **AI: Kjøper ikke dress/business klær** - Hindrer karriereprogresjon
-  - Årsak: AI kjøper kun klær når ingen klær (`currentClothing === 'none'`)
-  - Løsning: Oppgrader klær når det åpner for bedre jobber
+- [x] **AI: Kjøper ikke dress/business klær** - Hindrer karriereprogresjon (FIKSET 2026-02-01)
+  - Årsak: AI kjøpte kun klær når ingen klær (`currentClothing === 'none'`)
+  - Løsning: Ny `getClothingForBetterJobs()` funksjon, oppgraderer klær proaktivt
 
-- [ ] **Balansering: Wild Willy for aggressiv** - 25% sjanse per item per uke
+- [x] **Balansering: Wild Willy for aggressiv** - 25% sjanse per item per uke (FIKSET 2026-02-01)
   - Resultat: Items stjeles konstant i low-cost housing
-  - Forslag: Reduser til 10% eller øk incentiv for security apartments
+  - Løsning: Redusert til 10%, AI vurderer security apartments ved lav happiness
 
 ### Fikset
 - [x] React Error #31 - `player.clothes` objekt rendret direkte i PlayerStats.tsx (2026-02-01)
@@ -134,6 +134,11 @@
 - [x] Erfaringsbasert lønnsbonus - opptil 50% (2026-02-01)
 - [x] Oppsigelse ved lav dependability (2026-02-01)
 - [x] Doktor-triggering ved sult (2026-02-01)
+- [x] AI happiness-håndtering - kritisk sjekk og appliance-kjøp (2026-02-01)
+- [x] AI jobboppgradering - søker etter bedre jobber automatisk (2026-02-01)
+- [x] AI klesoppgradering for karriere - kjøper dress/business proaktivt (2026-02-01)
+- [x] Wild Willy balansering - redusert fra 25% til 10% (2026-02-01)
+- [x] AI security apartment-vurdering ved lav happiness (2026-02-01)
 
 ---
 
