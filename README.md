@@ -1,73 +1,106 @@
-# Welcome to your Lovable project
+# Jones in the Fast Lane
 
-## Project info
+En moderne web-reimagining av det klassiske Sierra-spillet fra 1991.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Om spillet
 
-## How can I edit this code?
+Jones in the Fast Lane er et livssimulerings-brettspill der du konkurrerer mot Jones (AI) for å oppnå livsmål innen:
 
-There are several ways of editing your application.
+- **Formue** - Tjen penger, spar i banken
+- **Lykke** - Kjøp ting, nyt helgene
+- **Utdanning** - Fullfør grader ved Hi-Tech U
+- **Karriere** - Klatr karrierestigen
 
-**Use Lovable**
+### Spillmekanikk
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **60 timer per uke** - Bruk tiden klokt
+- **Husleie hver 4. uke** - Ikke gå tom for penger!
+- **Wild Willy** - Pass opp for røveren
+- **Økonomi** - Priser og lønninger fluktuerer
 
-Changes made via Lovable will be committed automatically to this repo.
+## Teknologier
 
-**Use your preferred IDE**
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Shadcn-ui
+- Framer Motion
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Kom i gang
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# Installer dependencies
+npm install
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start utviklingsserver
 npm run dev
+
+# Bygg for produksjon
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## Prosjektstruktur
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+src/
+├── components/
+│   ├── game/          # Spillkomponenter
+│   └── ui/            # Shadcn-ui komponenter
+├── contexts/
+│   └── GameContext.tsx  # Spilltilstand
+├── hooks/
+│   └── useJonesAI.ts    # AI-motstander
+├── types/
+│   └── game.ts          # TypeScript typer
+└── pages/
+    └── Index.tsx        # Hovedside
+```
 
-**Use GitHub Codespaces**
+## Dokumentasjon
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- [agents.md](./agents.md) - AI-dokumentasjon
+- [todo.md](./todo.md) - Oppgaveliste
+- [log.md](./log.md) - Utviklingslogg
 
-## What technologies are used for this project?
+## Lokasjoner
 
-This project is built with:
+| Lokasjon | Type | Beskrivelse |
+|----------|------|-------------|
+| Low-Cost Housing | Leilighet | Billig, men risikabelt |
+| LeSecurity Apts | Leilighet | Trygt og dyrt |
+| Employment Office | Tjeneste | Finn jobber |
+| Hi-Tech U | Tjeneste | Utdanning |
+| Bank | Tjeneste | Sparing og aksjer |
+| Monolith Burgers | Mat | Hurtigmat |
+| Black's Market | Mat | Fersk mat og lotteri |
+| QT Clothing | Butikk | Kvalitetsklær |
+| Z-Mart | Butikk | Billige varer |
+| Socket City | Butikk | Elektronikk |
+| Factory | Arbeid | Fabrikk-jobber |
+| Pawn Shop | Tjeneste | Pantelåner |
+| Rent Office | Tjeneste | Betal husleie |
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Jobber (utvalg)
 
-## How can I deploy this project?
+**Entry-level:**
+- Janitor ($5/t)
+- Fry Cook ($6/t)
+- Stock Clerk ($6-7/t)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+**Med utdanning:**
+- Butcher ($11/t) - Trade School
+- Technician ($14/t) - Electronics
+- Engineer ($23/t) - Engineering
 
-## Can I connect a custom domain to my Lovable project?
+**Toppnivå:**
+- General Manager ($25/t) - Engineering + Business Admin
 
-Yes, you can!
+## Lisens
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Basert på det originale spillet av Sierra On-Line (1991).
+Denne versjonen er et fan-prosjekt for læring og underholdning.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+*Utviklet med React og Lovable*
