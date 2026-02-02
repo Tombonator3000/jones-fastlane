@@ -168,21 +168,22 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
     toast.success(`Enrolled in ${degree.name}! Study to complete.`);
   };
 
-  const handleStudy = (degreeId: string, hours: number) => {
-    if (player.hoursRemaining < hours) {
+  const handleStudy = (degreeId: string) => {
+    // Wiki: Each lesson takes 6 hours
+    if (player.hoursRemaining < 1) {
       toast.error("Not enough time!");
       return;
     }
     const degree = DEGREES.find(d => d.id === degreeId);
     if (!degree) return;
 
-    dispatch({ type: 'STUDY', degreeId, hours });
-    const newProgress = (player.studyProgress[degreeId] || 0) + hours;
+    dispatch({ type: 'STUDY', degreeId });
+    const newProgress = (player.studyProgress[degreeId] || 0) + 1;
     const lessonsRequired = getLessonsRequired(player, degree);
     if (newProgress >= lessonsRequired) {
       toast.success(`Degree completed! 🎓`);
     } else {
-      toast.success(`Studied for ${hours} hours. Progress: ${newProgress}/${lessonsRequired}`);
+      toast.success(`Studied 1 lesson. Progress: ${newProgress}/${lessonsRequired}`);
     }
   };
 
@@ -566,19 +567,14 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
                             <span className="text-[#1a1a2e]">{degree.name}</span>
                             <span className="text-[#4a4a5a]">{progress}/{lessonsRequired}h</span>
                           </div>
-                          <div className="flex gap-1">
-                            {[2, 4, 6].map(hours => (
-                              <Button
-                                key={hours}
-                                size="sm"
-                                className="location-menu-button text-[8px] px-2 py-1 h-6"
-                                onClick={() => handleStudy(courseId, hours)}
-                                disabled={player.hoursRemaining < hours}
-                              >
-                                {hours}h
-                              </Button>
-                            ))}
-                          </div>
+                          <Button
+                            size="sm"
+                            className="location-menu-button text-[8px] px-2 py-1 h-6"
+                            onClick={() => handleStudy(courseId)}
+                            disabled={player.hoursRemaining < 6}
+                          >
+                            Study (6h)
+                          </Button>
                         </div>
                       );
                     })}
@@ -879,26 +875,37 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
     }
   };
 
+  // Get character emoji for location portrait
+  const getLocationCharacter = () => {
+    switch (location.id) {
+      case 'monolith-burger': return '👨‍🍳';
+      case 'employment-office': return '👨‍💼';
+      case 'bank': return '🧔';
+      case 'qt-clothing': return '👔';
+      case 'socket-city': return '🔧';
+      case 'z-mart': return '🛒';
+      case 'hi-tech-u': return '👨‍🏫';
+      case 'blacks-market': return '👨‍🌾';
+      case 'pawn-shop': return '💎';
+      case 'factory': return '👷';
+      case 'rent-office': return '🔑';
+      default: return '🏠';
+    }
+  };
+
   return (
-    <div className="location-menu-panel">
+    <div className="location-menu-panel relative">
+      {/* Header with location name */}
       <div className="location-menu-header">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{location.icon}</span>
-            <h2 className="font-pixel text-[10px] md:text-xs text-[#1a1a2e] uppercase">
-              {location.name}
-            </h2>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="location-menu-close"
-            onClick={onClose}
-          >
-            DONE
-          </Button>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{location.icon}</span>
+          <h2 className="font-pixel text-[10px] md:text-xs text-[#f8f4e8] uppercase tracking-wider">
+            {location.name}
+          </h2>
         </div>
       </div>
+
+      {/* Main content */}
       <div className="location-menu-content">
         <AnimatePresence mode="wait">
           <motion.div
@@ -911,6 +918,23 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
             {renderContent()}
           </motion.div>
         </AnimatePresence>
+      </div>
+
+      {/* Footer with DONE button and character portrait */}
+      <div className="location-menu-footer">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="location-menu-close"
+          onClick={onClose}
+        >
+          DONE
+        </Button>
+      </div>
+
+      {/* Character portrait in corner */}
+      <div className="location-menu-portrait">
+        {getLocationCharacter()}
       </div>
     </div>
   );

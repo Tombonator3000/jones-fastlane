@@ -2,6 +2,85 @@
 
 ---
 
+## 2026-02-02 - Retro Grafikk Implementation fra Wiki
+
+### Oppgave
+Implementere autentisk 90-talls VGA-grafikk basert på wiki-referanser og skjermbilder fra originalspillet.
+
+### Referansebilder analysert
+Bruker lastet opp 5 skjermbilder fra originalspillet:
+1. **Employment Office** - Dialog med "EMPLOYERS" liste og portrett
+2. **Monolith Burgers** - Meny med priser, drikkebeger-grafikk
+3. **Jones Goals** - Målvisning med fire vertikale målere
+4. **Socket City** - Elektronikkliste med priser
+5. **Z-Mart** - Vareliste med retro-stil
+
+### Implementerte endringer
+
+#### 1. CSS Retro-stil oppdateringer (`index.css`)
+Komplett overhaling av `.location-menu-*` klasser:
+
+```css
+/* Autentisk VGA-fargeskjema */
+- Beige/sand bakgrunn: #d4c4a8, #c8b898
+- Teal header/knapper: #4aa8a8, #389898
+- Mørk kant: #1a1a2e
+- Prisliste med prikker mellom navn og pris
+
+/* Nye elementer */
+- .location-menu-portrait: Karakterportrett i hjørnet (64x64px)
+- .location-menu-footer: DONE-knapp footer
+- .location-menu-stats: Statistikk-visning i hjørnet
+- Forbedret scrollbar styling
+- Bedre box-shadow for 3D-effekt
+```
+
+#### 2. Build-feil fikset
+Rettet TypeScript-feil i Index.tsx, LocationDialog.tsx og LocationMenu.tsx:
+- Fjernet `hours` parameter fra STUDY action (wiki: fast 6 timer per leksjon)
+- Fikset BUY_CLOTHES action med riktige typer
+- Fikset CHANGE_APARTMENT til å bruke `apartmentType` istedenfor `apartment`
+- Fjernet ikke-eksisterende BUY_FOOD og BUY_ITEM actions
+
+#### 3. Referansebilder kopiert
+Kopiert brukerens skjermbilder til `src/assets/reference/` for fremtidig bruk:
+- employment-office.jpg
+- monolith-burgers.jpg
+- jones-goals.jpg
+- socket-city.jpg
+- z-mart.jpg
+
+#### 4. PlayerStats retro-redesign (`PlayerStats.tsx`)
+- Vertikal bar-visning som i originalspillet
+- Mørk blå bakgrunn med VGA-estetikk
+- Fire vertikale målere for W/H/E/C (Wealth, Happiness, Education, Career)
+- Glow-effekt på barene
+- Kompakt info-seksjon under barene
+
+#### 5. LocationMenu forbedret
+- Ny header med teal-farge og hvit tekst
+- Portrett-ikon i nedre hjørne
+- Footer med DONE-knapp
+- Bedre separasjon mellom seksjoner
+
+### Filer endret
+- `src/index.css` - Komplett retro-stil for location menus + PlayerStats
+- `src/pages/Index.tsx` - Fikset AI action handlers
+- `src/components/game/LocationDialog.tsx` - Fjernet hours fra STUDY
+- `src/components/game/LocationMenu.tsx` - Portrett og footer lagt til
+- `src/components/game/PlayerStats.tsx` - Fullstendig redesign med vertikale barer
+
+### Browser-testing
+✅ Verifisert at retro-stilen fungerer:
+- PlayerStats med vertikale målere (W/H/E/C)
+- LocationMenu med teal header, beige innhold, portrett, og DONE-footer
+- Autentisk 90-talls VGA-estetikk
+
+### Build-status
+✅ Build vellykket
+
+---
+
 ## 2026-02-02 - Fix Jones AI Burger Loop Bug (KRITISK)
 
 ### Problem

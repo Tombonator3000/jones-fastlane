@@ -77,10 +77,7 @@ function GameContent() {
           dispatch({ type: 'WORK', hours: nextAction.params?.hours as number });
           break;
         case 'STUDY':
-          dispatch({ type: 'STUDY', degreeId: nextAction.params?.degreeId as string, hours: nextAction.params?.hours as number });
-          break;
-        case 'BUY_FOOD':
-          dispatch({ type: 'BUY_FOOD', amount: nextAction.params?.amount as number, cost: nextAction.params?.cost as number });
+          dispatch({ type: 'STUDY', degreeId: nextAction.params?.degreeId as string });
           break;
         case 'BUY_FAST_FOOD':
           dispatch({ type: 'BUY_FAST_FOOD', itemId: nextAction.params?.itemId as string, cost: nextAction.params?.cost as number, happiness: nextAction.params?.happiness as number });
@@ -89,16 +86,26 @@ function GameContent() {
           dispatch({ type: 'BUY_FRESH_FOOD', units: nextAction.params?.units as number, cost: nextAction.params?.cost as number });
           break;
         case 'BUY_CLOTHES':
-          dispatch({ type: 'BUY_CLOTHES', clothingType: nextAction.params?.clothingType as string, store: nextAction.params?.store as string, cost: nextAction.params?.cost as number, weeks: nextAction.params?.weeks as number, happiness: nextAction.params?.happiness as number });
+          dispatch({ 
+            type: 'BUY_CLOTHES', 
+            clothingType: nextAction.params?.clothingType as 'casual' | 'dress' | 'business', 
+            store: nextAction.params?.store as 'qt' | 'zmart', 
+            cost: nextAction.params?.cost as number, 
+            weeks: nextAction.params?.weeks as number, 
+            happiness: nextAction.params?.happiness as number 
+          });
           break;
         case 'BUY_APPLIANCE':
-          dispatch({ type: 'BUY_APPLIANCE', itemId: nextAction.params?.itemId as string, cost: nextAction.params?.cost as number, happiness: nextAction.params?.happiness as number, store: nextAction.params?.store as string });
-          break;
-        case 'BUY_ITEM':
-          dispatch({ type: 'BUY_ITEM', itemId: nextAction.params?.itemId as string, cost: nextAction.params?.cost as number, happiness: nextAction.params?.happiness as number });
+          dispatch({ 
+            type: 'BUY_APPLIANCE', 
+            itemId: nextAction.params?.itemId as string, 
+            cost: nextAction.params?.cost as number, 
+            happiness: nextAction.params?.happiness as number, 
+            store: nextAction.params?.store as 'socket-city' | 'z-mart' 
+          });
           break;
         case 'CHANGE_APARTMENT':
-          dispatch({ type: 'CHANGE_APARTMENT', apartment: nextAction.params?.apartment as 'low-cost' | 'security' });
+          dispatch({ type: 'CHANGE_APARTMENT', apartmentType: nextAction.params?.apartmentType as 'low-cost' | 'security' });
           break;
         case 'APPLY_FOR_JOB':
           dispatch({ type: 'APPLY_FOR_JOB', job: nextAction.params?.job as Job });

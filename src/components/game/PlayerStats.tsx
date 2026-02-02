@@ -9,112 +9,117 @@ export function PlayerStats() {
 
   const stats = [
     { 
-      label: 'Wealth', 
+      label: 'W', 
+      fullLabel: 'Wealth',
       value: player.money + player.bankBalance, 
       goal: state.goals.wealth, 
-      color: 'bg-wealth',
+      color: '#ffd700',
       icon: '💰'
     },
     { 
-      label: 'Happiness', 
+      label: 'H', 
+      fullLabel: 'Happiness',
       value: player.happiness, 
       goal: state.goals.happiness, 
-      color: 'bg-happiness',
+      color: '#ff69b4',
       icon: '😊'
     },
     { 
-      label: 'Education', 
+      label: 'E', 
+      fullLabel: 'Education',
       value: player.education, 
       goal: state.goals.education, 
-      color: 'bg-education',
+      color: '#4169e1',
       icon: '📚'
     },
     { 
-      label: 'Career', 
+      label: 'C', 
+      fullLabel: 'Career',
       value: player.career, 
       goal: state.goals.career, 
-      color: 'bg-career',
+      color: '#32cd32',
       icon: '📈'
     },
   ];
 
+  const totalGoalPoints = state.goals.wealth + state.goals.happiness + state.goals.education + state.goals.career;
+  const currentPoints = Math.min(state.goals.wealth, player.money + player.bankBalance) 
+    + Math.min(state.goals.happiness, player.happiness) 
+    + Math.min(state.goals.education, player.education) 
+    + Math.min(state.goals.career, player.career);
+  const progressPercent = Math.round((currentPoints / totalGoalPoints) * 100);
+
   return (
-    <div className="bg-card pixel-border rounded-lg p-4 space-y-4">
-      {/* Player info header */}
-      <div className="flex items-center gap-3 border-b border-border pb-3">
-        <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-2xl">
-          {player.avatar}
-        </div>
-        <div>
-          <h3 className="font-pixel text-sm text-primary">{player.name}</h3>
-          <p className="game-text text-muted-foreground text-sm">
-            {player.job?.title || 'Unemployed'}
-          </p>
-        </div>
-      </div>
-
-      {/* Time remaining */}
-      <div className="flex items-center justify-between">
-        <span className="game-text text-muted-foreground">⏰ Time Left:</span>
-        <span className="font-pixel text-sm text-primary">{player.hoursRemaining}h</span>
-      </div>
-
-      {/* Money */}
-      <div className="flex items-center justify-between">
-        <span className="game-text text-muted-foreground">💵 Cash:</span>
-        <span className="font-pixel text-sm text-wealth">${player.money}</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span className="game-text text-muted-foreground">🏦 Bank:</span>
-        <span className="font-pixel text-sm text-wealth">${player.bankBalance}</span>
-      </div>
-
-      {/* Stats bars */}
-      <div className="space-y-3 pt-2 border-t border-border">
-        {stats.map((stat) => (
-          <div key={stat.label} className="space-y-1">
-            <div className="flex justify-between items-center">
-              <span className="game-text text-sm">
-                {stat.icon} {stat.label}
-              </span>
-              <span className="font-pixel text-[10px] text-muted-foreground">
-                {stat.value}/{stat.goal}
-              </span>
-            </div>
-            <div className="stat-bar">
-              <motion.div
-                className={`stat-bar-fill ${stat.color}`}
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(100, (stat.value / stat.goal) * 100)}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Status indicators */}
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border text-sm">
+    <div className="retro-stats-panel">
+      {/* Header */}
+      <div className="retro-stats-header">
         <div className="flex items-center gap-2">
-          <span>🍔</span>
-          <span className="game-text text-muted-foreground">Food: {player.food}</span>
+          <span className="text-xl">{player.avatar}</span>
+          <span className="font-pixel text-[10px] text-[#f8f4e8] uppercase">{player.name}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span>👔</span>
-          <span className="game-text text-muted-foreground">
+        <div className="text-[#f8f4e8] font-pixel text-[9px]">
+          Goal: {progressPercent}%
+        </div>
+      </div>
+
+      {/* Vertical bars like original game */}
+      <div className="retro-stats-bars">
+        {stats.map((stat) => {
+          const percent = Math.min(100, (stat.value / stat.goal) * 100);
+          return (
+            <div key={stat.label} className="retro-stat-column">
+              <div className="retro-stat-bar-container">
+                <motion.div
+                  className="retro-stat-bar-fill"
+                  style={{ backgroundColor: stat.color }}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${percent}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+                {/* Goal markers */}
+                <div className="retro-stat-goal-line" style={{ bottom: '100%' }} />
+              </div>
+              <div className="retro-stat-icon" style={{ color: stat.color }}>
+                {stat.icon}
+              </div>
+              <div className="retro-stat-label">{stat.label}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Info section */}
+      <div className="retro-stats-info">
+        <div className="retro-info-row">
+          <span>⏰ Time</span>
+          <span className="retro-info-value">{player.hoursRemaining}h</span>
+        </div>
+        <div className="retro-info-row">
+          <span>💵 Cash</span>
+          <span className="retro-info-value">${player.money}</span>
+        </div>
+        <div className="retro-info-row">
+          <span>🏦 Bank</span>
+          <span className="retro-info-value">${player.bankBalance}</span>
+        </div>
+        <div className="retro-info-row">
+          <span>👔 Clothes</span>
+          <span className="retro-info-value text-[10px]">
             C:{player.clothes.casual} D:{player.clothes.dress} B:{player.clothes.business}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="retro-info-row">
           <span>🏠</span>
-          <span className="game-text text-muted-foreground capitalize">
+          <span className="retro-info-value text-[10px]">
             {player.apartment === 'low-cost' ? 'Low-Cost' : 'Security'}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <span>🎓</span>
-          <span className="game-text text-muted-foreground">{player.degrees.length} degrees</span>
-        </div>
+        {player.job && (
+          <div className="retro-info-row">
+            <span>💼</span>
+            <span className="retro-info-value text-[9px]">{player.job.title}</span>
+          </div>
+        )}
       </div>
     </div>
   );
