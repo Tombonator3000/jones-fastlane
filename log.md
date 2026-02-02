@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-02-02 - Fix Game Deployment (Lokal + GitHub Pages)
+
+### Oppgave
+Fikse deployment slik at spillet kjører både lokalt og fra GitHub Pages.
+
+### Analyse
+
+**Identifiserte problemer:**
+1. `vite.config.ts` mangler `base`-konfigurasjon for GitHub Pages
+   - Lokalt: `base: '/'` fungerer
+   - GitHub Pages: `base: '/jones-fastlane/'` kreves (repo-navn)
+2. Ingen GitHub Actions workflow for automatisk deployment
+3. Dependencies var ikke installert (fikset med `npm install`)
+
+**Repository-info:**
+- Repo: `Tombonator3000/jones-fastlane`
+- Branch: `claude/fix-game-deployment-JxWrZ`
+
+### Løsning
+
+(Pågår...)
+
+---
+
 ## 2026-02-01 - Wiki Jobs List Implementation
 
 ### Oppgave
