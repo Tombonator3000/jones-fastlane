@@ -4,6 +4,16 @@
 
 ---
 
+## Prioritet 0: Deployment
+
+### Cross-Platform Support
+- [x] Vite config for lokal/Lovable (base: '/') (2026-02-02)
+- [x] Vite config for GitHub Pages (base: '/jones-fastlane/') (2026-02-02)
+- [x] GitHub Actions workflow for automatisk deployment (2026-02-02)
+- [ ] Aktivere GitHub Pages i repository settings (manuelt steg)
+
+---
+
 ## Prioritet 1: Kjernefunksjonalitet
 
 ### Spillmekanikk
