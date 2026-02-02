@@ -2,6 +2,65 @@
 
 ---
 
+## 2026-02-02 - Fix Jones AI Burger Loop Bug (KRITISK)
+
+### Problem
+Jones AI hang seg opp i en uendelig loop der han konstant prøvde å kjøpe burger om og om igjen.
+
+### Analyse
+
+**Root cause identifisert:**
+I `src/pages/Index.tsx` sin `processNextAiAction` switch-statement manglet det flere case-handlers for AI-handlinger:
+
+1. `BUY_FAST_FOOD` - **KRITISK MANGLENDE** - Burger-kjøp ble aldri utført!
+2. `BUY_FRESH_FOOD` - Fersk mat-kjøp ble aldri utført
+3. `BUY_APPLIANCE` - Elektronikk-kjøp ble aldri utført
+4. `CHANGE_APARTMENT` - Leilighetsbytte ble aldri utført
+
+**Hvorfor dette førte til uendelig loop:**
+1. Jones har `food <= 1` og `hasFastFood = false`
+2. AI bestemmer seg for å kjøpe burger → genererer `BUY_FAST_FOOD` action
+3. `processNextAiAction` mottar handlingen, men finner ingen case match
+4. **Ingenting skjer!** - dispatch kalles aldri
+5. `hasFastFood` forblir `false`
+6. Neste AI-beslutning ser fortsatt `food <= 1 && !hasFastFood`
+7. AI prøver å kjøpe burger igjen...
+8. Loop fortsetter uendelig
+
+**Også påvirket:**
+- AI kunne ikke kjøpe kjøleskap (BUY_APPLIANCE)
+- AI kunne ikke kjøpe fersk mat (BUY_FRESH_FOOD)
+- AI kunne ikke flytte til security apartments (CHANGE_APARTMENT)
+
+### Løsning
+
+Lagt til manglende case-handlers i `src/pages/Index.tsx`:
+
+```typescript
+case 'BUY_FAST_FOOD':
+  dispatch({ type: 'BUY_FAST_FOOD', itemId: nextAction.params?.itemId as string, cost: nextAction.params?.cost as number, happiness: nextAction.params?.happiness as number });
+  break;
+case 'BUY_FRESH_FOOD':
+  dispatch({ type: 'BUY_FRESH_FOOD', units: nextAction.params?.units as number, cost: nextAction.params?.cost as number });
+  break;
+case 'BUY_APPLIANCE':
+  dispatch({ type: 'BUY_APPLIANCE', itemId: nextAction.params?.itemId as string, cost: nextAction.params?.cost as number, happiness: nextAction.params?.happiness as number, store: nextAction.params?.store as string });
+  break;
+case 'CHANGE_APARTMENT':
+  dispatch({ type: 'CHANGE_APARTMENT', apartment: nextAction.params?.apartment as 'low-cost' | 'security' });
+  break;
+```
+
+Også fikset `BUY_CLOTHES` case til å sende riktige parametere som AI-en genererer (`clothingType`, `store`, `weeks`, `happiness` i stedet for bare `level`).
+
+### Filer endret
+- `src/pages/Index.tsx` - Lagt til manglende AI action handlers
+
+### Build-status
+✅ Build vellykket (npm run build)
+
+---
+
 ## 2026-02-02 - Cross-Platform Support (Lovable + GitHub Pages)
 
 ### Oppgave

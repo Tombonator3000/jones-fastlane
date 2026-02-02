@@ -128,6 +128,9 @@
   - Løsning: Redusert til 10%, AI vurderer security apartments ved lav happiness
 
 ### Fikset
+- [x] **AI: Burger loop bug** - Jones kjøpte burger konstant i uendelig loop (FIKSET 2026-02-02)
+  - Årsak: `Index.tsx` manglet case-handlers for BUY_FAST_FOOD, BUY_FRESH_FOOD, BUY_APPLIANCE, CHANGE_APARTMENT
+  - Løsning: Lagt til alle manglende case-handlers i processNextAiAction switch
 - [x] React Error #31 - `player.clothes` objekt rendret direkte i PlayerStats.tsx (2026-02-01)
 
 ---
@@ -197,4 +200,4 @@
 
 ---
 
-*Sist oppdatert: 2026-02-01*
+*Sist oppdatert: 2026-02-02*
