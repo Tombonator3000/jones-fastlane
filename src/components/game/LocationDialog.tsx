@@ -146,21 +146,22 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
     toast.success(`Enrolled in ${degree.name}! Study to complete.`);
   };
 
-  const handleStudy = (degreeId: string, hours: number) => {
-    if (player.hoursRemaining < hours) {
+  const handleStudy = (degreeId: string) => {
+    // Wiki: Each lesson takes 6 hours
+    if (player.hoursRemaining < 1) {
       toast.error("Not enough time!");
       return;
     }
     const degree = DEGREES.find(d => d.id === degreeId);
     if (!degree) return;
 
-    dispatch({ type: 'STUDY', degreeId, hours });
-    const newProgress = (player.studyProgress[degreeId] || 0) + hours;
+    dispatch({ type: 'STUDY', degreeId });
+    const newProgress = (player.studyProgress[degreeId] || 0) + 1;
     const lessonsRequired = getLessonsRequired(player, degree);
     if (newProgress >= lessonsRequired) {
       toast.success(`Degree completed! 🎓`);
     } else {
-      toast.success(`Studied for ${hours} hours. Progress: ${newProgress}/${lessonsRequired}`);
+      toast.success(`Studied 1 lesson. Progress: ${newProgress}/${lessonsRequired}`);
     }
   };
 
@@ -597,20 +598,15 @@ export function LocationDialog({ location, open, onClose }: LocationDialogProps)
                         <span className="font-pixel text-xs">{degree.name}</span>
                         <span className="text-muted-foreground text-xs">{progress}/{lessonsRequired}h</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-1">
-                        {[2, 4, 6].map(hours => (
-                          <Button
-                            key={hours}
-                            size="sm"
-                            variant="secondary"
-                            className="pixel-button text-[8px]"
-                            onClick={() => handleStudy(courseId, hours)}
-                            disabled={player.hoursRemaining < hours}
-                          >
-                            Study {hours}h
-                          </Button>
-                        ))}
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="pixel-button text-[8px]"
+                        onClick={() => handleStudy(courseId)}
+                        disabled={player.hoursRemaining < 6}
+                      >
+                        Study (6h)
+                      </Button>
                     </div>
                   );
                 })}
