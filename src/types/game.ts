@@ -215,9 +215,9 @@ export const LOCATIONS: Location[] = [
   // Zone: x 52-66%, y 0-24%
   { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 59, y: 12 }, size: { width: 14, height: 24 }, color: 'location-service', icon: '💎' },
   
-  // Shadow Market - Cottage/hut with smoke (top-right corner)
-  // Zone: x 85-100%, y 0-24%
-  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 92, y: 12 }, size: { width: 16, height: 24 }, color: 'location-food', icon: '🥬' },
+  // Shadow Market - Cottage/hut with smoke (top-right corner, inside board)
+  // Zone: x 68-80%, y 0-24% - the cottage with chimney smoke
+  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 74, y: 12 }, size: { width: 12, height: 24 }, color: 'location-food', icon: '🥬' },
 
   // ========== RIGHT SIDE (top to bottom) ==========
   // Rusty Tankard - Watermill with wheel
