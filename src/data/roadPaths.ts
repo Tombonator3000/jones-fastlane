@@ -71,37 +71,37 @@ export const ROAD_WAYPOINTS: Waypoint[] = [
 // Location to nearest road waypoint index mapping
 // This maps each location to the closest point on the road loop
 export const LOCATION_WAYPOINT_INDEX: Record<string, number> = {
-  'security-apartments': 0,
-  'rent-office': 2,
-  'low-cost-housing': 4,
-  'pawn-shop': 6,
-  'z-mart': 8,
-  'monolith-burger': 10,
-  'qt-clothing': 12,
-  'socket-city': 14,
-  'hi-tech-u': 16,
-  'employment-office': 18,
-  'factory': 20,
-  'bank': 23,
-  'blacks-market': 25,
+  'noble-heights': 0,
+  'landlord-office': 2,
+  'the-slums': 4,
+  'the-fence': 6,
+  'general-store': 8,
+  'rusty-tankard': 10,
+  'armory': 12,
+  'enchanter': 14,
+  'academy': 16,
+  'guild-hall': 18,
+  'the-forge': 20,
+  'guildholm-bank': 23,
+  'shadow-market': 25,
 };
 
 // Entry points - the position where a player enters/exits a location from the road
 // These are positions between the building and the road
 export const LOCATION_ENTRY_POINTS: Record<string, Waypoint> = {
-  'security-apartments': { x: 12, y: 25 },
-  'rent-office': { x: 28, y: 22 },
-  'low-cost-housing': { x: 44, y: 22 },
-  'pawn-shop': { x: 60, y: 22 },
-  'z-mart': { x: 82, y: 22 },
-  'monolith-burger': { x: 82, y: 40 },
-  'qt-clothing': { x: 82, y: 56 },
-  'socket-city': { x: 82, y: 73 },
-  'hi-tech-u': { x: 72, y: 82 },
-  'employment-office': { x: 52, y: 82 },
-  'factory': { x: 28, y: 82 },
-  'bank': { x: 18, y: 65 },
-  'blacks-market': { x: 18, y: 44 },
+  'noble-heights': { x: 12, y: 25 },
+  'landlord-office': { x: 28, y: 22 },
+  'the-slums': { x: 44, y: 22 },
+  'the-fence': { x: 60, y: 22 },
+  'general-store': { x: 82, y: 22 },
+  'rusty-tankard': { x: 82, y: 40 },
+  'armory': { x: 82, y: 56 },
+  'enchanter': { x: 82, y: 73 },
+  'academy': { x: 72, y: 82 },
+  'guild-hall': { x: 52, y: 82 },
+  'the-forge': { x: 28, y: 82 },
+  'guildholm-bank': { x: 18, y: 65 },
+  'shadow-market': { x: 18, y: 44 },
 };
 
 /**
@@ -156,7 +156,7 @@ export function calculatePath(fromLocationId: string, toLocationId: string): Way
  * Get home location ID based on apartment type
  */
 export function getHomeLocation(apartmentType: 'low-cost' | 'security'): string {
-  return apartmentType === 'low-cost' ? 'low-cost-housing' : 'security-apartments';
+  return apartmentType === 'low-cost' ? 'the-slums' : 'noble-heights';
 }
 
 /**

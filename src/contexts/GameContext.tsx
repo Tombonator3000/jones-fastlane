@@ -764,7 +764,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       updatedPlayers[state.currentPlayerIndex] = {
         ...currentPlayer,
         apartment: action.apartmentType,
-        currentLocation: action.apartmentType === 'low-cost' ? 'low-cost-housing' : 'security-apartments',
+        currentLocation: action.apartmentType === 'low-cost' ? 'the-slums' : 'noble-heights',
       };
 
       return { ...state, players: updatedPlayers };
@@ -917,7 +917,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         relaxation: newRelaxation,
         lotteryTickets: 0, // Reset lottery tickets
         pawnedItems: updatedPawnedItems,
-        currentLocation: currentPlayer.apartment === 'low-cost' ? 'low-cost-housing' : 'security-apartments',
+        currentLocation: currentPlayer.apartment === 'low-cost' ? 'the-slums' : 'noble-heights',
         items: itemsAfterRobbery,
         job: newJob,
         hasRelaxedThisTurn: false, // Reset for next turn

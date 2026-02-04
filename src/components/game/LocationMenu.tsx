@@ -36,7 +36,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
       <div className="location-menu-panel">
         <div className="location-menu-header">
           <h2 className="font-pixel text-xs md:text-sm text-[#1a1a2e]">
-            JONES IN THE FAST LANE
+            GUILD LIFE
           </h2>
         </div>
         <div className="location-menu-content">
@@ -61,7 +61,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
 
   const handleWork = (hours: number) => {
     if (!player.job) {
-      toast.error("You need a job first! Visit the Employment Office.");
+      toast.error("You need a position first! Visit the Guild Hall.");
       return;
     }
     if (player.job.location !== location.id) {
@@ -268,7 +268,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
 
   const handleChangeApartment = (apartmentType: 'low-cost' | 'security') => {
     dispatch({ type: 'CHANGE_APARTMENT', apartmentType });
-    toast.success(`Moved to ${apartmentType === 'low-cost' ? 'Low-Cost Housing' : 'Security Apartments'}`);
+    toast.success(`Moved to ${apartmentType === 'low-cost' ? 'The Slums' : 'Noble Heights'}`);
   };
 
   // Work section component for locations where player works
@@ -298,14 +298,14 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
 
   const renderContent = () => {
     switch (location.id) {
-      case 'monolith-burger':
+      case 'rusty-tankard':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Welcome to Monolith Burgers! Try our Astro Chicken!"
+              "Welcome to The Rusty Tankard! Try our famous Roast Fowl!"
             </p>
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">FAST FOOD MENU</h4>
+              <h4 className="location-menu-section-title">TAVERN MENU</h4>
               <ScrollArea className="h-32">
                 <div className="space-y-1">
                   {FAST_FOOD.map(item => {
@@ -329,15 +329,15 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'blacks-market':
+      case 'shadow-market':
         const maxStorage = getMaxFoodStorage(player);
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Welcome to Black's Market! Fresh groceries and more!"
+              "The Shadow Market... fresh provisions and whispered rumors."
             </p>
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">FRESH FOOD</h4>
+              <h4 className="location-menu-section-title">PROVISIONS</h4>
               {maxStorage === 0 ? (
                 <p className="text-[#8a4a4a] text-sm">You need a refrigerator!</p>
               ) : (
@@ -377,14 +377,14 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'qt-clothing':
+      case 'armory':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Quality clothes that last!"
+              "Fine armor and garments for the discerning adventurer!"
             </p>
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">BUY CLOTHES (QT)</h4>
+              <h4 className="location-menu-section-title">ARMORY GOODS</h4>
               <div className="space-y-1">
                 {(['casual', 'dress', 'business'] as const).map(type => {
                   const info = CLOTHING[type];
@@ -410,14 +410,14 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'z-mart':
+      case 'general-store':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Z-Mart: Where savings meet quality... sort of!"
+              "General Store: Basic supplies for the frugal adventurer!"
             </p>
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">DISCOUNT CLOTHES</h4>
+              <h4 className="location-menu-section-title">BASIC GARMENTS</h4>
               <div className="space-y-1">
                 {(['casual', 'dress'] as const).map(type => {
                   const info = CLOTHING[type];
@@ -438,7 +438,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               </div>
             </div>
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">ELECTRONICS</h4>
+              <h4 className="location-menu-section-title">MAGICAL ITEMS</h4>
               <ScrollArea className="h-24">
                 <div className="space-y-1">
                   {APPLIANCES.filter(a => a.zMartPrice !== null).map(item => {
@@ -463,14 +463,14 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'socket-city':
+      case 'enchanter':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Socket City: Quality electronics with warranty!"
+              "Enchanter's Workshop: Magical items of the finest quality!"
             </p>
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">APPLIANCE STORE</h4>
+              <h4 className="location-menu-section-title">ENCHANTED GOODS</h4>
               <ScrollArea className="h-40">
                 <div className="space-y-1">
                   {APPLIANCES.filter(a => a.socketCityPrice > 0).map(item => {
@@ -495,11 +495,11 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'employment-office':
+      case 'guild-hall':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Find your dream job here!"
+              "Guild Hall - Find work, take quests, advance your rank!"
             </p>
             {player.job && (
               <div className="bg-[#e8e0d0] p-2 rounded">
@@ -512,7 +512,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               </div>
             )}
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">AVAILABLE JOBS</h4>
+              <h4 className="location-menu-section-title">AVAILABLE POSITIONS</h4>
               <ScrollArea className="h-32">
                 <div className="space-y-1">
                   {getAvailableJobs().map(job => {
@@ -533,7 +533,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
                     );
                   })}
                   {getAvailableJobs().length === 0 && (
-                    <p className="text-[#8a4a4a] text-sm">No jobs available</p>
+                    <p className="text-[#8a4a4a] text-sm">No positions available</p>
                   )}
                 </div>
               </ScrollArea>
@@ -544,12 +544,12 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'hi-tech-u':
+      case 'academy':
         const availableDegrees = getPlayerAvailableDegrees();
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Hi-Tech University - Knowledge is Power!"
+              "The Academy - Knowledge is the foundation of power!"
             </p>
             {player.enrolledCourses.length > 0 && (
               <div className="location-menu-section">
@@ -610,11 +610,11 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'bank':
+      case 'guildholm-bank':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Your money is safe with us!"
+              "Guildholm Bank - Your gold is safe with us!"
             </p>
             <div className="bg-[#e8e0d0] p-2 rounded">
               <div className="flex justify-between text-sm">
@@ -694,15 +694,15 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'factory':
+      case 'the-forge':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Factory - Best paying jobs in town!"
+              "The Forge - Hard work, fair pay!"
             </p>
             {player.job?.location === location.id ? (
               <div className="location-menu-section">
-                <h4 className="location-menu-section-title">WORK AT FACTORY</h4>
+                <h4 className="location-menu-section-title">WORK AT THE FORGE</h4>
                 <p className="text-[#1a1a2e] text-sm mb-2">
                   {player.job.title} - ${calculateWage(player.job.baseWage, economyReading)}/hr
                 </p>
@@ -727,13 +727,13 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'rent-office':
+      case 'landlord-office':
         const apartment = APARTMENTS[player.apartment];
         const rentAmount = calculatePrice(apartment.baseRent, economyReading);
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Rent Office - Pay rent and change apartments"
+              "Landlord's Office - Pay rent and change lodgings"
             </p>
             <div className="bg-[#e8e0d0] p-2 rounded">
               <div className="flex justify-between text-sm">
@@ -754,7 +754,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               </Button>
             )}
             <div className="location-menu-section">
-              <h4 className="location-menu-section-title">CHANGE APARTMENT</h4>
+              <h4 className="location-menu-section-title">CHANGE LODGINGS</h4>
               <div className="space-y-1">
                 {Object.entries(APARTMENTS).map(([key, apt]) => {
                   const rent = calculatePrice(apt.baseRent, economyReading);
@@ -779,8 +779,8 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'low-cost-housing':
-      case 'security-apartments':
+      case 'the-slums':
+      case 'noble-heights':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
@@ -810,11 +810,11 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
           </div>
         );
 
-      case 'pawn-shop':
+      case 'the-fence':
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
-              "Pawn Shop - We buy your stuff!"
+              "The Fence - We deal in... various goods."
             </p>
             {player.items.length > 0 ? (
               <div className="location-menu-section">
@@ -878,17 +878,17 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
   // Get character emoji for location portrait
   const getLocationCharacter = () => {
     switch (location.id) {
-      case 'monolith-burger': return '👨‍🍳';
-      case 'employment-office': return '👨‍💼';
-      case 'bank': return '🧔';
-      case 'qt-clothing': return '👔';
-      case 'socket-city': return '🔧';
-      case 'z-mart': return '🛒';
-      case 'hi-tech-u': return '👨‍🏫';
-      case 'blacks-market': return '👨‍🌾';
-      case 'pawn-shop': return '💎';
-      case 'factory': return '👷';
-      case 'rent-office': return '🔑';
+      case 'rusty-tankard': return '👨‍🍳';
+      case 'guild-hall': return '👨‍💼';
+      case 'guildholm-bank': return '🧔';
+      case 'armory': return '👔';
+      case 'enchanter': return '🔧';
+      case 'general-store': return '🛒';
+      case 'academy': return '👨‍🏫';
+      case 'shadow-market': return '👨‍🌾';
+      case 'the-fence': return '💎';
+      case 'the-forge': return '👷';
+      case 'landlord-office': return '🔑';
       default: return '🏠';
     }
   };

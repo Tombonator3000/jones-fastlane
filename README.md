@@ -1,24 +1,24 @@
-# Jones in the Fast Lane
+# Guild Life
 
-En moderne web-reimagining av det klassiske Sierra-spillet fra 1991.
+A fantasy-themed life simulation game set in the world of Guildholm. Originally inspired by the classic Sierra game "Jones in the Fast Lane" (1991), now reimagined with a fantasy twist.
 
-## Om spillet
+## About the Game
 
-Jones in the Fast Lane er et livssimulerings-brettspill der du konkurrerer mot Jones (AI) for å oppnå livsmål innen:
+Guild Life is a board-game style life simulation where you compete against Grimwald (AI) to achieve life goals in:
 
-- **Formue** - Tjen penger, spar i banken
-- **Lykke** - Kjøp ting, nyt helgene
-- **Utdanning** - Fullfør grader ved Hi-Tech U
-- **Karriere** - Klatr karrierestigen
+- **Wealth** - Earn gold, save at Guildholm Bank
+- **Happiness** - Buy items, enjoy weekends at the tavern
+- **Education** - Complete studies at The Academy
+- **Career** - Rise through the guild ranks
 
-### Spillmekanikk
+### Game Mechanics
 
-- **60 timer per uke** - Bruk tiden klokt
-- **Husleie hver 4. uke** - Ikke gå tom for penger!
-- **Wild Willy** - Pass opp for røveren
-- **Økonomi** - Priser og lønninger fluktuerer
+- **60 hours per week** - Manage your time wisely
+- **Rent every 4 weeks** - Do not run out of gold!
+- **Shadowfingers** - Beware the notorious thief
+- **Economy** - Prices and wages fluctuate
 
-## Teknologier
+## Technologies
 
 - React 18
 - TypeScript
@@ -27,80 +27,93 @@ Jones in the Fast Lane er et livssimulerings-brettspill der du konkurrerer mot J
 - Shadcn-ui
 - Framer Motion
 
-## Kom i gang
+## Getting Started
 
 ```bash
-# Installer dependencies
+# Install dependencies
 npm install
 
-# Start utviklingsserver
+# Start development server
 npm run dev
 
-# Bygg for produksjon
+# Build for production
 npm run build
 ```
 
-## Prosjektstruktur
+## Project Structure
 
 ```
 src/
 ├── components/
-│   ├── game/          # Spillkomponenter
-│   └── ui/            # Shadcn-ui komponenter
+│   ├── game/            # Game components
+│   └── ui/              # Shadcn-ui components
 ├── contexts/
-│   └── GameContext.tsx  # Spilltilstand
+│   └── GameContext.tsx  # Game state
 ├── hooks/
-│   └── useJonesAI.ts    # AI-motstander
+│   ├── useGrimwaldAI.ts # AI opponent
+│   └── useQuests.ts     # Quest system
 ├── types/
-│   └── game.ts          # TypeScript typer
+│   └── game.ts          # TypeScript types
 └── pages/
-    └── Index.tsx        # Hovedside
+    └── Index.tsx        # Main page
 ```
 
-## Dokumentasjon
+## Documentation
 
-- [agents.md](./agents.md) - AI-dokumentasjon
-- [todo.md](./todo.md) - Oppgaveliste
-- [log.md](./log.md) - Utviklingslogg
+- [agents.md](./agents.md) - AI documentation
+- [todo.md](./todo.md) - Task list
+- [log.md](./log.md) - Development log
 
-## Lokasjoner
+## Locations
 
-| Lokasjon | Type | Beskrivelse |
+| Location | Type | Description |
 |----------|------|-------------|
-| Low-Cost Housing | Leilighet | Billig, men risikabelt |
-| LeSecurity Apts | Leilighet | Trygt og dyrt |
-| Employment Office | Tjeneste | Finn jobber |
-| Hi-Tech U | Tjeneste | Utdanning |
-| Bank | Tjeneste | Sparing og aksjer |
-| Monolith Burgers | Mat | Hurtigmat |
-| Black's Market | Mat | Fersk mat og lotteri |
-| QT Clothing | Butikk | Kvalitetsklær |
-| Z-Mart | Butikk | Billige varer |
-| Socket City | Butikk | Elektronikk |
-| Factory | Arbeid | Fabrikk-jobber |
-| Pawn Shop | Tjeneste | Pantelåner |
-| Rent Office | Tjeneste | Betal husleie |
+| The Slums | Lodging | Cheap, but Shadowfingers lurks |
+| Noble Heights | Lodging | Safe and expensive |
+| Guild Hall | Service | Find work, take quests |
+| The Academy | Service | Learn new skills |
+| Guildholm Bank | Service | Savings and investments |
+| The Rusty Tankard | Tavern | Food, drink, and rumors |
+| Shadow Market | Market | Fresh provisions and lottery |
+| The Armory | Store | Quality gear |
+| General Store | Store | Basic supplies |
+| Enchanter's Workshop | Store | Magical items |
+| The Forge | Workplace | Hard work, fair pay |
+| The Fence | Service | Pawn shop |
+| Landlord's Office | Service | Pay rent |
 
-## Jobber (utvalg)
+## Guild Ranks
+
+| Rank | Quests Required | Quest Access |
+|------|-----------------|--------------|
+| Novice | 0 | E-Rank |
+| Apprentice | 3 | E, D-Rank |
+| Journeyman | 8 | E, D, C-Rank |
+| Adept | 15 | E, D, C, B-Rank |
+| Veteran | 25 | E, D, C, B, A-Rank |
+| Elite | 40 | All Ranks |
+| Guildmaster | 60 | All Ranks |
+
+## Jobs (Selection)
 
 **Entry-level:**
-- Janitor ($5/t)
-- Fry Cook ($6/t)
-- Stock Clerk ($6-7/t)
+- Kitchen Hand (5 gold/hr)
+- Stock Hand (5 gold/hr)
+- Forge Hand (7 gold/hr)
 
-**Med utdanning:**
-- Butcher ($11/t) - Trade School
-- Technician ($14/t) - Electronics
-- Engineer ($23/t) - Engineering
+**With Education:**
+- Butcher (12 gold/hr) - Trade School
+- Journeyman Enchanter (11 gold/hr) - Enchanting
+- Artificer (23 gold/hr) - Advanced Enchanting
 
-**Toppnivå:**
-- General Manager ($25/t) - Engineering + Business Admin
+**Top-tier:**
+- Guild Council Member (25 gold/hr) - Guild Administration + Advanced Enchanting
 
-## Lisens
+## License
 
-Basert på det originale spillet av Sierra On-Line (1991).
-Denne versjonen er et fan-prosjekt for læring og underholdning.
+Originally inspired by Sierra On-Line's classic game (1991).
+This version is a fan project for learning and entertainment.
 
 ---
 
-*Utviklet med React og Lovable*
+*A Fantasy Life Simulation*

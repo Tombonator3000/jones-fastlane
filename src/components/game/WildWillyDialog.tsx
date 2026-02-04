@@ -9,9 +9,9 @@ interface WildWillyDialogProps {
   onClose: () => void;
 }
 
-// Wild Willy pixel art sprite (inline base64 for simplicity)
-// This is a stylized bandit character with a gun
-const WILD_WILLY_SPRITE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAOESURBVFiF7ZZNaBNBFMd/s5tNd5NuYppUq9YPFBUVRBRFPHjw4MGbB/HgwYN48ODRg1cvXkTBg+LFgxcPHkQQRMSDeBARQRRFRdFWq7VVW5smNptNdjd7cNNm06TaFPTg/2DYnZl5vzfz5s0U/u9/HCLwl4DrwAlgP1ALWMA0MAoMAk+BmUCbYuC0p8sGYJ2X5Pf+VwDcvB5OcL+gD6YhOACMF5Nc8bTl4CjQBYQ9fQ8wCnQA54CjwE1gPJ+Cgo6qGQ2dAKz29DsK+gR0AC8oTAF+fgU8BA4CLQXtgJ1A3DMgI+CJgPWN2G5gO2AB3wWsEGDYa9sAdHv9dgLWAGjYC9wCLgXsYgC3PX0NcBB4H7BOgjsAGoqTJQxC6+gBLgO3CugGOAk87AwFPBOwd1GYAo6GfSdjbgTwmLyRICqUEBrfgNbO4M+LwDMBOwPcCNh+AOC+p58BXhR44hdQkOLOQrj2hKJXgJsBC5TQTsA0MBHQ/hCwcJGLpPdQAbqBu/OxOOCG9x1oAZ5PBwI+B44BR4DbBbQJ4FnAXk/PB1xUJvgJ2AGc8/T7A3YRwPPA84CdAnYGLBKwXQG75unHAGCXpx+nsBOgvE04C2wqSDcFHC2gD4CbAdse0CPAfwACnAvYSqA94FuAPgUJhVsR6AFoFLD7A5oEmgN2L0DnAW4DbqbAS/4V0OSf+o4Cjoc1J4G1QBbYDJz11LN06OmQsOmgJwx0ARtBaCLhWeAG0OyxWxFR4FTATgJPPS0DWEPYLqCjhL7s9T3h9a0A1gdscQnUAjR7/VqAOwE76rVXAXsKaAU4g4JXuVzA24DtLkIvj5JZ0ObtXFAMWa8BaxewPQFdEtBFBbSdJcB6zzYEtKSAzQHdbKATOOM11EWJ8wGtB24E7FBa/iqF+c3ruy9gK4B/AjQHbFNBn+PAnYLamoAeCehOD+VGwHYE9BqKIaIHgUcBDYcwNSDoAG57/Y4HbCLhMxQGy5vAi4gC0B3QZgKeAW56bc0F+gRoKIwCw9RKOkD4COcL0sZJaS3oLj3GZ3E6b/j3dHqZ7WLhM4F5gG8F7G4ULgC3A3YrYFuBh0u1r/DJpwO6JaBHgcsF+TqA64hCRYpx4ELA+gBu5WvOxyKgJ2DrUWgI6EXgbqBPQ8GRn/T5lyfAI89+EbC7sHgrRJ5/C/4CepULv/8AAAAASUVORK5CYII=`;
+// Shadowfingers pixel art sprite (inline base64 - using same sprite for now)
+// This is a stylized rogue character
+const SHADOWFINGERS_SPRITE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAOESURBVFiF7ZZNaBNBFMd/s5tNd5NuYppUq9YPFBUVRBRFPHjw4MGbB/HgwYN48ODRg1cvXkTBg+LFgxcPHkQQRMSDeBARQRRFRdFWq7VVW5smNptNdjd7cNNm06TaFPTg/2DYnZl5vzfz5s0U/u9/HCLwl4DrwAlgP1ALWMA0MAoMAk+BmUCbYuC0p8sGYJ2X5Pf+VwDcvB5OcL+gD6YhOACMF5Nc8bTl4CjQBYQ9fQ8wCnQA54CjwE1gPJ+Cgo6qGQ2dAKz29DsK+gR0AC8oTAF+fgU8BA4CLQXtgJ1A3DMgI+CJgPWN2G5gO2AB3wWsEGDYa9sAdHv9dgLWAGjYC9wCLgXsYgC3PX0NcBB4H7BOgjsAGoqTJQxC6+gBLgO3CugGOAk87AwFPBOwd1GYAo6GfSdjbgTwmLyRICqUEBrfgNbO4M+LwDMBOwPcCNh+AOC+p58BXhR44hdQkOLOQrj2hKJXgJsBC5TQTsA0MBHQ/hCwcJGLpPdQAbqBu/OxOOCG9x1oAZ5PBwI+B44BR4DbBbQJ4FnAXk/PB1xUJvgJ2AGc8/T7A3YRwPPA84CdAnYGLBKwXQG75unHAGCXpx+nsBOgvE04C2wqSDcFHC2gD4CbAdse0CPAfwACnAvYSqA94FuAPgUJhVsR6AFoFLD7A5oEmgN2L0DnAW4DbqbAS/4V0OSf+o4Cjoc1J4G1QBbYDJz11LN06OmQsOmgJwx0ARtBaCLhWeAG0OyxWxFR4FTATgJPPS0DWEPYLqCjhL7s9T3h9a0A1gdscQnUAjR7/VqAOwE76rVXAXsKaAU4g4JXuVzA24DtLkIvj5JZ0ObtXFAMWa8BaxewPQFdEtBFBbSdJcB6zzYEtKSAzQHdbKATOOM11EWJ8wGtB24E7FBa/iqF+c3ruy9gK4B/AjQHbFNBn+PAnYLamoAeCehOD+VGwHYE9BqKIaIHgUcBDYcwNSDoAG57/Y4HbCLhMxQGy5vAi4gC0B3QZgKeAW56bc0F+gRoKIwCw9RKOkD4COcL0sZJaS3oLj3GZ3E6b/j3dHqZ7WLhM4F5gG8F7G4ULgC3A3YrYFuBh0u1r/DJpwO6JaBHgcsF+TqA64hCRYpx4ELA+gBu5WvOxyKgJ2DrUWgI6EXgbqBPQ8GRn/T5lyfAI89+EbC7sHgrRJ5/C/4CepULv/8AAAAASUVORK5CYII=`;
 
 export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
   const { state, dispatch } = useGame();
@@ -41,7 +41,7 @@ export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
             ROBBERY!
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Wild Willy robbery event
+            Shadowfingers theft event
           </DialogDescription>
         </DialogHeader>
 
@@ -51,7 +51,7 @@ export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
             animate={{ opacity: 1 }}
             className="space-y-4"
           >
-            {/* Wild Willy Animation */}
+            {/* Shadowfingers Animation */}
             <div className="relative h-32 bg-gradient-to-b from-slate-800 to-slate-900 rounded-lg overflow-hidden">
               {/* Street background for street robbery */}
               {isStreetRobbery && (
@@ -68,7 +68,7 @@ export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
                 </div>
               )}
 
-              {/* Wild Willy sprite with animation */}
+              {/* Shadowfingers sprite with animation */}
               <motion.div
                 initial={{ x: 200, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -81,8 +81,8 @@ export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
                 className="absolute bottom-4 right-8"
               >
                 <motion.img
-                  src={WILD_WILLY_SPRITE}
-                  alt="Wild Willy"
+                  src={SHADOWFINGERS_SPRITE}
+                  alt="Shadowfingers"
                   className="w-16 h-16 pixelated"
                   style={{ imageRendering: 'pixelated' }}
                   animate={{
@@ -140,21 +140,21 @@ export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
               className="bg-amber-50 border-2 border-amber-800 p-4 rounded"
             >
               <div className="text-center">
-                <h3 className="font-pixel text-xs text-amber-900 mb-2">📰 DAILY NEWS</h3>
+                <h3 className="font-pixel text-xs text-amber-900 mb-2">📜 GUILDHOLM HERALD</h3>
                 <div className="h-px bg-amber-800 mb-2" />
 
                 {isStreetRobbery && (
                   <>
                     <p className="font-pixel text-sm text-amber-900 mb-2">
-                      WILD WILLY STRIKES AGAIN!
+                      SHADOWFINGERS STRIKES AGAIN!
                     </p>
                     <p className="game-text text-amber-800">
-                      Local citizen robbed at gunpoint outside the {
-                        state.players[state.currentPlayerIndex]?.currentLocation === 'bank'
-                          ? 'Bank'
-                          : "Black's Market"
+                      Local adventurer robbed in the streets near the {
+                        state.players[state.currentPlayerIndex]?.currentLocation === 'guildholm-bank'
+                          ? 'Guildholm Bank'
+                          : "Shadow Market"
                       }.
-                      All cash stolen - ${state.wildWillyEvent.amountStolen}!
+                      All gold stolen - {state.wildWillyEvent.amountStolen} coins!
                     </p>
                   </>
                 )}
@@ -162,10 +162,10 @@ export function WildWillyDialog({ open, onClose }: WildWillyDialogProps) {
                 {isApartmentRobbery && (
                   <>
                     <p className="font-pixel text-sm text-amber-900 mb-2">
-                      BURGLARY AT LOW-COST HOUSING!
+                      BURGLARY IN THE SLUMS!
                     </p>
                     <p className="game-text text-amber-800">
-                      Wild Willy broke into an apartment and stole: {stolenItemNames.join(', ')}.
+                      Shadowfingers broke into a lodging and stole: {stolenItemNames.join(', ')}.
                     </p>
                   </>
                 )}
