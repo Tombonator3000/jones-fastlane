@@ -194,41 +194,42 @@ export interface GameGoals {
 }
 
 // Positions match the medieval game board image (percentage based)
-// Each location has center position and size to cover the entire building
+// Each location has center position and size to cover the ENTIRE building
+// Sizes increased to ensure full building coverage
 export const LOCATIONS: Location[] = [
   // TOP ROW (left to right)
-  // LeSecurity -> Steinslott med tarn (x: 0-10%, y: 0-15%)
-  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 5, y: 7.5 }, size: { width: 10, height: 15 }, color: 'location-apartment', icon: '🏰' },
-  // Rent Office -> Rundt steintarn (x: 15-22%, y: 5-18%)
-  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 18.5, y: 11.5 }, size: { width: 7, height: 13 }, color: 'location-service', icon: '🔑' },
-  // Low-Cost Housing -> Bindverk m/stripet markise (x: 28-38%, y: 5-18%)
-  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 33, y: 11.5 }, size: { width: 10, height: 13 }, color: 'location-apartment', icon: '🏚️' },
-  // Pawn Shop -> Bindverk m/hvit markise (x: 42-52%, y: 5-18%)
-  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 47, y: 11.5 }, size: { width: 10, height: 13 }, color: 'location-service', icon: '💎' },
-  // Z-Mart -> Smedje m/glodende ild (x: 58-70%, y: 5-18%)
-  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 64, y: 11.5 }, size: { width: 12, height: 13 }, color: 'location-store', icon: '🛒' },
+  // Slott med tarn - øverst venstre hjørne
+  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 5, y: 10 }, size: { width: 12, height: 20 }, color: 'location-apartment', icon: '🏰' },
+  // Bindverk hus ved siden av slottet (venstre for tårn)
+  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 16, y: 12 }, size: { width: 10, height: 18 }, color: 'location-apartment', icon: '🏚️' },
+  // Rundt steintarn
+  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 26, y: 12 }, size: { width: 8, height: 18 }, color: 'location-service', icon: '🔑' },
+  // Bindverk m/stripet markise
+  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 36, y: 12 }, size: { width: 12, height: 18 }, color: 'location-service', icon: '💎' },
+  // Bindverk m/hvit markise
+  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 50, y: 12 }, size: { width: 14, height: 18 }, color: 'location-store', icon: '🛒' },
 
   // RIGHT SIDE (top to bottom)
-  // Monolith Burger -> Vannmolle m/hjul (x: 85-98%, y: 20-35%)
-  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 91.5, y: 27.5 }, size: { width: 13, height: 15 }, color: 'location-food', icon: '🍺' },
-  // QT Clothing -> Fjoslada/lagerbygning (x: 85-98%, y: 40-55%)
-  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 91.5, y: 47.5 }, size: { width: 13, height: 15 }, color: 'location-store', icon: '⚔️' },
-  // Socket City -> Stor herregard (x: 85-98%, y: 60-75%)
-  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 91.5, y: 67.5 }, size: { width: 13, height: 15 }, color: 'location-store', icon: '🔮' },
+  // Vannmolle m/hjul (x: 85-100%, y: 15-35%)
+  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 92, y: 25 }, size: { width: 16, height: 20 }, color: 'location-food', icon: '🍺' },
+  // Fjoslada/lagerbygning (x: 85-100%, y: 40-55%)
+  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 92, y: 47 }, size: { width: 16, height: 18 }, color: 'location-store', icon: '⚔️' },
+  // Stor herregard (x: 85-100%, y: 58-78%)
+  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 92, y: 68 }, size: { width: 16, height: 20 }, color: 'location-store', icon: '🔮' },
 
   // BOTTOM ROW (left to right)
-  // Factory -> Bindverk + "FACTORY" skilt (x: 0-12%, y: 75-90%)
-  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 6, y: 82.5 }, size: { width: 12, height: 15 }, color: 'location-work', icon: '🔨' },
-  // Employment Office -> "EMPLOYMENT OFFICE" skilt (x: 25-40%, y: 82-98%)
-  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 32.5, y: 90 }, size: { width: 15, height: 16 }, color: 'location-service', icon: '📜' },
-  // Hi-Tech U -> "REGAL" bygning (x: 65-78%, y: 82-98%)
-  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 71.5, y: 90 }, size: { width: 13, height: 16 }, color: 'location-service', icon: '🎓' },
+  // Factory bygning (x: 0-15%, y: 75-95%)
+  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 8, y: 85 }, size: { width: 16, height: 20 }, color: 'location-work', icon: '🔨' },
+  // Employment Office bygning (x: 22-42%, y: 78-98%) - STOR for å dekke hele bygning
+  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 32, y: 88 }, size: { width: 20, height: 22 }, color: 'location-service', icon: '📜' },
+  // REGAL/Academy bygning - byttet med bank (x: 62-80%, y: 78-98%)
+  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 71, y: 88 }, size: { width: 18, height: 22 }, color: 'location-service', icon: '🎓' },
 
   // LEFT SIDE (top to bottom)
-  // Black's Market -> Strahytte/cottage (x: 0-12%, y: 35-50%)
-  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 6, y: 42.5 }, size: { width: 12, height: 15 }, color: 'location-food', icon: '🥬' },
-  // Bank -> Stor bindverksbygning (x: 0-12%, y: 55-70%)
-  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 6, y: 62.5 }, size: { width: 12, height: 15 }, color: 'location-service', icon: '🏦' },
+  // Strahytte/cottage (x: 0-15%, y: 32-50%)
+  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 8, y: 42 }, size: { width: 16, height: 18 }, color: 'location-food', icon: '🥬' },
+  // Bank - stor bindverksbygning (x: 0-15%, y: 52-72%)
+  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 8, y: 62 }, size: { width: 16, height: 20 }, color: 'location-service', icon: '🏦' },
 ];
 
 // DEGREES - Fantasy themed education for Guild Life
