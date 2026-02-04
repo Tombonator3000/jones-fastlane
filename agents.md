@@ -1,131 +1,65 @@
-# Agents - Jones in the Fast Lane
+# Guild Life - Agent Instructions
 
-## Oversikt
+## Project Overview
+This is a fantasy adaptation of Jones in the Fast Lane. The game is a digital board game life simulator where players balance work, education, quests, and survival to achieve four goals: Wealth, Happiness, Education, and Career.
 
-Dette dokumentet beskriver AI-agentene i spillet og deres beslutningstaking.
+## Development Rules
 
----
+### Logging
+- Log ALL changes to `log.md` with timestamps
+- Format: `## YYYY-MM-DD HH:MM` followed by bullet points of changes
+- Include file names and brief descriptions
 
-## Jones AI (`useJonesAI.ts`)
+### Code Style
+- No emoji in code or documentation
+- No em dash characters
+- Use TypeScript strict mode
+- Prefer functional components in React
+- Use Zustand for state management
 
-Jones er den primære AI-motstanderen i spillet. Han tar automatiske beslutninger basert på spillets mål og sin nåværende tilstand.
+### Naming Conventions
+- AI opponent: "Grimwald" (not "Jones")
+- Use fantasy-themed names for all locations and NPCs
+- Keep variable names descriptive and in camelCase
 
-### Beslutningslogikk
-
-Jones bruker en prioritetsbasert beslutningsmodell:
-
-#### 1. Nødsituasjoner (Høyest prioritet)
-- **Betale husleie** - Hvis husleie er forfalt
-- **Kjøpe mat** - Hvis Jones sulter (food <= 1 og ingen fast food)
-
-#### 1.5 Kritisk Happiness (NY!)
-- **Kjøpe appliances** - Hvis happiness < 15 og har penger
-  - Prioriterer items med høyest happiness-bonus
-  - Fallback: Kjøper deluxe meal for happiness
-- **Flytte til security** - Hvis happiness < 20, bor i low-cost og har items
-
-#### 2. Jobbsøking og oppgradering
-- Hvis Jones ikke har jobb, søker han etter beste tilgjengelige jobb
-- Kjøper klær hvis nødvendig for å kvalifisere til jobber
-- **Søker etter bedre jobb** når kvalifisert (NY!)
-- **Kjøper klær** som åpner for bedre jobber (NY!)
-
-#### 3. Arbeid
-- Arbeider når han trenger penger og har jobb
-- Prioriterer arbeid over studier når formue-fremgang er lav
-
-#### 4. Utdanning
-- Melder seg på kurs ved Hi-Tech U
-- Studerer eksisterende kurs
-- Prioriterer utdanning når karriere-fremgang er lav
-
-#### 5. Oppgraderinger
-- Kjøper bedre klær for høyere jobber
-- Kjøper elektronikk for lykke
-- Kjøper kjøleskap for matlagring
-
-#### 6. Banking
-- Setter inn overskuddspenger i banken
-
-### Prioritetsberegning
-
-```typescript
-const priority = {
-  needsWealth: wealthProgress < 100,
-  needsHappiness: happinessProgress < 100,
-  needsEducation: educationProgress < 100,
-  needsCareer: careerProgress < 100,
-  lowestProgress: Math.min(all_progresses)
-};
+### File Organization
+```
+src/
+  components/    # React components
+  systems/       # Game logic (TimeSystem, EconomySystem, etc.)
+  store/         # Zustand stores
+  data/          # JSON game data
+  types/         # TypeScript type definitions
+  utils/         # Helper functions
+  hooks/         # Custom React hooks
 ```
 
-### Tilgjengelige handlinger
+### Key Mechanics to Preserve
+1. Turn-based (1 turn = 1 week)
+2. Time budget per turn (168 hours)
+3. Rent due every 4 weeks
+4. Clothing/equipment degrades every 8 weeks
+5. Dynamic economy with price fluctuations
+6. Four-goal victory system (Wealth, Happiness, Education, Career)
+7. Hot-seat multiplayer support
 
-| Handling | Beskrivelse |
-|----------|-------------|
-| `MOVE_TO_LOCATION` | Flytt til en lokasjon |
-| `WORK` | Arbeid X timer |
-| `STUDY` | Studer et fag |
-| `BUY_FAST_FOOD` | Kjøp hurtigmat |
-| `BUY_FRESH_FOOD` | Kjøp fersk mat |
-| `BUY_CLOTHES` | Kjøp klær |
-| `BUY_APPLIANCE` | Kjøp elektronikk |
-| `APPLY_FOR_JOB` | Søk på jobb |
-| `ENROLL_DEGREE` | Meld deg på kurs |
-| `DEPOSIT_MONEY` | Sett inn penger |
-| `PAY_RENT` | Betal husleie |
-| `END_TURN` | Avslutt uke |
+### Priority Order
+1. Core game loop (time, movement, basic actions)
+2. Economy (money, rent, prices)
+3. Jobs and work system
+4. Education system
+5. Goal tracking and victory
+6. Quest system
+7. Events and random encounters
+8. Multiplayer and AI opponent
+9. Polish and animations
 
----
+### Testing
+- Write tests for game systems (not UI)
+- Test economic balance
+- Test win conditions
 
-## Fremtidige AI-forbedringer
-
-### Implementert (2026-02-01)
-- [x] Kritisk happiness-håndtering
-- [x] Jobboppgradering logikk
-- [x] Klesoppgradering for karriere
-- [x] Security apartment-vurdering
-- [x] Wild Willy balansering (10% istedenfor 25%)
-
-### Planlagt
-- [ ] Vanskelighetsgrader (Easy/Medium/Hard)
-- [ ] Tilpassing til spillerens strategi
-- [ ] Aksjehandel-strategi
-- [ ] Lotteri-strategi
-
-### Vanskelighetsgrader (planlagt)
-- **Easy**: Jones tar tilfeldige valg
-- **Medium**: Standard prioritetsbasert (nåværende)
-- **Hard**: Optimal strategi med langsiktig planlegging
-
----
-
-## Teknisk implementasjon
-
-### Hook-struktur
-```typescript
-export function useJonesAI() {
-  const decideNextAction = useCallback(
-    (player: Player, goals: GameGoals, rentDue: boolean, economyIndex: number): AIDecision[] => {
-      // Returnerer liste med beslutninger
-    },
-    []
-  );
-
-  return { decideNextAction };
-}
-```
-
-### AIDecision Interface
-```typescript
-interface AIDecision {
-  action: string;           // Handlingstype
-  params?: Record<string, unknown>;  // Parametere
-  delay: number;            // Forsinkelse i ms (for animasjon)
-  message: string;          // Melding til spiller
-}
-```
-
----
-
-*Sist oppdatert: 2026-02-01*
+### When in Doubt
+- Refer to `guild-life-complete-spec.md` for detailed mechanics
+- Keep the Jones in the Fast Lane feel: accessible, competitive, funny
+- Prioritize playability over complexity

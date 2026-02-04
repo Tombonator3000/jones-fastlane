@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-02-04 15:45 - Updated agents.md
+
+### Oppgave
+Oppdatere agents.md med nye Guild Life agent instructions.
+
+### Endringer
+- `agents.md` - Fullstendig erstattet innhold med nye Guild Life agent instructions
+  - Project overview (fantasy adaptation of Jones in the Fast Lane)
+  - Development rules: Logging, Code Style, Naming Conventions
+  - File organization structure
+  - Key mechanics to preserve (turn-based, time budget, rent, economy, etc.)
+  - Priority order for development (1-9)
+  - Testing guidelines
+  - Reference to guild-life-complete-spec.md
+
+---
+
 ## 2026-02-04 - Guild Life Conversion (Fantasy Theme)
 
 ### Oppgave
