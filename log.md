@@ -2,6 +2,32 @@
 
 ---
 
+## 2026-02-04 - Ny middelalder spillbrett-bakgrunn
+
+### Oppgave
+Bytte ut gammel bakgrunn med ny middelalder-tematisert bakgrunn og oppdatere header-tekst.
+
+### Endringer
+
+#### 1. Ny spillbrett-bakgrunn
+- `src/assets/game-board.jpg` - Erstattet med nytt middelalder-tematisert bilde
+  - Viser en fantasy landsby med bygninger rundt en sentral plass
+  - Bygninger inkluderer: slott, vannmolle, smedje, taverna, marked, mm.
+  - Skilter synlige: "FACTORY", "EMPLOYMENT OFFICE", "REGAL"
+
+#### 2. Header-tekst oppdatert
+- `src/components/game/GameBoard.tsx:67` - Endret fra "JONES IN THE FAST LANE" til "GUILD LIFE"
+
+### Filer endret
+- `src/assets/game-board.jpg` - Ny bakgrunn
+- `src/components/game/GameBoard.tsx` - Header-tekst
+- `log.md` - Denne loggen
+
+### Build-status
+Venter pa verifisering
+
+---
+
 ## 2026-02-04 - Quest System og Health Implementation (Phase 2)
 
 ### Oppgave
