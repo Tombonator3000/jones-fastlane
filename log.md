@@ -2,35 +2,55 @@
 
 ---
 
-## 2026-02-04 21:15 - Hotspots justert til faktiske bygningsposisjoner
+## 2026-02-04 22:00 - ENDELIG FIX: Hotspots basert på røde sonelinjer
 
 ### Oppgave
-Hotspots (gule rammer) var langt utenfor bygningene. Brukeren viste skjermbilde der rammene ikke matchet husene.
+Hotspots var fortsatt langt utenfor husene. Bruker viste annotert bilde (Bakgrunn2-4.jpeg) med røde linjer som deler brettet i eksakte soner.
 
-### Analyse
-Problemet var at koordinatene var kalkulert som om brettet startet ved x:0, y:0, men spillbrettet har morke kanter rundt. De faktiske bygningene er INNE pa brettet.
+### Analyse av røde sonelinjer i bildet
+Brettet har hvit firkant i midten. Bygninger ligger i sonene rundt:
 
-### Endringer
-Alle 13 lokasjoner justert med nye koordinater:
+**Topprad (y: 0-22%):**
+- Noble Heights: x 0-10%
+- Landlord Office: x 13-24%
+- The Slums: x 30-48%
+- The Fence: x 50-66%
+- Shadow Market: x 74-90%
 
-| Lokasjon | Ny pos. (x,y) | Ny storrelse |
-|----------|---------------|--------------|
-| Noble Heights | 14, 14 | 10x15% |
-| Landlord Office | 24, 12 | 8x12% |
-| The Slums | 40, 11 | 16x14% |
-| The Fence | 58, 11 | 14x14% |
-| Shadow Market | 76, 12 | 16x14% |
-| Rusty Tankard | 88, 26 | 10x16% |
-| Armory | 88, 50 | 10x18% |
-| Enchanter | 88, 74 | 10x18% |
-| The Forge | 17, 88 | 14x14% |
-| Guild Hall | 37, 86 | 16x16% |
-| Academy | 62, 86 | 18x16% |
-| General Store | 14, 35 | 10x16% |
-| Guildholm Bank | 16, 58 | 12x18% |
+**Høyreside (x: 88-100%):**
+- Rusty Tankard: y 22-42%
+- Armory: y 42-62%
+- Enchanter: y 78-100%
+
+**Bunnrad (y: 65-100%):**
+- The Forge: x 0-14%
+- Guild Hall: x 24-44%
+- Academy: x 52-74%
+
+**Venstreside (x: 0-16%):**
+- General Store: y 24-42%
+- Guildholm Bank: y 46-66%
+
+### Nye koordinater (senter + størrelse)
+
+| Lokasjon | x | y | width | height |
+|----------|---|---|-------|--------|
+| Noble Heights | 5 | 11 | 10 | 22 |
+| Landlord Office | 18.5 | 11 | 11 | 22 |
+| The Slums | 39 | 11 | 18 | 22 |
+| The Fence | 58 | 11 | 16 | 22 |
+| Shadow Market | 82 | 11 | 16 | 22 |
+| Rusty Tankard | 94 | 32 | 12 | 20 |
+| Armory | 94 | 52 | 12 | 20 |
+| Enchanter | 94 | 89 | 12 | 22 |
+| The Forge | 7 | 85 | 14 | 30 |
+| Guild Hall | 34 | 85 | 20 | 30 |
+| Academy | 63 | 85 | 22 | 30 |
+| General Store | 8 | 33 | 16 | 18 |
+| Guildholm Bank | 8 | 56 | 16 | 20 |
 
 ### Filer endret
-- `src/types/game.ts` - LOCATIONS array med presise koordinater
+- `src/types/game.ts` - LOCATIONS med presise koordinater fra røde soner
 - `log.md` - Denne loggen
 
 ---
