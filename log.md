@@ -2,6 +2,63 @@
 
 ---
 
+## 2026-02-04 19:30 - Spillbrett soneinndeling
+
+### Oppgave
+Justere lokasjonssonene slik at de matcher det annoterte referansebildet med rode sonelinjer.
+
+### Analyse av bildet
+Basert pa brukerens annoterte bilde med rode sonelinjer, identifiserte jeg folgende sonegrenser:
+
+**Topp rad (y: 0-24%):**
+- Noble: x 0-14%
+- Land Lord: x 14-28%
+- Slums: x 28-52%
+- Fence: x 52-68%
+- Shadow Market: x 68-85%
+
+**Venstre side (x: 0-14%):**
+- General Store: y 24-48%
+- Bank: y 48-72%
+- Forge: y 72-100%
+
+**Hoyre side (x: 86-100%):**
+- Rusty Tankard: y 24-48%
+- Armory: y 48-72%
+- Enchanter: y 72-100%
+
+**Bunn rad (y: 72-100%):**
+- Guild Hall: x 22-46%
+- Academy: x 54-78%
+
+### Endringer
+Fullstendig oppdatert LOCATIONS array med presise koordinater basert pa bildeanalyse:
+
+| Lokasjon | Gammel pos. (x,y) | Ny pos. (x,y) | Ny storrelse |
+|----------|-------------------|---------------|--------------|
+| Noble Heights | 5, 12 | 7, 12 | 14x24% |
+| Landlord Office | 23, 12 | 21, 12 | 14x24% |
+| The Slums | 40, 12 | 40, 12 | 24x24% |
+| The Fence | 59, 12 | 60, 12 | 16x24% |
+| Shadow Market | 74, 12 | 76.5, 12 | 17x24% |
+| Rusty Tankard | 92, 36 | 93, 36 | 14x24% |
+| Armory | 92, 59 | 93, 60 | 14x24% |
+| Enchanter | 92, 88 | 93, 86 | 14x28% |
+| The Forge | 6, 88 | 7, 86 | 14x28% |
+| Guild Hall | 35, 88 | 34, 86 | 24x28% |
+| Academy | 65, 88 | 66, 86 | 24x28% |
+| General Store | 6, 36 | 7, 36 | 14x24% |
+| Guildholm Bank | 6, 59 | 7, 60 | 14x24% |
+
+### Filer endret
+- `src/types/game.ts` - LOCATIONS array med oppdaterte koordinater
+- `log.md` - Denne loggen
+
+### Build-status
+Build vellykket (npm run build)
+
+---
+
 ## 2026-02-04 18:00 - Senterpanel dekker hvit flate
 
 ### Oppgave
