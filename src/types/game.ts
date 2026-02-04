@@ -194,53 +194,52 @@ export interface GameGoals {
 }
 
 // Positions match the medieval game board image (percentage based)
-// Updated 2026-02-04: Coordinates adjusted to match actual building positions
-// The game board image has dark borders - buildings are INSIDE the board area
-// Board area: approximately x:9-91%, y:5-95% of the container
-// X/Y er SENTER av hotspot, width/height er total storrelse
+// Updated 2026-02-04: Koordinater basert på røde sonelinjer i Bakgrunn2-4.jpeg
+// Brettet er delt inn i klare soner rundt den hvite midtflaten
+// Koordinatene bruker SENTER (x,y) og TOTAL størrelse (width,height)
 export const LOCATIONS: Location[] = [
-  // ========== TOP ROW (left to right) ==========
-  // Noble Heights - Castle with tower (top-left corner)
-  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 14, y: 14 }, size: { width: 10, height: 15 }, color: 'location-apartment', icon: '🏰' },
+  // ========== TOP ROW (y: 0-22%) ==========
+  // Noble Heights - Castle (øvre venstre, x: 0-10%)
+  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 5, y: 11 }, size: { width: 10, height: 22 }, color: 'location-apartment', icon: '🏰' },
 
-  // Landlord Office - Round stone tower (next to castle)
-  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 24, y: 12 }, size: { width: 8, height: 12 }, color: 'location-service', icon: '🔑' },
+  // Landlord Office - Tower (x: 13-24%)
+  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 18.5, y: 11 }, size: { width: 11, height: 22 }, color: 'location-service', icon: '🔑' },
 
-  // The Slums - Half-timbered buildings with striped awnings (top center-left)
-  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 40, y: 11 }, size: { width: 16, height: 14 }, color: 'location-apartment', icon: '🏚️' },
+  // The Slums - Buildings with awnings (x: 30-48%)
+  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 39, y: 11 }, size: { width: 18, height: 22 }, color: 'location-apartment', icon: '🏚️' },
 
-  // The Fence - Market stall area (top center-right)
-  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 58, y: 11 }, size: { width: 14, height: 14 }, color: 'location-service', icon: '💎' },
+  // The Fence - Market stall (x: 50-66%)
+  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 58, y: 11 }, size: { width: 16, height: 22 }, color: 'location-service', icon: '💎' },
 
-  // Shadow Market - Buildings in top-right area
-  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 76, y: 12 }, size: { width: 16, height: 14 }, color: 'location-food', icon: '🥬' },
+  // Shadow Market - Buildings (x: 74-90%)
+  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 82, y: 11 }, size: { width: 16, height: 22 }, color: 'location-food', icon: '🥬' },
 
-  // ========== RIGHT SIDE (top to bottom) ==========
-  // Rusty Tankard - Watermill with wheel (right side, upper)
-  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 88, y: 26 }, size: { width: 10, height: 16 }, color: 'location-food', icon: '🍺' },
+  // ========== RIGHT SIDE (x: 88-100%) ==========
+  // Rusty Tankard - Watermill (y: 22-42%)
+  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 94, y: 32 }, size: { width: 12, height: 20 }, color: 'location-food', icon: '🍺' },
 
-  // Armory - FACTORY building (right side, middle)
-  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 88, y: 50 }, size: { width: 10, height: 18 }, color: 'location-store', icon: '⚔️' },
+  // Armory - Factory building (y: 42-62%)
+  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 94, y: 52 }, size: { width: 12, height: 20 }, color: 'location-store', icon: '⚔️' },
 
-  // Enchanter - Forge with fire glow (right side, lower)
-  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 88, y: 74 }, size: { width: 10, height: 18 }, color: 'location-store', icon: '🔮' },
+  // Enchanter - Forge building (y: 78-100%)
+  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 94, y: 89 }, size: { width: 12, height: 22 }, color: 'location-store', icon: '🔮' },
 
-  // ========== BOTTOM ROW (left to right) ==========
-  // The Forge - FACTORY building (bottom-left)
-  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 17, y: 88 }, size: { width: 14, height: 14 }, color: 'location-work', icon: '🔨' },
+  // ========== BOTTOM ROW (y: 65-100%) ==========
+  // The Forge - Factory (x: 0-14%)
+  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 7, y: 85 }, size: { width: 14, height: 30 }, color: 'location-work', icon: '🔨' },
 
-  // Guild Hall - EMPLOYMENT OFFICE building (bottom center-left)
-  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 37, y: 86 }, size: { width: 16, height: 16 }, color: 'location-service', icon: '📜' },
+  // Guild Hall - Employment Office (x: 24-44%)
+  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 34, y: 85 }, size: { width: 20, height: 30 }, color: 'location-service', icon: '📜' },
 
-  // Academy - REGAL building (bottom center-right)
-  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 62, y: 86 }, size: { width: 18, height: 16 }, color: 'location-service', icon: '🎓' },
+  // Academy - Regal building (x: 52-74%)
+  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 63, y: 85 }, size: { width: 22, height: 30 }, color: 'location-service', icon: '🎓' },
 
-  // ========== LEFT SIDE (top to bottom) ==========
-  // General Store - Cottage with thatched roof (left side, upper)
-  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 14, y: 35 }, size: { width: 10, height: 16 }, color: 'location-store', icon: '🛒' },
+  // ========== LEFT SIDE (x: 0-16%) ==========
+  // General Store - Cottage (y: 24-42%)
+  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 8, y: 33 }, size: { width: 16, height: 18 }, color: 'location-store', icon: '🛒' },
 
-  // Guildholm Bank - Large building (left side, lower)
-  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 16, y: 58 }, size: { width: 12, height: 18 }, color: 'location-service', icon: '🏦' },
+  // Guildholm Bank - Large building (y: 46-66%)
+  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 8, y: 56 }, size: { width: 16, height: 20 }, color: 'location-service', icon: '🏦' },
 ];
 
 // DEGREES - Fantasy themed education for Guild Life
