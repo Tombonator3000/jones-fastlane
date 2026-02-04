@@ -29,11 +29,12 @@ export function GameBoard({
 
   return (
     <div
-      className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-lg overflow-hidden"
+      className="relative w-full h-full rounded-lg overflow-hidden"
       style={{
         backgroundImage: `url(${gameBoardImage})`,
-        backgroundSize: 'cover',
+        backgroundSize: 'contain',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
       }}
     >
       {/* Center panel - shows location menu or game status */}

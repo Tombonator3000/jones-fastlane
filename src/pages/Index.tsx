@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { GameProvider, useGame } from '@/contexts/GameContext';
 import { GameBoard } from '@/components/game/GameBoard';
-import { PlayerStats } from '@/components/game/PlayerStats';
+import { TopBar } from '@/components/game/TopBar';
+import { CharacterSheet } from '@/components/game/CharacterSheet';
 import { GameSetup } from '@/components/game/GameSetup';
 import { WeekendEventDialog } from '@/components/game/WeekendEventDialog';
 import { WildWillyDialog } from '@/components/game/WildWillyDialog';
@@ -19,6 +20,7 @@ function GameContent() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showWeekendEvent, setShowWeekendEvent] = useState(false);
   const [showWildWilly, setShowWildWilly] = useState(false);
+  const [showCharacterSheet, setShowCharacterSheet] = useState(false);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [isAiTurn, setIsAiTurn] = useState(false);
   const [pendingEndTurn, setPendingEndTurn] = useState(false);
@@ -230,95 +232,75 @@ function GameContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.header
-          className="text-center mb-6"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="font-pixel text-xl md:text-2xl text-primary title-text">
-            GUILD LIFE
-          </h1>
-        </motion.header>
+    <div className="fullscreen-game-container">
+      {/* Top Bar */}
+      <TopBar onPlayerClick={() => setShowCharacterSheet(true)} />
 
-        {/* Main game layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Player Stats Sidebar */}
-          <motion.div
-            className="lg:col-span-1 order-2 lg:order-1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <PlayerStats />
-            
-            {/* End Turn Button */}
-            <Button
-              className="pixel-button w-full mt-4 bg-accent hover:bg-accent/90"
-              onClick={handleEndTurn}
-              disabled={isAiTurn || isAnimating || pendingEndTurn}
-            >
-              {isAiTurn ? 'GRIMWALD PLAYS...' : pendingEndTurn ? 'GOING HOME...' : isAnimating ? 'MOVING...' : 'END WEEK'}
-            </Button>
+      {/* Fullscreen Game Board */}
+      <div className="fullscreen-game-board">
+        <GameBoard
+          onLocationClick={handleLocationClick}
+          selectedLocation={selectedLocation}
+          onCloseLocation={() => setSelectedLocation(null)}
+          movementAnimation={currentAnimation}
+          onAnimationComplete={completeAnimation}
+        />
+      </div>
 
-            {/* AI Message */}
-            {aiMessage && (
-              <motion.div
-                className="mt-4 bg-primary/20 border border-primary rounded-lg p-3"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <p className="font-pixel text-xs text-primary text-center">
-                  🤖 {aiMessage}
-                </p>
-              </motion.div>
-            )}
-
-            {/* Rent Warning */}
-            {state.rentDue && (
-              <motion.div
-                className="mt-4 bg-destructive/20 border border-destructive rounded-lg p-3"
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ repeat: Infinity, duration: 1 }}
-              >
-                <p className="font-pixel text-xs text-destructive text-center">
-                  ⚠️ RENT DUE!
-                </p>
-              </motion.div>
-            )}
-          </motion.div>
-
-          {/* Game Board */}
-          <motion.div
-            className="lg:col-span-3 order-1 lg:order-2"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <GameBoard
-              onLocationClick={handleLocationClick}
-              selectedLocation={selectedLocation}
-              onCloseLocation={() => setSelectedLocation(null)}
-              movementAnimation={currentAnimation}
-              onAnimationComplete={completeAnimation}
-            />
-            
-            {/* Quick info bar */}
-            <div className="mt-4 flex flex-wrap justify-center gap-4 bg-card/50 rounded-lg p-3 pixel-border">
-              <span className="game-text">
-                📅 Week {state.week} • Month {state.month}
-              </span>
-              <span className="game-text text-muted-foreground">
-                Current: {LOCATIONS.find(l => l.id === player?.currentLocation)?.name || 'Unknown'}
-              </span>
-            </div>
-          </motion.div>
+      {/* Bottom Bar */}
+      <div className="bottom-bar">
+        {/* Left side: Week/Month info */}
+        <div className="bottom-bar-info">
+          <span className="game-text">
+            📅 Week {state.week} - Month {state.month}
+          </span>
+          <span className="game-text text-muted-foreground">
+            Current: {LOCATIONS.find(l => l.id === player?.currentLocation)?.name || 'Unknown'}
+          </span>
         </div>
+
+        {/* Center: AI Message or Rent Warning */}
+        <div className="bottom-bar-messages">
+          {aiMessage && (
+            <motion.div
+              className="ai-message"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <span className="font-pixel text-xs text-primary">
+                🧙 {aiMessage}
+              </span>
+            </motion.div>
+          )}
+          {state.rentDue && !aiMessage && (
+            <motion.div
+              className="rent-warning"
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ repeat: Infinity, duration: 1 }}
+            >
+              <span className="font-pixel text-xs text-destructive">
+                ⚠️ RENT DUE!
+              </span>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Right side: End Week Button */}
+        <Button
+          className="pixel-button bg-accent hover:bg-accent/90 end-week-button"
+          onClick={handleEndTurn}
+          disabled={isAiTurn || isAnimating || pendingEndTurn}
+        >
+          {isAiTurn ? 'GRIMWALD PLAYS...' : pendingEndTurn ? 'GOING HOME...' : isAnimating ? 'MOVING...' : 'END WEEK'}
+        </Button>
       </div>
 
       {/* Dialogs */}
+      <CharacterSheet
+        open={showCharacterSheet}
+        onClose={() => setShowCharacterSheet(false)}
+      />
+
       <WeekendEventDialog
         open={showWeekendEvent}
         onClose={() => {
