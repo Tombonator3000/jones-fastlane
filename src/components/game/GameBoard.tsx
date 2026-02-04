@@ -37,15 +37,15 @@ export function GameBoard({
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Center panel - covers the entire white square in the middle of the board */}
-      {/* Position: roughly 13-87% horizontally, 24-76% vertically based on board layout */}
+      {/* Center panel - covers the white square in the middle of the board */}
+      {/* Based on reference image: the center area is roughly 35-65% horizontally, 32-68% vertically */}
       <div 
         className="absolute z-20 flex items-center justify-center"
         style={{
-          left: '13%',
-          top: '24%',
-          width: '74%',
-          height: '52%',
+          left: '35%',
+          top: '32%',
+          width: '30%',
+          height: '36%',
         }}
       >
         <AnimatePresence mode="wait">
