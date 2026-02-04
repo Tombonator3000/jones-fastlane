@@ -18,6 +18,12 @@ Bytte ut gammel bakgrunn med ny middelalder-tematisert bakgrunn og oppdatere hea
 #### 2. Header-tekst oppdatert
 - `src/components/game/GameBoard.tsx:67` - Endret fra "JONES IN THE FAST LANE" til "GUILD LIFE"
 
+#### 3. Lokasjon-posisjoner justert
+- `src/types/game.ts:196-220` - Oppdatert LOCATIONS array med nye koordinater
+  - Topp rad: Noble Heights (8,10), Landlord (22,8), Slums (35,8), Fence (50,8), Tavern (64,8), Armory (78,8), Store (92,10)
+  - Hoyre side: Enchanter (92,38), Forge (92,60)
+  - Bunn rad: Shadow Market (8,92), Guild Hall (35,92), Bank (58,92), Academy (82,92)
+
 ### Filer endret
 - `src/assets/game-board.jpg` - Ny bakgrunn
 - `src/components/game/GameBoard.tsx` - Header-tekst
