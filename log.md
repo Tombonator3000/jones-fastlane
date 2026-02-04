@@ -2,13 +2,39 @@
 
 ---
 
-## 2026-02-04 16:30 - Hotspot-posisjoner justert basert pa annotert bilde
+## 2026-02-04 17:00 - Fikset Shadow Market posisjon og senterpanel storrelse
 
 ### Oppgave
-Justere alle 13 lokasjons-hotspots til a dekke riktige bygninger basert pa brukerens annoterte bilde (Bakgrunn2-2.jpeg) med rode soner.
+1. Shadow Market hotspot var utenfor spillbrettet (x: 92% - for langt til hoyre)
+2. Senterpanelet dekket bare en liten del av den hvite firkanten i midten
+3. Klikk pa Shadow Market apnet General Store (feil)
 
-### Analyse av annotert bilde
-Bildet viser brettet delt inn i rode soner med bla tekst som indikerer hvor hver lokasjon skal vaere:
+### Endringer
+
+#### 1. Shadow Market posisjon fikset (`src/types/game.ts:218-220`)
+- Flyttet fra x: 92% til x: 74% (inne pa brettet, ovre hoyre hjorne)
+- Redusert bredde fra 16% til 12%
+- Naa dekker hotspot hytta med royken i ovre hoyre
+
+#### 2. Senterpanel dekker hele den hvite firkanten (`src/components/game/GameBoard.tsx:40-95`)
+- Senterpanel naa posisjonert med absolutte prosent-verdier:
+  - left: 13%, top: 24%, width: 74%, height: 52%
+- Disse verdiene matcher den hvite firkanten i midten av spillbrettet
+- LocationMenu fyller naa hele panelet
+
+#### 3. CSS oppdatert for full-storrelse panel (`src/index.css:217-233`)
+- Fjernet min-width: 300px, max-width: 360px, max-height: 420px
+- La til width: 100%, height: 100% for a fylle container
+
+### Filer endret
+- `src/types/game.ts` - Shadow Market posisjon
+- `src/components/game/GameBoard.tsx` - Senterpanel storrelse
+- `src/index.css` - LocationMenu CSS
+- `log.md` - Denne loggen
+
+---
+
+## 2026-02-04 16:30 - Hotspot-posisjoner justert basert pa annotert bilde
 
 **Top row (venstre til hoyre):**
 - Noble (slott) - x: 0-10%

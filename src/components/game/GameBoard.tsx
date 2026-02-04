@@ -37,8 +37,17 @@ export function GameBoard({
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Center panel - shows location menu or game status */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+      {/* Center panel - covers the entire white square in the middle of the board */}
+      {/* Position: roughly 13-87% horizontally, 24-76% vertically based on board layout */}
+      <div 
+        className="absolute z-20 flex items-center justify-center"
+        style={{
+          left: '13%',
+          top: '24%',
+          width: '74%',
+          height: '52%',
+        }}
+      >
         <AnimatePresence mode="wait">
           {selectedLocation ? (
             <motion.div
@@ -47,6 +56,7 @@ export function GameBoard({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
+              className="w-full h-full flex items-center justify-center"
             >
               <LocationMenu
                 location={selectedLocation}
@@ -60,14 +70,14 @@ export function GameBoard({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="location-menu-panel text-center"
+              className="location-menu-panel text-center w-full h-full flex flex-col items-center justify-center"
             >
-              <div className="location-menu-header">
+              <div className="location-menu-header w-full">
                 <h2 className="font-pixel text-[10px] md:text-xs text-[#f5f0e6]">
                   GUILD LIFE
                 </h2>
               </div>
-              <div className="location-menu-content">
+              <div className="location-menu-content flex-1 flex flex-col items-center justify-center">
                 <p className="text-[#4a4a5a] text-sm">Week {state.week} • Month {state.month}</p>
                 {currentPlayer && (
                   <>
