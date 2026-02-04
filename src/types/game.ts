@@ -37,6 +37,9 @@ export interface Player {
   // Guild Life additions
   guildRank: GuildRank;
   completedQuests: string[];
+  // Health system
+  health: number;
+  maxHealth: number;
 }
 
 export interface PawnedItem {
@@ -581,6 +584,9 @@ export function createInitialPlayer(id: string, name: string, avatar: string): P
     // Guild Life additions
     guildRank: 'novice',
     completedQuests: [],
+    // Health system
+    health: 100,
+    maxHealth: 100,
   };
 }
 

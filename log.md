@@ -2,6 +2,79 @@
 
 ---
 
+## 2026-02-04 - Quest System og Health Implementation (Phase 2)
+
+### Oppgave
+Implementere nye systemer for Guild Life: Quest System, Guild Rank Progression, og Health System.
+
+### Endringer
+
+#### 1. Fikset gjenstaende Jones-referanser
+- `src/index.css:7` - Endret kommentar fra "Jones in the Fast Lane" til "Guild Life"
+- `src/pages/Index.tsx:142` - Endret kommentar fra "Jones' turn" til "Grimwald's turn"
+
+#### 2. Ny QuestBoard-komponent (`src/components/game/QuestBoard.tsx`)
+- Quest Board UI med rank-fargekoding (E-S rank)
+- Guild Rank visning med progress mot neste rank
+- Quest selection modal med detaljer (tid, belonning, risiko)
+- Rank Up-knapp nar spilleren kvalifiserer
+- Integrert med useQuests hook for quest-data
+
+#### 3. Health System
+- Lagt til `health` og `maxHealth` felter i Player interface (`src/types/game.ts`)
+- Initialisert health til 100/100 i `createInitialPlayer`
+- Quest failure gir damage (reduserer health)
+- Health vises i Guild Hall stats
+
+#### 4. Nye Game Actions (`src/contexts/GameContext.tsx`)
+- `COMPLETE_QUEST` - Fullforer quest, gir gold, tar skade ved failure
+- `RANK_UP` - Forfremmer spilleren til neste guild rank
+- `HEAL` - Healer spilleren mot en kostnad
+
+#### 5. Quest Completion Logic
+- Time cost trekkes fra hoursRemaining
+- Damage trekkes fra health ved quest failure
+- Success gir +3 happiness, +5 experience
+- Failure gir -2 happiness, +1 experience
+- Partial reward (25%) ved failure
+
+#### 6. Rank Up System
+- Rank up gir +10 happiness og +15 career points
+- Newspaper message annonserer forfremming
+- Rank order: novice -> apprentice -> journeyman -> adept -> veteran -> elite -> guildmaster
+
+#### 7. Healing i Rusty Tankard (`src/components/game/LocationMenu.tsx`)
+- "Healer's Corner" seksjon vises nar health < maxHealth
+- "Rest & Ale" healer 25 HP for 20g (economy-adjusted)
+- "Full Healing" healer til max HP for 50g (economy-adjusted)
+- HP-status vises i healing UI
+
+#### 8. Guild Hall Integration
+- QuestBoard integrert i guild-hall case
+- HP vises i stats-linjen (Exp | Dep | HP)
+- ScrollArea redusert for a gi plass til Quest Board
+
+### Filer endret
+- `src/index.css` - Oppdatert kommentar
+- `src/pages/Index.tsx` - Oppdatert kommentar
+- `src/types/game.ts` - Lagt til health/maxHealth i Player
+- `src/contexts/GameContext.tsx` - Lagt til COMPLETE_QUEST, RANK_UP, HEAL actions
+- `src/components/game/QuestBoard.tsx` - NY fil
+- `src/components/game/LocationMenu.tsx` - Integrert QuestBoard, lagt til healing
+- `src/hooks/useQuests.ts` - Allerede implementert (13 quest templates)
+
+### Build-status
+Build vellykket (npm run build)
+
+### Neste steg
+- [ ] Equipment system (vapen, rustning)
+- [ ] Flere quest-typer (escort, dungeon, fetch)
+- [ ] Multi-stage quests
+- [ ] The Deep Dungeon (endgame)
+- [ ] Fantasy-themed UI farger
+
+---
+
 ## 2026-02-04 15:45 - Updated agents.md
 
 ### Oppgave

@@ -139,7 +139,7 @@ function GameContent() {
     }, nextAction.delay);
   }, [dispatch, getCurrentPlayer, startMovement, queueAutoGoHome]);
 
-  // Trigger AI turn when it's Jones' turn
+  // Trigger AI turn when it's Grimwald's turn
   useEffect(() => {
     if (isGrimwaldPlaying && state.isGameStarted && !state.isGameOver && !isAiTurn && !showWeekendEvent && !showWildWilly) {
       // Small delay before AI starts thinking
