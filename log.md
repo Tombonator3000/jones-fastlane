@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-02-04 17:30 - Senterpanel justert til riktig storrelse
+
+### Oppgave
+Senterpanelet gikk langt utenfor den hvite firkanten midt pa brettet. Skulle matche Jones in the Fast Lane layout.
+
+### Endringer
+
+#### Senterpanel storrelse korrigert (`src/components/game/GameBoard.tsx:40-50`)
+- Endret fra for stort omrade (left: 13%, width: 74%, top: 24%, height: 52%)
+- Justert til den faktiske hvite firkanten pa brettet:
+  - left: 35%, top: 32%, width: 30%, height: 36%
+- Na matcher panelet det synlige hvite omradet i midten
+
+### Filer endret
+- `src/components/game/GameBoard.tsx` - Senterpanel dimensjoner
+- `log.md` - Denne loggen
+
+---
+
 ## 2026-02-04 17:00 - Fikset Shadow Market posisjon og senterpanel storrelse
 
 ### Oppgave
