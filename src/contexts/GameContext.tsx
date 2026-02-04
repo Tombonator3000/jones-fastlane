@@ -6,6 +6,7 @@ import {
   Job,
   WeekendEvent,
   WildWillyEvent,
+  GuildRank,
   createInitialPlayer,
   createInitialGameState,
   WEEKEND_EVENTS,
@@ -66,7 +67,11 @@ type GameAction =
   | { type: 'DOCTOR_VISIT'; cost: number }
   | { type: 'PROCESS_LOTTERY' }
   | { type: 'MARKET_CRASH'; severity: 'minor' | 'moderate' | 'major' }
-  | { type: 'ECONOMIC_BOOM'; severity: 'minor' | 'moderate' | 'major' };
+  | { type: 'ECONOMIC_BOOM'; severity: 'minor' | 'moderate' | 'major' }
+  // Guild Life quest system
+  | { type: 'COMPLETE_QUEST'; questId: string; success: boolean; goldEarned: number; damage: number; timeCost: number }
+  | { type: 'RANK_UP' }
+  | { type: 'HEAL'; amount: number; cost: number };
 
 function calculateDistance(from: string, to: string): number {
   // Simplified distance calculation - each move costs 1 hour
@@ -1036,6 +1041,94 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'CLEAR_WILD_WILLY_EVENT': {
       return { ...state, wildWillyEvent: null };
+    }
+
+    // ===== Guild Life Quest System =====
+    case 'COMPLETE_QUEST': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      // Apply time cost
+      const newHours = Math.max(0, currentPlayer.hoursRemaining - action.timeCost);
+
+      // Apply damage (reduce health)
+      const newHealth = Math.max(0, currentPlayer.health - action.damage);
+
+      // Update completed quests if successful
+      const newCompletedQuests = action.success
+        ? [...currentPlayer.completedQuests, action.questId]
+        : currentPlayer.completedQuests;
+
+      // Happiness change based on success/failure
+      const happinessChange = action.success ? 3 : -2;
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money + action.goldEarned,
+        hoursRemaining: newHours,
+        health: newHealth,
+        completedQuests: newCompletedQuests,
+        happiness: Math.max(0, Math.min(100, currentPlayer.happiness + happinessChange)),
+        experience: currentPlayer.experience + (action.success ? 5 : 1),
+      };
+
+      const questMessage = action.success
+        ? `Quest completed! Earned ${action.goldEarned} gold.`
+        : `Quest failed! Took ${action.damage} damage. Earned ${action.goldEarned} gold.`;
+
+      return {
+        ...state,
+        players: updatedPlayers,
+        newspaper: questMessage,
+      };
+    }
+
+    case 'RANK_UP': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      const rankOrder: GuildRank[] = ['novice', 'apprentice', 'journeyman', 'adept', 'veteran', 'elite', 'guildmaster'];
+      const currentIndex = rankOrder.indexOf(currentPlayer.guildRank);
+      if (currentIndex >= rankOrder.length - 1) {
+        return state; // Already at max rank
+      }
+
+      const newRank = rankOrder[currentIndex + 1];
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        guildRank: newRank,
+        happiness: Math.min(100, currentPlayer.happiness + 10), // Rank up gives happiness
+        career: currentPlayer.career + 15, // Rank up gives career points
+      };
+
+      return {
+        ...state,
+        players: updatedPlayers,
+        newspaper: `Promoted to ${newRank}! The guild celebrates your advancement.`,
+      };
+    }
+
+    case 'HEAL': {
+      const currentPlayer = state.players[state.currentPlayerIndex];
+
+      if (currentPlayer.money < action.cost) {
+        return state; // Not enough money
+      }
+
+      const newHealth = Math.min(currentPlayer.maxHealth, currentPlayer.health + action.amount);
+
+      const updatedPlayers = [...state.players];
+      updatedPlayers[state.currentPlayerIndex] = {
+        ...currentPlayer,
+        money: currentPlayer.money - action.cost,
+        health: newHealth,
+      };
+
+      return {
+        ...state,
+        players: updatedPlayers,
+      };
     }
 
     default:

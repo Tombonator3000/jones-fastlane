@@ -19,6 +19,7 @@ import {
   meetsJobRequirements,
   getLessonsRequired,
 } from '@/types/game';
+import { QuestBoard } from './QuestBoard';
 import { toast } from 'sonner';
 
 interface LocationMenuProps {
@@ -299,14 +300,50 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
   const renderContent = () => {
     switch (location.id) {
       case 'rusty-tankard':
+        const healCost = calculatePrice(20, economyReading);
+        const fullHealCost = calculatePrice(50, economyReading);
+        const healthMissing = player.maxHealth - player.health;
         return (
           <div className="space-y-3">
             <p className="text-[#4a4a5a] text-sm italic">
               "Welcome to The Rusty Tankard! Try our famous Roast Fowl!"
             </p>
+            {/* Healing Section */}
+            {player.health < player.maxHealth && (
+              <div className="location-menu-section">
+                <h4 className="location-menu-section-title">HEALER'S CORNER</h4>
+                <p className="text-[#1a1a2e] text-xs mb-2">
+                  HP: {player.health}/{player.maxHealth}
+                </p>
+                <div className="space-y-1">
+                  <button
+                    className="location-menu-item"
+                    onClick={() => {
+                      dispatch({ type: 'HEAL', amount: 25, cost: healCost });
+                      toast.success('Healed 25 HP!');
+                    }}
+                    disabled={player.money < healCost}
+                  >
+                    <span>Rest & Ale (+25 HP)</span>
+                    <span>${healCost}</span>
+                  </button>
+                  <button
+                    className="location-menu-item"
+                    onClick={() => {
+                      dispatch({ type: 'HEAL', amount: healthMissing, cost: fullHealCost });
+                      toast.success('Fully healed!');
+                    }}
+                    disabled={player.money < fullHealCost}
+                  >
+                    <span>Full Healing (Max HP)</span>
+                    <span>${fullHealCost}</span>
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="location-menu-section">
               <h4 className="location-menu-section-title">TAVERN MENU</h4>
-              <ScrollArea className="h-32">
+              <ScrollArea className="h-24">
                 <div className="space-y-1">
                   {FAST_FOOD.map(item => {
                     const cost = calculatePrice(item.basePrice, economyReading);
@@ -511,9 +548,13 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
                 </p>
               </div>
             )}
+
+            {/* Quest Board */}
+            <QuestBoard player={player} />
+
             <div className="location-menu-section">
               <h4 className="location-menu-section-title">AVAILABLE POSITIONS</h4>
-              <ScrollArea className="h-32">
+              <ScrollArea className="h-24">
                 <div className="space-y-1">
                   {getAvailableJobs().map(job => {
                     const wage = calculateWage(job.baseWage, economyReading);
@@ -539,7 +580,7 @@ export function LocationMenu({ location, onClose }: LocationMenuProps) {
               </ScrollArea>
             </div>
             <p className="text-[#4a4a5a] text-xs">
-              Exp: {player.experience} | Dep: {player.dependability}
+              Exp: {player.experience} | Dep: {player.dependability} | HP: {player.health}/{player.maxHealth}
             </p>
           </div>
         );
