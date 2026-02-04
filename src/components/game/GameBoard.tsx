@@ -64,7 +64,7 @@ export function GameBoard({
             >
               <div className="location-menu-header">
                 <h2 className="font-pixel text-[10px] md:text-xs text-[#f5f0e6]">
-                  JONES IN THE FAST LANE
+                  GUILD LIFE
                 </h2>
               </div>
               <div className="location-menu-content">
