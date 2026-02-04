@@ -25,7 +25,7 @@ interface AIDecision {
   message: string;
 }
 
-export function useJonesAI() {
+export function useGrimwaldAI() {
   const getAIAvailableJobs = (player: Player): Job[] => {
     return JOBS.filter(job => {
       const { eligible } = meetsJobRequirements(player, job);
@@ -140,12 +140,12 @@ export function useJonesAI() {
         action: 'MOVE_TO_LOCATION',
         params: { locationId: 'rent-office' },
         delay: 800,
-        message: 'Jones goes to Rent Office to pay rent...',
+        message: 'Grimwald goes to Rent Office to pay rent...',
       });
       decisions.push({
         action: 'PAY_RENT',
         delay: 600,
-        message: 'Jones pays rent.',
+        message: 'Grimwald pays rent.',
       });
       return decisions;
     }
@@ -157,9 +157,9 @@ export function useJonesAI() {
       if (maxStorage === 0) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
-          params: { locationId: 'monolith-burger' },
+          params: { locationId: 'rusty-tankard' },
           delay: 800,
-          message: 'Jones needs food and goes to Monolith Burgers...',
+          message: 'Grimwald needs food and goes to The Rusty Tankard...',
         });
         const burger = FAST_FOOD.find(f => f.id === 'burger');
         if (burger && player.money >= calculatePrice(burger.basePrice, economyReading)) {
@@ -167,7 +167,7 @@ export function useJonesAI() {
             action: 'BUY_FAST_FOOD',
             params: { itemId: 'burger', cost: calculatePrice(burger.basePrice, economyReading), happiness: burger.happinessBonus },
             delay: 600,
-            message: 'Jones buys a burger.',
+            message: 'Grimwald buys a burger.',
           });
         }
         return decisions;
@@ -176,9 +176,9 @@ export function useJonesAI() {
       // Buy fresh food
       decisions.push({
         action: 'MOVE_TO_LOCATION',
-        params: { locationId: 'blacks-market' },
+        params: { locationId: 'shadow-market' },
         delay: 800,
-        message: 'Jones needs food and goes to Black\'s Market...',
+        message: 'Grimwald needs food and goes to Black\'s Market...',
       });
       const foodAmount = Math.min(4, maxStorage - player.food);
       const foodCost = foodAmount * calculatePrice(20, economyReading);
@@ -187,7 +187,7 @@ export function useJonesAI() {
           action: 'BUY_FRESH_FOOD',
           params: { units: foodAmount, cost: foodCost },
           delay: 600,
-          message: `Jones buys ${foodAmount} units of fresh food.`,
+          message: `Grimwald buys ${foodAmount} units of fresh food.`,
         });
       }
       return decisions;
@@ -200,7 +200,7 @@ export function useJonesAI() {
       decisions.push({
         action: 'END_TURN',
         delay: 1000,
-        message: 'Jones does not have enough time and ends the week.',
+        message: 'Grimwald does not have enough time and ends the week.',
       });
       return decisions;
     }
@@ -218,15 +218,15 @@ export function useJonesAI() {
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
-            params: { locationId: 'socket-city' },
+            params: { locationId: 'enchanter' },
             delay: 800,
-            message: 'Jones urgently needs happiness and goes shopping...',
+            message: 'Grimwald urgently needs happiness and goes shopping...',
           });
           decisions.push({
             action: 'BUY_APPLIANCE',
-            params: { itemId: item.id, cost, happiness: item.happiness, store: 'socket-city' },
+            params: { itemId: item.id, cost, happiness: item.happiness, store: 'enchanter' },
             delay: 600,
-            message: `Jones buys a ${item.name} to boost happiness!`,
+            message: `Grimwald buys a ${item.name} to boost happiness!`,
           });
           return decisions;
         }
@@ -237,15 +237,15 @@ export function useJonesAI() {
       if (deluxeMeal && player.money >= calculatePrice(deluxeMeal.basePrice, economyReading)) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
-          params: { locationId: 'monolith-burger' },
+          params: { locationId: 'rusty-tankard' },
           delay: 800,
-          message: 'Jones treats himself to feel better...',
+          message: 'Grimwald treats himself to feel better...',
         });
         decisions.push({
           action: 'BUY_FAST_FOOD',
           params: { itemId: 'deluxe-meal', cost: calculatePrice(deluxeMeal.basePrice, economyReading), happiness: deluxeMeal.happinessBonus },
           delay: 600,
-          message: 'Jones buys a deluxe meal for happiness!',
+          message: 'Grimwald buys a deluxe meal for happiness!',
         });
         return decisions;
       }
@@ -260,13 +260,13 @@ export function useJonesAI() {
           action: 'MOVE_TO_LOCATION',
           params: { locationId: 'rent-office' },
           delay: 800,
-          message: 'Jones decides to move to a safer apartment...',
+          message: 'Grimwald decides to move to a safer apartment...',
         });
         decisions.push({
           action: 'CHANGE_APARTMENT',
           params: { apartment: 'security' },
           delay: 600,
-          message: 'Jones moves to LeSecurity Apartments!',
+          message: 'Grimwald moves to Noble Heights!',
         });
         return decisions;
       }
@@ -278,15 +278,15 @@ export function useJonesAI() {
       if (bestJob) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
-          params: { locationId: 'employment-office' },
+          params: { locationId: 'guild-hall' },
           delay: 800,
-          message: 'Jones looks for a job at Employment Office...',
+          message: 'Grimwald looks for a job at Guild Hall...',
         });
         decisions.push({
           action: 'APPLY_FOR_JOB',
           params: { job: bestJob },
           delay: 600,
-          message: `Jones applies for a job as ${bestJob.title}!`,
+          message: `Grimwald applies for a job as ${bestJob.title}!`,
         });
         return decisions;
       }
@@ -296,9 +296,9 @@ export function useJonesAI() {
       if (currentClothing === 'none' && player.money >= calculatePrice(CLOTHING.casual.qtPrice, economyReading)) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
-          params: { locationId: 'qt-clothing' },
+          params: { locationId: 'armory' },
           delay: 800,
-          message: 'Jones needs better clothes to get a job...',
+          message: 'Grimwald needs better clothes to get a job...',
         });
         decisions.push({
           action: 'BUY_CLOTHES',
@@ -310,7 +310,7 @@ export function useJonesAI() {
             happiness: CLOTHING.casual.happiness
           },
           delay: 600,
-          message: 'Jones buys casual clothes!',
+          message: 'Grimwald buys casual clothes!',
         });
         return decisions;
       }
@@ -322,15 +322,15 @@ export function useJonesAI() {
       if (betterJob && betterJob.id !== player.job.id) {
         decisions.push({
           action: 'MOVE_TO_LOCATION',
-          params: { locationId: 'employment-office' },
+          params: { locationId: 'guild-hall' },
           delay: 800,
-          message: 'Jones looks for a better job at Employment Office...',
+          message: 'Grimwald looks for a better job at Guild Hall...',
         });
         decisions.push({
           action: 'APPLY_FOR_JOB',
           params: { job: betterJob },
           delay: 600,
-          message: `Jones gets promoted to ${betterJob.title}!`,
+          message: `Grimwald gets promoted to ${betterJob.title}!`,
         });
         return decisions;
       }
@@ -343,9 +343,9 @@ export function useJonesAI() {
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
-            params: { locationId: 'qt-clothing' },
+            params: { locationId: 'armory' },
             delay: 800,
-            message: `Jones needs ${neededClothes} clothes for a better job...`,
+            message: `Grimwald needs ${neededClothes} clothes for a better job...`,
           });
           decisions.push({
             action: 'BUY_CLOTHES',
@@ -357,7 +357,7 @@ export function useJonesAI() {
               happiness: clothingInfo.happiness
             },
             delay: 600,
-            message: `Jones buys ${neededClothes} clothes!`,
+            message: `Grimwald buys ${neededClothes} clothes!`,
           });
           return decisions;
         }
@@ -370,14 +370,14 @@ export function useJonesAI() {
         action: 'MOVE_TO_LOCATION',
         params: { locationId: player.job.location },
         delay: 800,
-        message: `Jones goes to work at ${player.job.location}...`,
+        message: `Grimwald goes to work at ${player.job.location}...`,
       });
       const workHours = Math.min(player.hoursRemaining - 4, player.job.hoursPerShift);
       decisions.push({
         action: 'WORK',
         params: { hours: workHours },
         delay: 600,
-        message: `Jones works ${workHours} hours as ${player.job.title}.`,
+        message: `Grimwald works ${workHours} hours as ${player.job.title}.`,
       });
       return decisions;
     }
@@ -392,9 +392,9 @@ export function useJonesAI() {
         if (degree) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
-            params: { locationId: 'hi-tech-u' },
+            params: { locationId: 'academy' },
             delay: 800,
-            message: 'Jones continues studying at Hi-Tech U...',
+            message: 'Grimwald continues studying at The Academy...',
           });
           const lessonsRequired = getLessonsRequired(player, degree);
           const studyHours = Math.min(player.hoursRemaining - 4, lessonsRequired - (player.studyProgress[degreeId] || 0));
@@ -402,7 +402,7 @@ export function useJonesAI() {
             action: 'STUDY',
             params: { degreeId, hours: studyHours },
             delay: 600,
-            message: `Jones studies ${degree.name} for ${studyHours} hours.`,
+            message: `Grimwald studies ${degree.name} for ${studyHours} hours.`,
           });
           return decisions;
         }
@@ -412,15 +412,15 @@ export function useJonesAI() {
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
-            params: { locationId: 'hi-tech-u' },
+            params: { locationId: 'academy' },
             delay: 800,
-            message: 'Jones enrolls in a new course at Hi-Tech U...',
+            message: 'Grimwald enrolls in a new course at The Academy...',
           });
           decisions.push({
             action: 'ENROLL_DEGREE',
             params: { degreeId: degree.id, cost },
             delay: 600,
-            message: `Jones enrolls in ${degree.name}!`,
+            message: `Grimwald enrolls in ${degree.name}!`,
           });
           return decisions;
         }
@@ -436,9 +436,9 @@ export function useJonesAI() {
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
-            params: { locationId: 'qt-clothing' },
+            params: { locationId: 'armory' },
             delay: 800,
-            message: 'Jones upgrades wardrobe...',
+            message: 'Grimwald upgrades wardrobe...',
           });
           decisions.push({
             action: 'BUY_CLOTHES',
@@ -450,7 +450,7 @@ export function useJonesAI() {
               happiness: clothingInfo.happiness
             },
             delay: 600,
-            message: `Jones buys ${nextClothes} clothes!`,
+            message: `Grimwald buys ${nextClothes} clothes!`,
           });
           return decisions;
         }
@@ -468,15 +468,15 @@ export function useJonesAI() {
         if (player.money >= cost) {
           decisions.push({
             action: 'MOVE_TO_LOCATION',
-            params: { locationId: 'socket-city' },
+            params: { locationId: 'enchanter' },
             delay: 800,
-            message: 'Jones goes to Socket City for shopping...',
+            message: "Grimwald goes to Enchanter's Workshop for shopping...",
           });
           decisions.push({
             action: 'BUY_APPLIANCE',
-            params: { itemId: item.id, cost, happiness: item.happiness, store: 'socket-city' },
+            params: { itemId: item.id, cost, happiness: item.happiness, store: 'enchanter' },
             delay: 600,
-            message: `Jones buys a ${item.name}!`,
+            message: `Grimwald buys a ${item.name}!`,
           });
           return decisions;
         }
@@ -489,15 +489,15 @@ export function useJonesAI() {
       const cost = calculatePrice(fridge.socketCityPrice, economyReading);
       decisions.push({
         action: 'MOVE_TO_LOCATION',
-        params: { locationId: 'socket-city' },
+        params: { locationId: 'enchanter' },
         delay: 800,
-        message: 'Jones buys a refrigerator to store food...',
+        message: 'Grimwald buys a refrigerator to store food...',
       });
       decisions.push({
         action: 'BUY_APPLIANCE',
-        params: { itemId: 'refrigerator', cost, happiness: fridge.happiness, store: 'socket-city' },
+        params: { itemId: 'refrigerator', cost, happiness: fridge.happiness, store: 'enchanter' },
         delay: 600,
-        message: 'Jones buys a refrigerator!',
+        message: 'Grimwald buys a refrigerator!',
       });
       return decisions;
     }
@@ -508,14 +508,14 @@ export function useJonesAI() {
         action: 'MOVE_TO_LOCATION',
         params: { locationId: player.job.location },
         delay: 800,
-        message: 'Jones goes to work...',
+        message: 'Grimwald goes to work...',
       });
       const workHours = Math.min(player.hoursRemaining - 4, player.job.hoursPerShift);
       decisions.push({
         action: 'WORK',
         params: { hours: workHours },
         delay: 600,
-        message: `Jones works ${workHours} hours.`,
+        message: `Grimwald works ${workHours} hours.`,
       });
       return decisions;
     }
@@ -526,13 +526,13 @@ export function useJonesAI() {
         action: 'MOVE_TO_LOCATION',
         params: { locationId: 'bank' },
         delay: 800,
-        message: 'Jones deposits money in the bank...',
+        message: 'Grimwald deposits money in the bank...',
       });
       decisions.push({
         action: 'DEPOSIT_MONEY',
         params: { amount: player.money - 50 },
         delay: 600,
-        message: `Jones deposits $${player.money - 50} in the bank.`,
+        message: `Grimwald deposits $${player.money - 50} in the bank.`,
       });
       return decisions;
     }
@@ -541,7 +541,7 @@ export function useJonesAI() {
     decisions.push({
       action: 'END_TURN',
       delay: 1000,
-      message: 'Jones ends the week.',
+      message: 'Grimwald ends the week.',
     });
 
     return decisions;

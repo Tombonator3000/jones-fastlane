@@ -72,6 +72,22 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Fantasy color palette for Guild Life
+        parchment: '#f4e4bc',
+        leather: '#8b4513',
+        gold: '#ffd700',
+        bronze: '#cd7f32',
+        iron: '#434343',
+        blood: '#8b0000',
+        magic: '#9932cc',
+        divine: '#ffefd5',
+        // Quest rank colors
+        'rank-e': '#808080',
+        'rank-d': '#00aa00',
+        'rank-c': '#0088ff',
+        'rank-b': '#aa00aa',
+        'rank-a': '#ff8800',
+        'rank-s': '#ff0000',
       },
       borderRadius: {
         lg: "var(--radius)",

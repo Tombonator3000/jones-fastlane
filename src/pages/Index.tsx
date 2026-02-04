@@ -10,7 +10,7 @@ import { WildWillyDialog } from '@/components/game/WildWillyDialog';
 import { GameOverDialog } from '@/components/game/GameOverDialog';
 import { Location, LOCATIONS, Job } from '@/types/game';
 import { toast } from 'sonner';
-import { useJonesAI } from '@/hooks/useJonesAI';
+import { useGrimwaldAI } from '@/hooks/useGrimwaldAI';
 import { useMovementAnimation } from '@/hooks/useMovementAnimation';
 import { getHomeLocation } from '@/data/roadPaths';
 
@@ -23,7 +23,7 @@ function GameContent() {
   const [isAiTurn, setIsAiTurn] = useState(false);
   const [pendingEndTurn, setPendingEndTurn] = useState(false);
   const aiActionQueue = useRef<Array<{ action: string; params?: Record<string, unknown>; delay: number; message: string }>>([]);
-  const { decideNextAction } = useJonesAI();
+  const { decideNextAction } = useGrimwaldAI();
   const {
     currentAnimation,
     isAnimating,
@@ -33,8 +33,8 @@ function GameContent() {
   } = useMovementAnimation();
   const player = getCurrentPlayer();
 
-  // Check if current player is Jones (AI)
-  const isJonesPlaying = player?.name === 'Jones';
+  // Check if current player is Grimwald (AI)
+  const isGrimwaldPlaying = player?.name === 'Grimwald';
 
   // Process AI actions
   const processNextAiAction = useCallback(() => {
@@ -141,7 +141,7 @@ function GameContent() {
 
   // Trigger AI turn when it's Jones' turn
   useEffect(() => {
-    if (isJonesPlaying && state.isGameStarted && !state.isGameOver && !isAiTurn && !showWeekendEvent && !showWildWilly) {
+    if (isGrimwaldPlaying && state.isGameStarted && !state.isGameOver && !isAiTurn && !showWeekendEvent && !showWildWilly) {
       // Small delay before AI starts thinking
       const timer = setTimeout(() => {
         setIsAiTurn(true);
@@ -152,7 +152,7 @@ function GameContent() {
 
       return () => clearTimeout(timer);
     }
-  }, [isJonesPlaying, state.isGameStarted, state.isGameOver, isAiTurn, showWeekendEvent, showWildWilly, state.currentPlayerIndex, decideNextAction, player, state.goals, state.rentDue, processNextAiAction]);
+  }, [isGrimwaldPlaying, state.isGameStarted, state.isGameOver, isAiTurn, showWeekendEvent, showWildWilly, state.currentPlayerIndex, decideNextAction, player, state.goals, state.rentDue, processNextAiAction]);
 
   useEffect(() => {
     if (state.weekendEvent && state.isGameStarted) {
@@ -168,10 +168,10 @@ function GameContent() {
   }, [state.wildWillyEvent, state.isGameStarted]);
 
   useEffect(() => {
-    if (state.rentDue && player && !isJonesPlaying) {
+    if (state.rentDue && player && !isGrimwaldPlaying) {
       toast.warning("Rent is due! Visit the Rent Office to pay.");
     }
-  }, [state.rentDue, player, isJonesPlaying]);
+  }, [state.rentDue, player, isGrimwaldPlaying]);
 
   const handleLocationClick = (location: Location) => {
     if (!player || isAiTurn || isAnimating) return;
@@ -239,7 +239,7 @@ function GameContent() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="font-pixel text-xl md:text-2xl text-primary title-text">
-            JONES IN THE FAST LANE
+            GUILD LIFE
           </h1>
         </motion.header>
 
@@ -260,7 +260,7 @@ function GameContent() {
               onClick={handleEndTurn}
               disabled={isAiTurn || isAnimating || pendingEndTurn}
             >
-              {isAiTurn ? 'JONES SPILLER...' : pendingEndTurn ? 'GAR HJEM...' : isAnimating ? 'BEVEGER SEG...' : 'AVSLUTT UKE'}
+              {isAiTurn ? 'GRIMWALD PLAYS...' : pendingEndTurn ? 'GOING HOME...' : isAnimating ? 'MOVING...' : 'END WEEK'}
             </Button>
 
             {/* AI Message */}

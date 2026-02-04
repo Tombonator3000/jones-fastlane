@@ -34,6 +34,9 @@ export interface Player {
   rentDebt: number;
   // Current wage (can be affected by pay cuts)
   currentWage: number | null;
+  // Guild Life additions
+  guildRank: GuildRank;
+  completedQuests: string[];
 }
 
 export interface PawnedItem {
@@ -62,6 +65,33 @@ export interface Job {
 }
 
 export type ClothingLevel = 'none' | 'casual' | 'dress' | 'business';
+
+// Guild Rank system for Guild Life
+export type GuildRank =
+  | 'novice'
+  | 'apprentice'
+  | 'journeyman'
+  | 'adept'
+  | 'veteran'
+  | 'elite'
+  | 'guildmaster';
+
+// Quest system types
+export type QuestRank = 'E' | 'D' | 'C' | 'B' | 'A' | 'S';
+
+export interface Quest {
+  id: string;
+  name: string;
+  description: string;
+  rank: QuestRank;
+  timeCost: number;
+  goldReward: number;
+  riskLevel: number; // 0-1, chance of damage
+  requirements?: {
+    guildRank?: GuildRank;
+    education?: string[];
+  };
+}
 
 export interface Degree {
   id: string;
@@ -162,110 +192,106 @@ export interface GameGoals {
 // Positions match the game board image (percentage based)
 export const LOCATIONS: Location[] = [
   // Top row (left to right)
-  { id: 'security-apartments', name: 'LeSecurity Apts', type: 'apartment', description: 'Expensive but safe from thieves', position: { x: 12, y: 18 }, color: 'location-apartment', icon: '🏢' },
-  { id: 'rent-office', name: 'Rent Office', type: 'service', description: 'Pay rent and change apartments', position: { x: 28, y: 15 }, color: 'location-service', icon: '🔑' },
-  { id: 'low-cost-housing', name: 'Low-Cost Housing', type: 'apartment', description: 'Cheap but Wild Willy may rob you!', position: { x: 44, y: 15 }, color: 'location-apartment', icon: '🏚️' },
-  { id: 'pawn-shop', name: 'Pawn Shop', type: 'service', description: 'Pawn items for cash or buy pawned goods', position: { x: 60, y: 15 }, color: 'location-service', icon: '💎' },
-  { id: 'z-mart', name: 'Z-Mart', type: 'store', description: 'Discount store - cheaper but items may break', position: { x: 88, y: 18 }, color: 'location-store', icon: '🛒' },
+  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 12, y: 18 }, color: 'location-apartment', icon: '🏰' },
+  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 28, y: 15 }, color: 'location-service', icon: '🔑' },
+  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 44, y: 15 }, color: 'location-apartment', icon: '🏚️' },
+  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 60, y: 15 }, color: 'location-service', icon: '💎' },
+  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 88, y: 18 }, color: 'location-store', icon: '🛒' },
 
   // Right side (top to bottom)
-  { id: 'monolith-burger', name: 'Monolith Burgers', type: 'food', description: 'Fast food and soft drinks', position: { x: 88, y: 38 }, color: 'location-food', icon: '🍔' },
-  { id: 'qt-clothing', name: 'QT Clothing', type: 'store', description: 'Quality clothes that last longer', position: { x: 88, y: 55 }, color: 'location-store', icon: '👔' },
-  { id: 'socket-city', name: 'Socket City', type: 'store', description: 'Full-price electronics with warranty', position: { x: 88, y: 75 }, color: 'location-store', icon: '📺' },
+  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 88, y: 38 }, color: 'location-food', icon: '🍺' },
+  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 88, y: 55 }, color: 'location-store', icon: '⚔️' },
+  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 88, y: 75 }, color: 'location-store', icon: '🔮' },
 
   // Bottom row (right to left)
-  { id: 'hi-tech-u', name: 'Hi-Tech U', type: 'service', description: 'Enroll in courses and study for degrees', position: { x: 70, y: 85 }, color: 'location-service', icon: '🎓' },
-  { id: 'employment-office', name: 'Employment Office', type: 'service', description: 'Find jobs and ask for raises', position: { x: 50, y: 85 }, color: 'location-service', icon: '💼' },
-  { id: 'factory', name: 'Factory', type: 'workplace', description: 'Best paying jobs in town', position: { x: 30, y: 85 }, color: 'location-work', icon: '🏭' },
+  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 70, y: 85 }, color: 'location-service', icon: '🎓' },
+  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 50, y: 85 }, color: 'location-service', icon: '📜' },
+  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 30, y: 85 }, color: 'location-work', icon: '🔨' },
 
   // Left side (bottom to top)
-  { id: 'bank', name: 'Bank', type: 'service', description: 'Deposits, loans, and stock market', position: { x: 12, y: 65 }, color: 'location-service', icon: '🏦' },
-  { id: 'blacks-market', name: "Black's Market", type: 'food', description: 'Fresh groceries, lottery, and newspaper', position: { x: 12, y: 42 }, color: 'location-food', icon: '🥬' },
+  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 12, y: 65 }, color: 'location-service', icon: '🏦' },
+  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 12, y: 42 }, color: 'location-food', icon: '🥬' },
 ];
 
-// DEGREES - Based on wiki: 11 total, each gives 9 education points (1 + 11*9 = 100 max)
+// DEGREES - Fantasy themed education for Guild Life
 export const DEGREES: Degree[] = [
   // Starting degrees
   { id: 'trade-school', name: 'Trade School', enrollmentFee: 50, lessonsRequired: 10, prerequisites: [], educationPoints: 9 },
-  { id: 'junior-college', name: 'Junior College', enrollmentFee: 50, lessonsRequired: 10, prerequisites: [], educationPoints: 9 },
+  { id: 'guild-admin', name: 'Junior Academy', enrollmentFee: 50, lessonsRequired: 10, prerequisites: [], educationPoints: 9 },
 
-  // Requires Junior College
-  { id: 'electronics', name: 'Electronics', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['junior-college'], educationPoints: 9 },
-  { id: 'pre-engineering', name: 'Pre-Engineering', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['junior-college'], educationPoints: 9 },
-  { id: 'business-admin', name: 'Business Administration', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['junior-college'], educationPoints: 9 },
-  { id: 'academic', name: 'Academic', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['junior-college'], educationPoints: 9 },
+  // Requires Junior Academy
+  { id: 'enchanting', name: 'Enchanting', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['guild-admin'], educationPoints: 9 },
+  { id: 'pre-enchanting', name: 'Pre-Enchanting', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['guild-admin'], educationPoints: 9 },
+  { id: 'guild-administration', name: 'Guild Administration', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['guild-admin'], educationPoints: 9 },
+  { id: 'scholarly', name: 'Scholarly Arts', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['guild-admin'], educationPoints: 9 },
 
   // Advanced degrees
-  { id: 'engineering', name: 'Engineering', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['pre-engineering'], educationPoints: 9 },
-  { id: 'graduate-school', name: 'Graduate School', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['academic'], educationPoints: 9 },
-  { id: 'research', name: 'Research', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['graduate-school'], educationPoints: 9 },
-  { id: 'accounting', name: 'Accounting', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['business-admin'], educationPoints: 9 },
-  { id: 'advanced-electronics', name: 'Advanced Electronics', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['electronics'], educationPoints: 9 },
+  { id: 'advanced-enchanting', name: 'Advanced Enchanting', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['pre-enchanting'], educationPoints: 9 },
+  { id: 'arcane-studies', name: 'Arcane Studies', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['scholarly'], educationPoints: 9 },
+  { id: 'arcane-research', name: 'Arcane Research', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['arcane-studies'], educationPoints: 9 },
+  { id: 'treasury-management', name: 'Treasury Management', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['guild-administration'], educationPoints: 9 },
+  { id: 'master-enchanting', name: 'Master Enchanting', enrollmentFee: 50, lessonsRequired: 10, prerequisites: ['enchanting'], educationPoints: 9 },
 ];
 
-// JOBS - Based on wiki: https://jonesinthefastlane.fandom.com/wiki/List_of_Jobs
-// (*) CD-ROM only jobs - included for completeness
-// (**) Cook - Anyone can get this job, no matter their stats
+// JOBS - Fantasy themed jobs for Guild Life
 export const JOBS: Job[] = [
-  // ========== Z-MART ==========
-  { id: 'clerk-zmart', title: 'Clerk', location: 'z-mart', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 5 },
-  { id: 'assistant-manager-zmart', title: 'Assistant Manager', location: 'z-mart', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 20, requiredDependability: 20, careerPoints: 10 },
-  { id: 'manager-zmart', title: 'Manager', location: 'z-mart', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'business', requiredExperience: 30, requiredDependability: 30, careerPoints: 15 },
+  // ========== GENERAL STORE ==========
+  { id: 'stock-hand-store', title: 'Stock Hand', location: 'general-store', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 5 },
+  { id: 'shopkeeper-assistant', title: 'Shopkeeper Assistant', location: 'general-store', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 20, requiredDependability: 20, careerPoints: 10 },
+  { id: 'shopkeeper', title: 'Shopkeeper', location: 'general-store', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'business', requiredExperience: 30, requiredDependability: 30, careerPoints: 15 },
 
-  // ========== MONOLITH BURGERS ==========
-  // (**) Cook - Anyone can get this job, 0 experience required
-  { id: 'cook-monolith', title: 'Cook', location: 'monolith-burger', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 0, requiredDependability: 10, careerPoints: 3 },
-  { id: 'clerk-monolith', title: 'Clerk', location: 'monolith-burger', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 7 },
-  { id: 'assistant-manager-monolith', title: 'Assistant Manager', location: 'monolith-burger', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 30, careerPoints: 12 },
-  { id: 'manager-monolith', title: 'Manager', location: 'monolith-burger', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 40, careerPoints: 18 },
+  // ========== THE RUSTY TANKARD ==========
+  // Kitchen Hand - Anyone can get this job, 0 experience required
+  { id: 'kitchen-hand', title: 'Kitchen Hand', location: 'rusty-tankard', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 0, requiredDependability: 10, careerPoints: 3 },
+  { id: 'serving-wench', title: 'Server', location: 'rusty-tankard', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 7 },
+  { id: 'barkeep-assistant', title: 'Barkeep Assistant', location: 'rusty-tankard', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 30, careerPoints: 12 },
+  { id: 'tavernkeeper', title: 'Tavernkeeper', location: 'rusty-tankard', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 40, careerPoints: 18 },
 
-  // ========== QT CLOTHING ==========
-  // (*) Janitor - CD-ROM only
-  { id: 'janitor-qt', title: 'Janitor', location: 'qt-clothing', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
-  { id: 'salesperson-qt', title: 'Salesperson', location: 'qt-clothing', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 15 },
-  { id: 'assistant-manager-qt', title: 'Assistant Manager', location: 'qt-clothing', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'business', requiredExperience: 40, requiredDependability: 40, careerPoints: 22 },
-  { id: 'manager-qt', title: 'Manager', location: 'qt-clothing', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 35 },
+  // ========== THE ARMORY ==========
+  { id: 'maintenance-armory', title: 'Maintenance', location: 'armory', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
+  { id: 'arms-dealer', title: 'Arms Dealer', location: 'armory', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 15 },
+  { id: 'armorsmith-assistant', title: 'Armorsmith Assistant', location: 'armory', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'business', requiredExperience: 40, requiredDependability: 40, careerPoints: 22 },
+  { id: 'master-armorsmith', title: 'Master Armorsmith', location: 'armory', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['guild-administration'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 35 },
 
-  // ========== SOCKET CITY ==========
-  // (*) Clerk - CD-ROM only
-  { id: 'clerk-socket', title: 'Clerk', location: 'socket-city', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
-  { id: 'salesperson-socket', title: 'Salesperson', location: 'socket-city', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 12 },
-  { id: 'electronics-repairman', title: 'Electronics Repairman', location: 'socket-city', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['electronics'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 30 },
-  { id: 'manager-socket', title: 'Manager', location: 'socket-city', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['electronics', 'junior-college'], requiredClothes: 'business', requiredExperience: 40, requiredDependability: 40, careerPoints: 42 },
+  // ========== ENCHANTER'S WORKSHOP ==========
+  { id: 'apprentice-enchanter', title: 'Apprentice', location: 'enchanter', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
+  { id: 'enchanter-assistant', title: "Enchanter's Assistant", location: 'enchanter', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'dress', requiredExperience: 30, requiredDependability: 30, careerPoints: 12 },
+  { id: 'journeyman-enchanter', title: 'Journeyman Enchanter', location: 'enchanter', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['enchanting'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 30 },
+  { id: 'master-enchanter', title: 'Master Enchanter', location: 'enchanter', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['enchanting', 'guild-admin'], requiredClothes: 'business', requiredExperience: 40, requiredDependability: 40, careerPoints: 42 },
 
-  // ========== HI-TECH U ==========
-  { id: 'janitor-hitechu', title: 'Janitor', location: 'hi-tech-u', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 4 },
-  { id: 'teacher-hitechu', title: 'Teacher', location: 'hi-tech-u', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['academic'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 50, careerPoints: 32 },
-  { id: 'professor-hitechu', title: 'Professor', location: 'hi-tech-u', baseWage: 20, hoursPerShift: 6, requiredDegrees: ['research'], requiredClothes: 'dress', requiredExperience: 50, requiredDependability: 60, careerPoints: 65 },
+  // ========== THE ACADEMY ==========
+  { id: 'maintenance-academy', title: 'Maintenance', location: 'academy', baseWage: 5, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 4 },
+  { id: 'instructor', title: 'Instructor', location: 'academy', baseWage: 11, hoursPerShift: 6, requiredDegrees: ['scholarly'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 50, careerPoints: 32 },
+  { id: 'master-scholar', title: 'Master Scholar', location: 'academy', baseWage: 20, hoursPerShift: 6, requiredDegrees: ['arcane-research'], requiredClothes: 'dress', requiredExperience: 50, requiredDependability: 60, careerPoints: 65 },
 
-  // ========== FACTORY ==========
-  { id: 'janitor-factory', title: 'Janitor', location: 'factory', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 8 },
-  { id: 'assembly-worker', title: 'Assembly Worker', location: 'factory', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 18 },
-  { id: 'secretary-factory', title: 'Secretary', location: 'factory', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 24 },
-  { id: 'machinists-helper', title: "Machinist's Helper", location: 'factory', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['pre-engineering'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 28 },
-  { id: 'executive-secretary', title: 'Executive Secretary', location: 'factory', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 55 },
-  { id: 'machinist', title: 'Machinist', location: 'factory', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['engineering'], requiredClothes: 'casual', requiredExperience: 50, requiredDependability: 50, careerPoints: 58 },
-  { id: 'department-manager', title: 'Department Manager', location: 'factory', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['junior-college', 'engineering'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 72 },
-  { id: 'engineer', title: 'Engineer', location: 'factory', baseWage: 23, hoursPerShift: 6, requiredDegrees: ['junior-college', 'engineering'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 78 },
-  { id: 'general-manager', title: 'General Manager', location: 'factory', baseWage: 25, hoursPerShift: 6, requiredDegrees: ['business-admin', 'engineering'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 100 },
+  // ========== THE FORGE ==========
+  { id: 'forge-hand', title: 'Forge Hand', location: 'the-forge', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 8 },
+  { id: 'smithy-apprentice', title: 'Smithy Apprentice', location: 'the-forge', baseWage: 8, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 18 },
+  { id: 'guild-clerk', title: 'Guild Clerk', location: 'the-forge', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 24 },
+  { id: 'smithy-helper', title: "Smith's Helper", location: 'the-forge', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['pre-enchanting'], requiredClothes: 'casual', requiredExperience: 40, requiredDependability: 40, careerPoints: 28 },
+  { id: 'guild-secretary', title: 'Guild Secretary', location: 'the-forge', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['guild-administration'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 55 },
+  { id: 'master-smith', title: 'Master Smith', location: 'the-forge', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['advanced-enchanting'], requiredClothes: 'casual', requiredExperience: 50, requiredDependability: 50, careerPoints: 58 },
+  { id: 'forge-overseer', title: 'Forge Overseer', location: 'the-forge', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['guild-admin', 'advanced-enchanting'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 72 },
+  { id: 'artificer', title: 'Artificer', location: 'the-forge', baseWage: 23, hoursPerShift: 6, requiredDegrees: ['guild-admin', 'advanced-enchanting'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 78 },
+  { id: 'guild-council-member', title: 'Guild Council Member', location: 'the-forge', baseWage: 25, hoursPerShift: 6, requiredDegrees: ['guild-administration', 'advanced-enchanting'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 100 },
 
-  // ========== BANK ==========
-  { id: 'janitor-bank', title: 'Janitor', location: 'bank', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
-  { id: 'teller-bank', title: 'Teller', location: 'bank', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 28 },
-  { id: 'assistant-manager-bank', title: 'Assistant Manager', location: 'bank', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 42 },
-  { id: 'manager-bank', title: 'Manager', location: 'bank', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 60 },
-  { id: 'broker-bank', title: 'Broker', location: 'bank', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['business-admin', 'academic'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 85 },
+  // ========== GUILDHOLM BANK ==========
+  { id: 'maintenance-bank', title: 'Maintenance', location: 'guildholm-bank', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 6 },
+  { id: 'coin-counter', title: 'Coin Counter', location: 'guildholm-bank', baseWage: 10, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 28 },
+  { id: 'vault-assistant', title: 'Vault Assistant', location: 'guildholm-bank', baseWage: 14, hoursPerShift: 6, requiredDegrees: ['guild-administration'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 42 },
+  { id: 'bank-manager', title: 'Bank Manager', location: 'guildholm-bank', baseWage: 19, hoursPerShift: 6, requiredDegrees: ['guild-administration'], requiredClothes: 'business', requiredExperience: 60, requiredDependability: 60, careerPoints: 60 },
+  { id: 'investment-broker', title: 'Investment Broker', location: 'guildholm-bank', baseWage: 22, hoursPerShift: 6, requiredDegrees: ['guild-administration', 'scholarly'], requiredClothes: 'business', requiredExperience: 70, requiredDependability: 70, careerPoints: 85 },
 
-  // ========== BLACK'S MARKET ==========
-  { id: 'janitor-blacks', title: 'Janitor', location: 'blacks-market', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 5 },
-  { id: 'checker-blacks', title: 'Checker', location: 'blacks-market', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 20, careerPoints: 12 },
-  { id: 'butcher-blacks', title: 'Butcher', location: 'blacks-market', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 32 },
-  { id: 'assistant-manager-blacks', title: 'Assistant Manager', location: 'blacks-market', baseWage: 15, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 45 },
-  { id: 'manager-blacks', title: 'Manager', location: 'blacks-market', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['business-admin'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 58 },
+  // ========== SHADOW MARKET ==========
+  { id: 'sweeper-market', title: 'Sweeper', location: 'shadow-market', baseWage: 6, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 10, careerPoints: 5 },
+  { id: 'market-hand', title: 'Market Hand', location: 'shadow-market', baseWage: 8, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 20, requiredDependability: 20, careerPoints: 12 },
+  { id: 'butcher', title: 'Butcher', location: 'shadow-market', baseWage: 12, hoursPerShift: 6, requiredDegrees: ['trade-school'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 32 },
+  { id: 'market-overseer', title: 'Market Overseer', location: 'shadow-market', baseWage: 15, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'dress', requiredExperience: 40, requiredDependability: 40, careerPoints: 45 },
+  { id: 'shadow-broker', title: 'Shadow Broker', location: 'shadow-market', baseWage: 18, hoursPerShift: 6, requiredDegrees: ['guild-administration'], requiredClothes: 'business', requiredExperience: 50, requiredDependability: 50, careerPoints: 58 },
 
-  // ========== RENT OFFICE ==========
-  { id: 'groundskeeper-rent', title: 'Groundskeeper', location: 'rent-office', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 8 },
-  { id: 'apartment-manager-rent', title: 'Apartment Manager', location: 'rent-office', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['junior-college'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 22 },
+  // ========== LANDLORD'S OFFICE ==========
+  { id: 'groundskeeper', title: 'Groundskeeper', location: 'landlord-office', baseWage: 7, hoursPerShift: 6, requiredDegrees: [], requiredClothes: 'casual', requiredExperience: 10, requiredDependability: 20, careerPoints: 8 },
+  { id: 'estate-manager', title: 'Estate Manager', location: 'landlord-office', baseWage: 9, hoursPerShift: 6, requiredDegrees: ['guild-admin'], requiredClothes: 'casual', requiredExperience: 30, requiredDependability: 30, careerPoints: 22 },
 ];
 
 // APPLIANCES - Based on wiki prices
@@ -310,13 +336,13 @@ export const CLOTHING = {
   },
 };
 
-// FAST FOOD - Monolith Burgers menu based on wiki
+// TAVERN FOOD - The Rusty Tankard menu
 export const FAST_FOOD: FastFoodItem[] = [
-  { id: 'burger', name: 'Burger', basePrice: 8, preventsStarvation: true, happinessBonus: 0 },
-  { id: 'cheeseburger', name: 'Cheeseburger', basePrice: 12, preventsStarvation: true, happinessBonus: 1 },
-  { id: 'astro-chicken', name: 'Astro Chicken', basePrice: 15, preventsStarvation: true, happinessBonus: 2 },
-  { id: 'soft-drink', name: 'Soft Drink', basePrice: 5, preventsStarvation: false, happinessBonus: 1 },
-  { id: 'deluxe-meal', name: 'Deluxe Meal', basePrice: 25, preventsStarvation: true, happinessBonus: 3 },
+  { id: 'bread-stew', name: 'Bread and Stew', basePrice: 8, preventsStarvation: true, happinessBonus: 0 },
+  { id: 'meat-pie', name: 'Meat Pie', basePrice: 12, preventsStarvation: true, happinessBonus: 1 },
+  { id: 'roast-fowl', name: 'Roast Fowl', basePrice: 15, preventsStarvation: true, happinessBonus: 2 },
+  { id: 'ale', name: 'Tankard of Ale', basePrice: 5, preventsStarvation: false, happinessBonus: 1 },
+  { id: 'feast', name: 'Adventurer Feast', basePrice: 25, preventsStarvation: true, happinessBonus: 3 },
 ];
 
 // FRESH FOOD - Black's Market
@@ -346,19 +372,19 @@ export const STOCKS: Stock[] = [
   { id: 'unlimited', name: 'Unlimited', basePrice: 40, currentPrice: 40, isSafe: false },
 ];
 
-// APARTMENTS - Based on wiki
+// APARTMENTS - Fantasy themed housing for Guild Life
 export const APARTMENTS = {
   'low-cost': {
-    name: 'Low-Cost Housing',
+    name: 'The Slums',
     baseRent: 125,
     canBeRobbed: true,
-    description: 'Cheap rent but Wild Willy may steal your belongings',
+    description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...',
   },
   'security': {
-    name: 'LeSecurity Apartments',
+    name: 'Noble Heights',
     baseRent: 350,
     canBeRobbed: false,
-    description: 'Safe and secure, but expensive',
+    description: 'Luxurious apartments in the noble quarter. Safe and comfortable.',
   },
 };
 
@@ -426,25 +452,25 @@ export const LOTTERY_PRIZES = [
   { tickets: 500, prizes: [{ amount: 5000, chance: 0.05 }, { amount: 500, chance: 0.2 }, { amount: 200, chance: 1.0 }] }, // Guaranteed $200 at 500 tickets
 ];
 
-// WILD WILLY events - Based on wiki
-export const WILD_WILLY = {
+// SHADOWFINGERS events - The notorious thief of Guildholm
+export const SHADOWFINGERS = {
   streetRobbery: {
-    minWeek: 4, // Wiki: Only on or after Week #4
-    happinessLoss: 3, // Wiki: -3 Happiness
-    description: 'Wild Willy robbed you on the street! All cash stolen!',
-    // Wiki: Different chances based on location
+    minWeek: 4, // Only on or after Week #4
+    happinessLoss: 3, // -3 Happiness
+    description: 'Shadowfingers ambushed you in the streets! All gold stolen!',
+    // Different chances based on location
     chances: {
-      'bank': 1 / 31, // ~3.2% chance when leaving bank
-      'blacks-market': 1 / 51, // ~1.95% chance when leaving market
+      'guildholm-bank': 1 / 31, // ~3.2% chance when leaving bank
+      'shadow-market': 1 / 51, // ~1.95% chance when leaving market
     } as Record<string, number>,
   },
   apartmentRobbery: {
-    location: 'low-cost-housing',
-    chancePerItemType: 0.25, // Wiki: 25% chance per item TYPE (not per item)
-    happinessLoss: 4, // Wiki: -4 Happiness
-    description: 'Wild Willy broke into your apartment!',
+    location: 'the-slums',
+    chancePerItemType: 0.25, // 25% chance per item TYPE (not per item)
+    happinessLoss: 4, // -4 Happiness
+    description: 'Shadowfingers broke into your lodging!',
   },
-  // Items that can NEVER be stolen (per wiki)
+  // Items that can NEVER be stolen
   unStealableItems: [
     'refrigerator',
     'freezer',
@@ -455,6 +481,9 @@ export const WILD_WILLY = {
     'atlas',
   ],
 };
+
+// Keep WILD_WILLY as alias for backwards compatibility
+export const WILD_WILLY = SHADOWFINGERS;
 
 // DOCTOR VISIT - Based on wiki
 export const DOCTOR_VISIT = {
@@ -507,11 +536,11 @@ export const RENT_GARNISHMENT = {
 };
 
 export const AVATARS = [
-  { id: 'jones', name: 'Jones', emoji: '🧔', description: 'The legendary competitor' },
-  { id: 'player1', name: 'Alex', emoji: '👨', description: 'Ready to succeed' },
-  { id: 'player2', name: 'Sam', emoji: '👩', description: 'Ambitious go-getter' },
-  { id: 'player3', name: 'Jordan', emoji: '🧑', description: 'Street smart' },
-  { id: 'player4', name: 'Casey', emoji: '👱', description: 'The optimist' },
+  { id: 'grimwald', name: 'Grimwald', emoji: '🧙', description: 'The legendary rival' },
+  { id: 'player1', name: 'Aldric', emoji: '⚔️', description: 'A brave warrior' },
+  { id: 'player2', name: 'Sera', emoji: '🏹', description: 'A cunning ranger' },
+  { id: 'player3', name: 'Theron', emoji: '🗡️', description: 'A skilled rogue' },
+  { id: 'player4', name: 'Elara', emoji: '✨', description: 'A gifted mage' },
 ];
 
 // Helper functions
@@ -525,7 +554,7 @@ export function createInitialPlayer(id: string, name: string, avatar: string): P
     happiness: 10,
     education: 1, // Starting education
     career: 0,
-    currentLocation: 'low-cost-housing',
+    currentLocation: 'the-slums',
     job: null,
     degrees: [],
     clothes: {
@@ -549,6 +578,9 @@ export function createInitialPlayer(id: string, name: string, avatar: string): P
     hasRelaxedThisTurn: false,
     rentDebt: 0,
     currentWage: null,
+    // Guild Life additions
+    guildRank: 'novice',
+    completedQuests: [],
   };
 }
 

@@ -1,4 +1,77 @@
-# Utviklingslogg - Jones in the Fast Lane
+# Utviklingslogg - Guild Life (tidligere Jones in the Fast Lane)
+
+---
+
+## 2026-02-04 - Guild Life Conversion (Fantasy Theme)
+
+### Oppgave
+Konvertere Jones in the Fast Lane klon til et fantasy-tematisert spill kalt "Guild Life".
+
+### Konverteringsplan
+- Phase 1: Rename Core Elements (search/replace)
+- Phase 2: Update Types (Guild Rank, Quest system)
+- Phase 3: Update UI Text (fantasy descriptions)
+- Phase 4: Add Quest System (new feature)
+- Phase 5: Update Visual Theme (Tailwind colors)
+- Phase 6: Update README.md
+
+### Fremdrift
+
+**14:30 - Phase 1 Completed**
+- Renamed useJonesAI.ts to useGrimwaldAI.ts
+- Replaced all "Jones" references with "Grimwald"
+- Updated all location IDs and names:
+  - low-cost-housing -> the-slums
+  - security-apartments -> noble-heights
+  - monolith-burger -> rusty-tankard
+  - blacks-market -> shadow-market
+  - qt-clothing -> armory
+  - z-mart -> general-store
+  - socket-city -> enchanter
+  - employment-office -> guild-hall
+  - hi-tech-u -> academy
+  - factory -> the-forge
+  - bank -> guildholm-bank
+  - rent-office -> landlord-office
+  - pawn-shop -> the-fence
+- Updated JOBS with fantasy titles
+- Updated DEGREES with fantasy names
+- Updated APARTMENTS descriptions
+- Updated WILD_WILLY to SHADOWFINGERS
+- Updated AVATARS to fantasy characters
+- Updated FAST_FOOD to tavern menu
+- Updated all UI text in game files
+
+**15:00 - Phase 2 Completed**
+- Added GuildRank type (novice through guildmaster)
+- Added QuestRank type (E through S)
+- Added Quest interface
+- Updated Player interface with guildRank and completedQuests
+
+**15:10 - Phase 3 Completed** (done during Phase 1)
+- All UI text updated to fantasy theme
+
+**15:15 - Phase 4 Completed**
+- Created useQuests.ts hook with:
+  - 13 quest templates (E through S rank)
+  - Quest refresh system based on guild rank
+  - Quest attempt system with success/failure
+  - Guild rank progression thresholds
+
+**15:20 - Phase 5 Completed**
+- Added fantasy color palette to Tailwind:
+  - parchment, leather, gold, bronze, iron, blood, magic, divine
+  - Quest rank colors (E through S)
+
+**15:25 - Phase 6 Completed**
+- Updated README.md with Guild Life branding
+- Updated all documentation to English
+- Added guild ranks table
+- Updated locations table with fantasy names
+
+**15:30 - Build Verification**
+- npm run build: SUCCESS
+- All TypeScript compiles without errors
 
 ---
 

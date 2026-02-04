@@ -20,7 +20,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
     education: 100,
     career: 100,
   });
-  const [playWithJones, setPlayWithJones] = useState(false);
+  const [playWithGrimwald, setPlayWithGrimwald] = useState(false);
 
   const handleAddPlayer = () => {
     if (playerName.trim() && selectedAvatar) {
@@ -31,8 +31,8 @@ export function GameSetup({ onStart }: GameSetupProps) {
   };
 
   const handleStartGame = () => {
-    if (playWithJones && state.players.length < 2) {
-      dispatch({ type: 'ADD_PLAYER', name: 'Jones', avatar: '🧔' });
+    if (playWithGrimwald && state.players.length < 2) {
+      dispatch({ type: 'ADD_PLAYER', name: 'Grimwald', avatar: '🧙' });
     }
     dispatch({ type: 'START_GAME', goals });
     onStart();
@@ -61,20 +61,20 @@ export function GameSetup({ onStart }: GameSetupProps) {
                   animate={{ scale: [1, 1.02, 1] }}
                   transition={{ repeat: Infinity, duration: 2 }}
                 >
-                  JONES IN THE
+                  GUILD
                 </motion.h1>
                 <motion.h1
                   className="font-pixel text-3xl md:text-4xl text-accent title-text"
                   animate={{ scale: [1, 1.02, 1] }}
                   transition={{ repeat: Infinity, duration: 2, delay: 0.1 }}
                 >
-                  FAST LANE
+                  LIFE
                 </motion.h1>
               </div>
 
               <p className="game-text text-xl text-muted-foreground max-w-md mx-auto">
-                Climb the ladder of success! Manage your time, earn money,
-                get educated, and find happiness before your rivals do.
+                Rise through the ranks of the Adventurer's Guild! Manage your time,
+                earn gold, learn new skills, and find glory before your rivals do.
               </p>
 
               <div className="flex flex-col gap-4 items-center pt-4">
@@ -83,11 +83,11 @@ export function GameSetup({ onStart }: GameSetupProps) {
                   className="pixel-button text-lg px-8 py-6 bg-primary hover:bg-primary/90"
                   onClick={() => setStep('players')}
                 >
-                  START GAME
+                  BEGIN ADVENTURE
                 </Button>
 
                 <p className="game-text text-muted-foreground text-sm">
-                  A Sierra On-Line Classic • Remake by Lovable
+                  A Fantasy Life Simulation
                 </p>
               </div>
             </motion.div>
@@ -145,7 +145,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
                       Choose Avatar
                     </label>
                     <div className="grid grid-cols-5 gap-2">
-                      {AVATARS.filter(a => a.id !== 'jones').map(avatar => (
+                      {AVATARS.filter(a => a.id !== 'grimwald').map(avatar => (
                         <motion.button
                           key={avatar.id}
                           className={`aspect-square rounded-lg border-2 flex items-center justify-center text-3xl transition-colors ${
@@ -173,21 +173,21 @@ export function GameSetup({ onStart }: GameSetupProps) {
                 </div>
               )}
 
-              {/* Play with Jones toggle */}
+              {/* Play with Grimwald toggle */}
               <div className="flex items-center justify-between bg-muted/50 rounded-lg p-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">🧔</span>
+                  <span className="text-2xl">🧙</span>
                   <div>
-                    <p className="game-text">Play against Jones?</p>
+                    <p className="game-text">Face Grimwald the Rival?</p>
                     <p className="text-muted-foreground text-sm">The AI competitor</p>
                   </div>
                 </div>
                 <Button
-                  variant={playWithJones ? 'default' : 'outline'}
+                  variant={playWithGrimwald ? 'default' : 'outline'}
                   className="pixel-button"
-                  onClick={() => setPlayWithJones(!playWithJones)}
+                  onClick={() => setPlayWithGrimwald(!playWithGrimwald)}
                 >
-                  {playWithJones ? 'YES' : 'NO'}
+                  {playWithGrimwald ? 'YES' : 'NO'}
                 </Button>
               </div>
 
@@ -202,7 +202,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
                 <Button
                   className="pixel-button flex-1"
                   onClick={() => setStep('goals')}
-                  disabled={state.players.length === 0 && !playWithJones}
+                  disabled={state.players.length === 0 && !playWithGrimwald}
                 >
                   SET GOALS
                 </Button>
