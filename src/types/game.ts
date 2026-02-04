@@ -192,28 +192,29 @@ export interface GameGoals {
   career: number;
 }
 
-// Positions match the game board image (percentage based)
+// Positions match the medieval game board image (percentage based)
+// Layout: Buildings around the edge with central white area
 export const LOCATIONS: Location[] = [
-  // Top row (left to right)
-  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 12, y: 18 }, color: 'location-apartment', icon: '🏰' },
-  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 28, y: 15 }, color: 'location-service', icon: '🔑' },
-  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 44, y: 15 }, color: 'location-apartment', icon: '🏚️' },
-  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 60, y: 15 }, color: 'location-service', icon: '💎' },
-  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 88, y: 18 }, color: 'location-store', icon: '🛒' },
+  // Top row (left to right) - Castle, towers, and shops along the top
+  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 8, y: 10 }, color: 'location-apartment', icon: '🏰' },
+  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 22, y: 8 }, color: 'location-service', icon: '🔑' },
+  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 35, y: 8 }, color: 'location-apartment', icon: '🏚️' },
+  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 50, y: 8 }, color: 'location-service', icon: '💎' },
+  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 64, y: 8 }, color: 'location-food', icon: '🍺' },
+  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 78, y: 8 }, color: 'location-store', icon: '⚔️' },
+  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 92, y: 10 }, color: 'location-store', icon: '🛒' },
 
-  // Right side (top to bottom)
-  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 88, y: 38 }, color: 'location-food', icon: '🍺' },
-  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 88, y: 55 }, color: 'location-store', icon: '⚔️' },
-  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 88, y: 75 }, color: 'location-store', icon: '🔮' },
+  // Right side (top to bottom) - Watermill and workshop
+  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 92, y: 38 }, color: 'location-store', icon: '🔮' },
+  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 92, y: 60 }, color: 'location-work', icon: '🔨' },
 
-  // Bottom row (right to left)
-  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 70, y: 85 }, color: 'location-service', icon: '🎓' },
-  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 50, y: 85 }, color: 'location-service', icon: '📜' },
-  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 30, y: 85 }, color: 'location-work', icon: '🔨' },
+  // Bottom row (left to right) - Factory, Employment Office, Regal, Academy
+  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 8, y: 92 }, color: 'location-food', icon: '🥬' },
+  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 35, y: 92 }, color: 'location-service', icon: '📜' },
+  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 58, y: 92 }, color: 'location-service', icon: '🏦' },
+  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 82, y: 92 }, color: 'location-service', icon: '🎓' },
 
-  // Left side (bottom to top)
-  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 12, y: 65 }, color: 'location-service', icon: '🏦' },
-  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 12, y: 42 }, color: 'location-food', icon: '🥬' },
+  // Left side (top to bottom) - Houses and market stalls
 ];
 
 // DEGREES - Fantasy themed education for Guild Life
