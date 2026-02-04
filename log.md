@@ -2,6 +2,39 @@
 
 ---
 
+## 2026-02-04 21:15 - Hotspots justert til faktiske bygningsposisjoner
+
+### Oppgave
+Hotspots (gule rammer) var langt utenfor bygningene. Brukeren viste skjermbilde der rammene ikke matchet husene.
+
+### Analyse
+Problemet var at koordinatene var kalkulert som om brettet startet ved x:0, y:0, men spillbrettet har morke kanter rundt. De faktiske bygningene er INNE pa brettet.
+
+### Endringer
+Alle 13 lokasjoner justert med nye koordinater:
+
+| Lokasjon | Ny pos. (x,y) | Ny storrelse |
+|----------|---------------|--------------|
+| Noble Heights | 14, 14 | 10x15% |
+| Landlord Office | 24, 12 | 8x12% |
+| The Slums | 40, 11 | 16x14% |
+| The Fence | 58, 11 | 14x14% |
+| Shadow Market | 76, 12 | 16x14% |
+| Rusty Tankard | 88, 26 | 10x16% |
+| Armory | 88, 50 | 10x18% |
+| Enchanter | 88, 74 | 10x18% |
+| The Forge | 17, 88 | 14x14% |
+| Guild Hall | 37, 86 | 16x16% |
+| Academy | 62, 86 | 18x16% |
+| General Store | 14, 35 | 10x16% |
+| Guildholm Bank | 16, 58 | 12x18% |
+
+### Filer endret
+- `src/types/game.ts` - LOCATIONS array med presise koordinater
+- `log.md` - Denne loggen
+
+---
+
 ## 2026-02-04 20:00 - Fullstendig soneinndeling basert pa rodt rutenett
 
 ### Oppgave
