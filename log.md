@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-02-04 18:00 - Senterpanel dekker hvit flate
+
+### Oppgave
+Justere senterpanelet slik at det dekker hele den hvite firkanten midt pa spillbrettet, som i Jones in the Fast Lane.
+
+### Endringer
+- Justert dimensjoner basert pa skjermbilder:
+  - left: 31% (var 35%)
+  - top: 25% (var 35%)
+  - width: 39% (var 32%)
+  - height: 48% (var 33%)
+- Panel skal na fylle hele den hvite flaten i midten av brettet
+
+### Filer endret
+- `src/components/game/GameBoard.tsx` - Senterpanel posisjon
+- `log.md` - Denne loggen
+
+---
+
 ## 2026-02-04 17:45 - Senterpanel justert igjen
 
 ### Oppgave
