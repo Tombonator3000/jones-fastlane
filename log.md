@@ -2,6 +2,48 @@
 
 ---
 
+## 2026-02-04 16:30 - Hotspot-posisjoner justert basert pa annotert bilde
+
+### Oppgave
+Justere alle 13 lokasjons-hotspots til a dekke riktige bygninger basert pa brukerens annoterte bilde (Bakgrunn2-2.jpeg) med rode soner.
+
+### Analyse av annotert bilde
+Bildet viser brettet delt inn i rode soner med bla tekst som indikerer hvor hver lokasjon skal vaere:
+
+**Top row (venstre til hoyre):**
+- Noble (slott) - x: 0-10%
+- Landlord (tarn) - x: 17-29%
+- Slums (markedsbygg) - x: 32-49%
+- Fence (liten butikk) - x: 52-66%
+- Shadow Market (hytte) - x: 85-100%
+
+**Hoyre side (topp til bunn):**
+- Rusty Tankard (vannmolle) - y: 26-46%
+- Armory (lagerbygg) - y: 50-68%
+- Enchanter (stort hus) - y: 76-100%
+
+**Bunn rad (venstre til hoyre):**
+- Forge/Factory - x: 0-13%
+- Guild/Employment Office - x: 23-47%
+- Academy/Regal - x: 55-75%
+
+**Venstre side (topp til bunn):**
+- General Store (hytte) - y: 26-46%
+- Bank (stort bygg) - y: 50-68%
+
+### Endringer
+- `src/types/game.ts:196-260` - Fullstendig omskrevet LOCATIONS array med:
+  - Presise koordinater basert pa rode soner
+  - X/Y angir SENTER av hotspot
+  - Width/height dekker hele bygningsomradet
+  - Kommentarer med zone-ranges for hver lokasjon
+
+### Filer endret
+- `src/types/game.ts` - Oppdaterte lokasjonskoordinater
+- `log.md` - Denne loggen
+
+---
+
 ## 2026-02-04 - Ny middelalder spillbrett-bakgrunn
 
 ### Oppgave

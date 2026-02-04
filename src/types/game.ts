@@ -194,42 +194,65 @@ export interface GameGoals {
 }
 
 // Positions match the medieval game board image (percentage based)
-// Based on annotated reference image with red zone grid
-// Each location covers the ENTIRE building area
+// Based on annotated reference image with red zone grid (Bakgrunn2-2.jpeg)
+// Koordinater justert 2026-02-04 basert pa visuell analyse av rodt rutenett
+// X/Y er SENTER av hotspot, width/height er total storrelse
 export const LOCATIONS: Location[] = [
-  // TOP ROW (left to right)
-  // Noble - Castle with tower (top-left corner, x: 0-12%, y: 0-22%)
-  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 6, y: 11 }, size: { width: 12, height: 22 }, color: 'location-apartment', icon: '🏰' },
-  // LandLord - Round stone tower (x: 18-30%, y: 0-22%)
-  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 24, y: 11 }, size: { width: 12, height: 22 }, color: 'location-service', icon: '🔑' },
-  // Slums - Half-timbered with striped awnings (x: 35-50%, y: 0-22%)
-  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 42, y: 11 }, size: { width: 15, height: 22 }, color: 'location-apartment', icon: '🏚️' },
-  // Fence - Half-timbered building (x: 55-68%, y: 0-22%)
-  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 61, y: 11 }, size: { width: 13, height: 22 }, color: 'location-service', icon: '💎' },
-  // Shadow Market - Cottage/hut (top-right corner, x: 78-100%, y: 0-22%)
-  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 89, y: 11 }, size: { width: 22, height: 22 }, color: 'location-food', icon: '🥬' },
+  // ========== TOP ROW (left to right) ==========
+  // Noble Heights - Castle with tower (far top-left)
+  // Zone: x 0-10%, y 0-24%
+  { id: 'noble-heights', name: 'Noble Heights', type: 'apartment', description: 'Luxurious apartments in the noble quarter. Safe and comfortable.', position: { x: 5, y: 12 }, size: { width: 10, height: 24 }, color: 'location-apartment', icon: '🏰' },
+  
+  // Landlord Office - Round stone tower
+  // Zone: x 17-29%, y 0-24%
+  { id: 'landlord-office', name: "Landlord's Office", type: 'service', description: 'Pay your rent here. Do not be late.', position: { x: 23, y: 12 }, size: { width: 12, height: 24 }, color: 'location-service', icon: '🔑' },
+  
+  // The Slums - Half-timbered buildings with striped awnings
+  // Zone: x 32-49%, y 0-24%
+  { id: 'the-slums', name: 'The Slums', type: 'apartment', description: 'A cramped room in the poorest district. Cheap, but Shadowfingers prowls these streets...', position: { x: 40, y: 12 }, size: { width: 17, height: 24 }, color: 'location-apartment', icon: '🏚️' },
+  
+  // The Fence - Small shop building
+  // Zone: x 52-66%, y 0-24%
+  { id: 'the-fence', name: 'The Fence', type: 'service', description: 'A pawn shop dealing in... various goods.', position: { x: 59, y: 12 }, size: { width: 14, height: 24 }, color: 'location-service', icon: '💎' },
+  
+  // Shadow Market - Cottage/hut with smoke (top-right corner)
+  // Zone: x 85-100%, y 0-24%
+  { id: 'shadow-market', name: 'Shadow Market', type: 'food', description: 'The black market. Dangerous but profitable. Fresh provisions and rumors.', position: { x: 92, y: 12 }, size: { width: 16, height: 24 }, color: 'location-food', icon: '🥬' },
 
-  // RIGHT SIDE (top to bottom)
-  // Rusty Tankard - Watermill with wheel (x: 78-100%, y: 22-42%)
-  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 89, y: 32 }, size: { width: 22, height: 20 }, color: 'location-food', icon: '🍺' },
-  // Armory - Barn/storage building (x: 78-100%, y: 45-62%)
-  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 89, y: 54 }, size: { width: 22, height: 17 }, color: 'location-store', icon: '⚔️' },
-  // Enchanter - Large half-timbered house (bottom-right, x: 78-100%, y: 72-100%)
-  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 89, y: 86 }, size: { width: 22, height: 28 }, color: 'location-store', icon: '🔮' },
+  // ========== RIGHT SIDE (top to bottom) ==========
+  // Rusty Tankard - Watermill with wheel
+  // Zone: x 85-100%, y 26-46%
+  { id: 'rusty-tankard', name: 'The Rusty Tankard', type: 'food', description: 'A lively tavern. Good food, strong drink, and rumors aplenty.', position: { x: 92, y: 36 }, size: { width: 16, height: 20 }, color: 'location-food', icon: '🍺' },
+  
+  // Armory - Barn/storage with "FACTORY" sign
+  // Zone: x 85-100%, y 50-68%
+  { id: 'armory', name: 'The Armory', type: 'store', description: 'Quality weapons, armor, and adventuring gear.', position: { x: 92, y: 59 }, size: { width: 16, height: 18 }, color: 'location-store', icon: '⚔️' },
+  
+  // Enchanter - Large half-timbered house (bottom-right corner)
+  // Zone: x 85-100%, y 76-100%
+  { id: 'enchanter', name: "Enchanter's Workshop", type: 'store', description: 'Magical items and enchantment services.', position: { x: 92, y: 88 }, size: { width: 16, height: 24 }, color: 'location-store', icon: '🔮' },
 
-  // BOTTOM ROW (left to right)
-  // Forge/Factory - Half-timbered with FACTORY sign (bottom-left, x: 0-15%, y: 78-100%)
-  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 8, y: 89 }, size: { width: 16, height: 22 }, color: 'location-work', icon: '🔨' },
-  // Guild Hall - EMPLOYMENT OFFICE building (x: 25-48%, y: 78-100%)
-  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 36, y: 89 }, size: { width: 23, height: 22 }, color: 'location-service', icon: '📜' },
-  // Academy - REGAL building (x: 55-75%, y: 78-100%)
-  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 65, y: 89 }, size: { width: 20, height: 22 }, color: 'location-service', icon: '🎓' },
+  // ========== BOTTOM ROW (left to right) ==========
+  // The Forge - Half-timbered with "FACTORY" sign (bottom-left)
+  // Zone: x 0-13%, y 76-100%
+  { id: 'the-forge', name: 'The Forge', type: 'workplace', description: 'The industrial district. Hard work, fair pay.', position: { x: 6, y: 88 }, size: { width: 13, height: 24 }, color: 'location-work', icon: '🔨' },
+  
+  // Guild Hall - EMPLOYMENT OFFICE building (center-bottom)
+  // Zone: x 23-47%, y 76-100%
+  { id: 'guild-hall', name: 'Guild Hall', type: 'service', description: 'The Adventurer Guild headquarters. Find work, take quests, advance your rank.', position: { x: 35, y: 88 }, size: { width: 24, height: 24 }, color: 'location-service', icon: '📜' },
+  
+  // Academy - REGAL building (center-right bottom)
+  // Zone: x 55-75%, y 76-100%
+  { id: 'academy', name: 'The Academy', type: 'service', description: 'The Academy of Arts - study combat, magic, divine arts, or business.', position: { x: 65, y: 88 }, size: { width: 20, height: 24 }, color: 'location-service', icon: '🎓' },
 
-  // LEFT SIDE (top to bottom)
-  // General Store - Cottage with thatched roof (x: 0-15%, y: 25-42%)
-  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 8, y: 34 }, size: { width: 16, height: 17 }, color: 'location-store', icon: '🛒' },
-  // Bank - Large half-timbered building (x: 0-15%, y: 48-68%)
-  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 8, y: 58 }, size: { width: 16, height: 20 }, color: 'location-service', icon: '🏦' },
+  // ========== LEFT SIDE (top to bottom) ==========
+  // General Store - Cottage with thatched roof
+  // Zone: x 0-13%, y 26-46%
+  { id: 'general-store', name: 'General Store', type: 'store', description: 'Basic supplies and provisions at discount prices.', position: { x: 6, y: 36 }, size: { width: 13, height: 20 }, color: 'location-store', icon: '🛒' },
+  
+  // Guildholm Bank - Large building with double doors
+  // Zone: x 0-13%, y 50-68%
+  { id: 'guildholm-bank', name: 'Guildholm Bank', type: 'service', description: 'Safe storage and investment opportunities.', position: { x: 6, y: 59 }, size: { width: 13, height: 18 }, color: 'location-service', icon: '🏦' },
 ];
 
 // DEGREES - Fantasy themed education for Guild Life
