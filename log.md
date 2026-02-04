@@ -2,6 +2,37 @@
 
 ---
 
+## 2026-02-04 - Fix hvit skjerm pa GitHub Pages
+
+### Problem
+Spillet viste bare hvit skjerm nar det ble startet fra GitHub Pages.
+
+### Analyse
+Problemet var at `BrowserRouter` i App.tsx manglet `basename` prop.
+
+- GitHub Pages deployer til `https://username.github.io/jones-fastlane/`
+- BrowserRouter uten basename forventer at appen kjorer pa `/`
+- Nar bruker beskte `/jones-fastlane/`, matchet ingen routes og spillet viste hvit skjerm
+
+### Losning
+Lagt til `basename={import.meta.env.BASE_URL}` til BrowserRouter:
+
+```tsx
+<BrowserRouter basename={import.meta.env.BASE_URL}>
+```
+
+`import.meta.env.BASE_URL` settes automatisk av Vite basert pa `base` config i vite.config.ts:
+- Lokalt/Lovable: `/`
+- GitHub Pages: `/jones-fastlane/`
+
+### Filer endret
+- `src/App.tsx` - Lagt til basename prop pa BrowserRouter
+
+### Build-status
+Build vellykket for begge miljoer (lokal og GitHub Pages)
+
+---
+
 ## 2026-02-04 19:30 - Spillbrett soneinndeling
 
 ### Oppgave
