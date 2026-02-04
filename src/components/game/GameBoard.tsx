@@ -99,13 +99,15 @@ export function GameBoard({
         return (
           <motion.button
             key={location.id}
-            className="absolute w-12 h-12 md:w-16 md:h-16 rounded-lg bg-transparent hover:bg-primary/20 border-2 border-transparent hover:border-primary cursor-pointer transition-all flex items-center justify-center"
+            className="absolute rounded-lg bg-transparent hover:bg-primary/20 border-2 border-transparent hover:border-primary cursor-pointer transition-all flex items-center justify-center"
             style={{
               left: `${location.position.x}%`,
               top: `${location.position.y}%`,
+              width: `${location.size.width}%`,
+              height: `${location.size.height}%`,
               transform: 'translate(-50%, -50%)',
             }}
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             animate={isCurrentLocation && !animatingPlayerId ? {
               boxShadow: ['0 0 10px hsl(45, 100%, 50%)', '0 0 25px hsl(45, 100%, 50%)', '0 0 10px hsl(45, 100%, 50%)'],
